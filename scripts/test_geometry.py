@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 from rasterio.transform import from_origin
 
-from geometry import DEM, FORWARD, boundary_crossings, frames, nearest_on_polyline, resample, runs, safe_ribbon, safe_sections, smooth_elevation, smooth_xy, width_from_tags
+from geometry import DEM, FORWARD, boundary_crossings, elevation_target, frames, resample, runs, safe_ribbon, safe_sections, smooth_elevation, smooth_xy, width_from_tags
 
 
 class GeometryTests(unittest.TestCase):
@@ -21,13 +21,22 @@ class GeometryTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 resample([[0,0],[1,0]],spacing)
 
-    def test_smoothing_deviation(self):
-        p,_ = resample([[0,0],[10,0],[10,10]],.5)
+    def test_smoothing_radius_and_heading(self):
+        p,_ = resample([[0,0],[150,0],[60,20],[60,200]],2)
         q = smooth_xy(p)
         np.testing.assert_allclose(q[[0,-1]],p[[0,-1]])
-        self.assertLessEqual(np.linalg.norm(q-nearest_on_polyline(q,p),axis=1).max(),2.800001)
+        q,s = resample(q,2)
+        _,_,curvature = frames(q,s)
+        self.assertLessEqual(abs(curvature).max(),1/12)
+        heading = np.unwrap(np.arctan2(np.diff(q,axis=0)[:,1],np.diff(q,axis=0)[:,0]))
+        self.assertLessEqual(np.max(abs(np.diff(heading))/((np.diff(s)[:-1]+np.diff(s)[1:])/2)),1/12)
+        self.assertLess(np.max(abs(np.gradient(curvature,s))),.02)
         with self.assertRaises(ValueError):
             smooth_xy([])
+        with self.assertRaises(ValueError):
+            smooth_xy([[0,0],[0,0]])
+        straight = smooth_xy([[0,0],[100,0]])
+        np.testing.assert_allclose(straight[:,1],0)
 
     def test_grade_and_vertical_curvature(self):
         s = np.arange(1000)*2.
@@ -35,8 +44,11 @@ class GeometryTests(unittest.TestCase):
         raw[300] += 200
         z = smooth_elevation(raw,s)
         grade = np.diff(z)/2
-        self.assertLessEqual(abs(grade).max(),.120001)
+        self.assertLessEqual(abs(grade).max(),.140001)
         self.assertLessEqual(abs(np.diff(grade)).max()/2,.001001)
+        np.testing.assert_allclose(smooth_elevation(-raw,s),-z,atol=1e-5)
+        self.assertLess(abs(np.mean(z-elevation_target(raw))),1e-5)
+        np.testing.assert_allclose(smooth_elevation(np.full(20,8.),np.arange(20)*2),8,atol=1e-5)
         with self.assertRaises(ValueError):
             smooth_elevation(np.array([1.,float('nan')]),np.array([0,1]))
         for raw,s in (([],[]),([1,2],[0,0]),([1,2],[0,float('nan')])):
@@ -100,6 +112,10 @@ class GeometryTests(unittest.TestCase):
             safe_sections(np.empty((0,2)),np.empty((0,2)),np.array([]),np.array([]),1)
 
         sections = safe_ribbon(xy,normal,np.full(len(s),7.),np.full((len(s),2),44.))
+        np.testing.assert_allclose(sections[0][0][:,0]+sections[1][0][:,0],7)
+        for cols,_ in sections:
+            np.testing.assert_allclose(cols[:,1]-cols[:,0],.3)
+            np.testing.assert_allclose(cols[:,2]-cols[:,1],1.5)
         for column in range(7):
             outline = np.concatenate([sections[0][1][:,column],sections[1][1][::-1,column]])
             self.assertEqual(len(boundary_crossings(outline)),0)

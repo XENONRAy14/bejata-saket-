@@ -9,11 +9,14 @@ import subprocess
 import urllib.request
 
 import numpy as np
+import osqp
 from PIL import Image
 from pyproj import Transformer
 import rasterio
 from scipy.ndimage import gaussian_filter1d, median_filter, minimum_filter1d, map_coordinates
 from scipy.spatial import cKDTree
+from scipy.interpolate import BSpline, CubicSpline
+from scipy import sparse
 
 ROOT = Path(__file__).resolve().parents[1]
 FORWARD = Transformer.from_crs(4326, 32631, always_xy=True)
@@ -95,20 +98,63 @@ def nearest_on_polyline(points, reference):
     return projected[np.arange(len(points)),best]
 
 
-def smooth_xy(points, max_deviation=2.8, reference=None):
+def smooth_xy(points, minimum_radius=12):
     base = np.asarray(points,dtype=float).copy()
-    if base.ndim != 2 or len(base) < 2 or not np.isfinite(base).all() or max_deviation < 0:
-        raise ValueError('Need finite points and nonnegative deviation')
-    reference = base if reference is None else reference
-    smooth = base.copy()
-    for _ in range(25):
-        smooth = gaussian_filter1d(smooth, 2, axis=0, mode='nearest')
-        nearest = nearest_on_polyline(smooth,reference)
-        delta = smooth-nearest
-        norm = np.linalg.norm(delta, axis=1)
-        smooth = nearest + delta*np.minimum(1, max_deviation/np.maximum(norm, 1e-9))[:, None]
+    if base.ndim != 2 or base.shape[1] != 2 or len(base) < 2 or not np.isfinite(base).all() or not np.isfinite(minimum_radius) or minimum_radius <= 0:
+        raise ValueError('Need finite points and positive minimum radius')
+    if (np.linalg.norm(np.diff(base,axis=0),axis=1) <= 0).any():
+        raise ValueError('Repeated centerline points')
+    keep = {0,len(base)-1}
+    stack = [(0,len(base)-1)]
+    while stack:
+        a,b = stack.pop()
+        if b <= a+1:
+            continue
+        delta = base[b]-base[a]
+        t = np.clip((base[a+1:b]-base[a])@delta/max(delta@delta,1e-12),0,1)
+        distance = np.linalg.norm(base[a+1:b]-(base[a]+t[:,None]*delta),axis=1)
+        i = int(np.argmax(distance))+a+1
+        if distance.max() > 2:
+            keep.add(i)
+            stack.extend([(a,i),(i,b)])
+    vertices = base[sorted(keep)]
+    radius = minimum_radius*1.6
+    while len(vertices) > 2:
+        segments = np.diff(vertices,axis=0)
+        lengths = np.linalg.norm(segments,axis=1)
+        direction = segments/lengths[:,None]
+        angle = np.r_[0,np.arctan2(direction[:-1,0]*direction[1:,1]-direction[:-1,1]*direction[1:,0],np.sum(direction[:-1]*direction[1:],axis=1)),0]
+        distance = radius*np.tan(abs(angle)/2)
+        conflicts = np.where(distance[:-1]+distance[1:] > lengths*.9)[0]
+        if not len(conflicts):
+            break
+        i = int(conflicts[0])
+        drop = i if i>0 and (i+1==len(vertices)-1 or abs(angle[i])<abs(angle[i+1])) else i+1
+        vertices = np.delete(vertices,drop,axis=0)
+    rounded = [vertices[0]]
+    for i in range(1,len(vertices)-1):
+        entry = vertices[i]-direction[i-1]*distance[i]
+        center = entry+np.sign(angle[i])*radius*np.array([-direction[i-1,1],direction[i-1,0]])
+        start = np.arctan2(*(entry-center)[::-1])
+        theta = start+np.linspace(0,angle[i],max(2,math.ceil(abs(angle[i])*radius)+1))
+        rounded.extend(center+radius*np.column_stack([np.cos(theta),np.sin(theta)]))
+    rounded.append(vertices[-1])
+    smooth,parameter = resample(rounded,1)
+    for _ in range(60):
+        smooth = gaussian_filter1d(smooth,4,axis=0,mode='nearest')
         smooth[[0, -1]] = base[[0, -1]]
-    return smooth
+        spline = CubicSpline(parameter,smooth,axis=0)
+        probe = np.sort(np.r_[parameter,(parameter[:-1]+parameter[1:])/2])
+        first,second = spline(probe,1),spline(probe,2)
+        curvature = np.abs(first[:,0]*second[:,1]-first[:,1]*second[:,0])/np.maximum(np.linalg.norm(first,axis=1)**3,1e-12)
+        if curvature.max() <= 1/(minimum_radius*1.12):
+            return spline(parameter)
+        smooth,parameter = resample(smooth,1)
+    raise RuntimeError('Cannot meet minimum centerline radius')
+
+
+def elevation_target(raw):
+    return gaussian_filter1d(median_filter(raw,size=11,mode='nearest'),6,mode='nearest',truncate=2)
 
 
 def smooth_elevation(raw, s):
@@ -118,15 +164,22 @@ def smooth_elevation(raw, s):
     ds = np.diff(s)
     if (ds <= 0).any():
         raise ValueError('Chainage must strictly increase')
-    target = gaussian_filter1d(median_filter(raw, size=11, mode='nearest'), 6, mode='nearest', truncate=2)
-    grade = np.clip(np.diff(target)/ds, -.12, .12)
-    limit = .001 * (ds[:-1]+ds[1:])/2
-    for i in range(1, len(grade)):
-        grade[i] = np.clip(grade[i], grade[i-1]-limit[i-1], grade[i-1]+limit[i-1])
-    for i in range(len(grade)-2, -1, -1):
-        grade[i] = np.clip(grade[i], grade[i+1]-limit[i], grade[i+1]+limit[i])
-    z = np.r_[0, np.cumsum(grade*ds)]
-    return z + max(np.mean(target-z), 1-z.min())
+    target = elevation_target(raw)
+    knots = np.r_[np.repeat(s[0],4),np.arange(s[0]+10,s[-1],10),np.repeat(s[-1],4)]
+    basis = BSpline.design_matrix(s,knots,3).tocsc()
+    count = basis.shape[1]
+    d1 = sparse.diags([-np.ones(count-1),np.ones(count-1)],[0,1],shape=(count-1,count),format='csc')
+    d1 = sparse.diags(3/(knots[4:count+3]-knots[1:count])) @ d1
+    d2 = sparse.diags([-np.ones(count-2),np.ones(count-2)],[0,1],shape=(count-2,count-1),format='csc')
+    d2 = sparse.diags(2/(knots[4:count+2]-knots[2:count])) @ d2 @ d1
+    constraint = sparse.csc_matrix(sparse.vstack([d1*10,d2*100],format='csc'))
+    bound = np.r_[np.full(count-1,1.4),np.full(count-2,.1)]
+    solver = osqp.OSQP()
+    solver.setup(P=sparse.csc_matrix(2*basis.T@basis),q=-2*np.asarray(basis.T@target).ravel(),A=constraint,l=-bound,u=bound,eps_abs=1e-7,eps_rel=1e-7,max_iter=100000,polishing=True,verbose=False)
+    result = solver.solve(raise_error=True)
+    if result.info.status != 'solved':
+        raise RuntimeError(f'Elevation fit: {result.info.status}')
+    return basis @ result.x
 
 
 def width_from_tags(tags):
@@ -175,11 +228,12 @@ def frames(xy, s):
 
 
 def section_offsets(width, budget):
-    half = np.minimum(width/2,budget*.75)
-    kerb = np.minimum(.3,budget*.04)
-    shoulder = np.minimum(1.5,budget*.1)
+    half = width/2
+    kerb = np.full(len(width),.3)
+    shoulder = np.full(len(width),1.5)
     inner = half+kerb+shoulder
-    return np.column_stack([half,half+kerb,inner,*[inner+(budget-inner)*f for f in (.2,.4,.65,1.)]])
+    outer = np.maximum(budget,inner+.1)
+    return np.column_stack([half,half+kerb,inner,*[inner+(outer-inner)*f for f in (.2,.4,.65,1.)]])
 
 
 def safe_sections(xy, normal, width, budget, sign):
@@ -244,12 +298,16 @@ def centerline():
     source = xy-origin
     reference = np.concatenate([*[np.linspace(a,b,math.ceil(np.linalg.norm(b-a)/2)+1)[:-1] for a,b in zip(source,source[1:])],source[-1:]])
     base, original_s = resample(source)
-    xy = smooth_xy(base,reference=reference)
+    smooth = smooth_xy(base)
+    xy,new_s = resample(smooth)
+    nearest_index = cKDTree(base).query(xy)[1]
+    original_s,base = original_s[nearest_index],base[nearest_index]
     s = np.r_[0, np.cumsum(np.linalg.norm(np.diff(xy, axis=0), axis=1))]
     tangent, normal, curvature = frames(xy, s)
     dem = DEM(origin)
     raw = dem.sample(xy)
     z = smooth_elevation(raw, s)
+    filtered = elevation_target(raw)
     info = json.loads((ROOT/'data/route_info.json').read_text())
     road_ends = np.cumsum([r['length_m'] for r in info['roads']])
     road_index = np.minimum(np.searchsorted(road_ends, original_s/original_s[-1]*road_ends[-1]), len(road_ends)-1)
@@ -307,13 +365,19 @@ def centerline():
     grade = np.diff(z)/np.diff(s)
     actual_width = offsets[0][:,0]+offsets[1][:,0]
     metrics = dict(length_m=float(s[-1]), length_3d_m=float(np.linalg.norm(np.diff(np.column_stack([xy,z]), axis=0), axis=1).sum()), samples=len(s), min_elevation_m=float(z.min()), max_elevation_m=float(z.max()), max_grade_percent=float(abs(grade).max()*100), total_climb_m=float(np.maximum(np.diff(z),0).sum()), min_radius_m=float(radius.min()), max_xy_deviation_m=float(np.linalg.norm(xy-nearest_on_polyline(xy,reference),axis=1).max()), max_sample_displacement_m=float(np.linalg.norm(xy-base,axis=1).max()), max_grade_change_per_m=float(np.max(abs(np.diff(grade))/((np.diff(s)[:-1]+np.diff(s)[1:])/2))), width_range_m=[float(widths.min()),float(widths.max())], actual_min_width_m=float(actual_width.min()), narrowed_length_m=float(np.diff(s)[actual_width[:-1]<widths[:-1]-.01].sum()), min_terrain_extent_m=float(terrain_extent.min()), ribbon_boundary_crossings=0, guardrail_m=[float(np.sum(np.diff(s)*a[:-1])) for a in guard], cut_m=[float(np.sum(np.diff(s)*a[:-1])) for a in cut])
-    np.savez_compressed(ROOT/'data/centerline.npz', xy=xy, z=z, s=s, raw=raw, width=widths, normal=normal, tangent=tangent, sides=points, offsets=np.array(offsets), guard=np.array(guard), cut=np.array(cut))
+    heading = np.unwrap(np.arctan2(np.diff(xy,axis=0)[:,1],np.diff(xy,axis=0)[:,0]))
+    metrics.update(mean_abs_elevation_error_m=float(np.mean(abs(z-filtered))),max_abs_elevation_error_m=float(np.max(abs(z-filtered))),mean_signed_elevation_error_m=float(np.mean(z-filtered)),max_heading_change_rad_per_m=float(np.max(abs(np.diff(heading))/((np.diff(s)[:-1]+np.diff(s)[1:])/2))))
+    median_dem = median_filter(raw,size=11,mode='nearest')
+    interval = (s >= 11000)&(s <= 19000)
+    metrics.update(mean_abs_median_dem_error_m=float(np.mean(abs(z-median_dem))),max_abs_median_dem_error_m=float(np.max(abs(z-median_dem))),mean_signed_elevation_error_11_19km_m=float(np.mean((z-filtered)[interval])),max_curvature_change_per_m2=float(np.max(abs(np.gradient(curvature,s)))))
+    np.savez_compressed(ROOT/'data/centerline.npz', xy=xy, z=z, s=s, raw=raw, filtered=filtered, width=widths, normal=normal, tangent=tangent, sides=points, offsets=np.array(offsets), guard=np.array(guard), cut=np.array(cut))
     (ROOT/'data/geometry_info.json').write_text(json.dumps(metrics, indent=2)+'\n')
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     fig, ax = plt.subplots(figsize=(14,4))
     ax.plot(s/1000, raw, color='#a4a4a4', lw=.7, label='Raw bilinear DSM')
+    ax.plot(s/1000,filtered,color='#4378a8',lw=.8,label='Median / Gaussian target')
     ax.plot(s/1000, z, color='#d44a2d', lw=1.4, label='Filtered / grade-limited road')
     ax.set(xlabel='Chainage (km)', ylabel='Elevation (m, DSM datum)', title='Béjaïa → Saket | elevation profile (DSM, not surveyed road)')
     ax.legend()

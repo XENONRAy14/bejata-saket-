@@ -102,7 +102,7 @@ def main():
     scene.unit_settings.system = 'METRIC'
     scene.unit_settings.scale_length = 1
     mats = {n:material(n) for n in ('asphalt','grass','gravel','rock','metal','kerb')}
-    chunk_ends = list(range(0,len(s)-1,100)) + [len(s)-1]
+    chunk_ends = np.unique(np.r_[0,np.searchsorted(s,np.arange(400,s[-1],400)),len(s)-1]).tolist()
     for chunk, (a,b) in enumerate(zip(chunk_ends,chunk_ends[1:])):
         subset = slice(a,b+1)
         road = np.stack([sides[1,subset,0], sides[0,subset,0]], axis=1)
