@@ -11,3 +11,5 @@ blend/*.blend*
 blend/*.kn5*
 !blend/bejaia_saket.blend
 *.log
+out/*.zip*
+data/*.partial

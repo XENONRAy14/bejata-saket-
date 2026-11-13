@@ -9,7 +9,8 @@ import struct
 import sys
 
 
-def inspect_kn5(path):
+def inspect_kn5(path, geometry=False):
+    import numpy as np
     data = memoryview(Path(path).read_bytes())
     offset = 0
     def take(size):
@@ -26,6 +27,7 @@ def inspect_kn5(path):
     if bytes(take(6)) != b'sc6969' or number() != 5:
         raise ValueError('Expected KN5 v5 header')
     textures = []
+    texture_formats = {}
     for _ in range(number()):
         if number() != 1:
             raise ValueError('Inactive embedded texture')
@@ -34,6 +36,8 @@ def inspect_kn5(path):
         if not len(blob):
             raise ValueError('Empty embedded texture')
         textures.append(name)
+        signature = bytes(blob[:8])
+        texture_formats[name] = 'PNG' if signature == b'\x89PNG\r\n\x1a\n' else ('DDS' if signature[:4] == b'DDS ' else 'UNKNOWN')
     materials = []
     for _ in range(number()):
         name,shader = string(),string()
@@ -62,17 +66,24 @@ def inspect_kn5(path):
         elif kind == 2:
             entry['castShadows'],entry['visible'],entry['transparent'] = struct.unpack('<???',take(3))
             vertices = number()
-            take(vertices*44)
+            vertex_data = take(vertices*44)
             indices = number()
             if children or not 0 < vertices <= 65536 or indices%3:
                 raise ValueError('Invalid mesh counts')
-            if any(index[0] >= vertices for index in struct.iter_unpack('<H',take(indices*2))):
+            index_data = take(indices*2)
+            if any(index[0] >= vertices for index in struct.iter_unpack('<H',index_data)):
                 raise ValueError('Index outside vertex array')
             material = number()
             if material >= len(materials):
                 raise ValueError('Missing material')
             take(4+8+16)
             entry.update(vertices=vertices,triangles=indices//3,material=material,renderable=number('?'))
+            if geometry:
+                positions = np.frombuffer(vertex_data, dtype='<f4').reshape(-1,11)[:,:3]
+                entry['bounds'] = (positions.min(axis=0), positions.max(axis=0))
+                if name.startswith('1ROAD_'):
+                    entry['positions'] = positions
+                    entry['indices'] = np.frombuffer(index_data, dtype='<u2').reshape(-1,3)
         else:
             raise ValueError(f'Unsupported node class {kind}')
         for _ in range(children):
@@ -80,7 +91,7 @@ def inspect_kn5(path):
     node()
     if offset != len(data):
         raise ValueError('Unexpected trailing KN5 data')
-    return dict(bytes=len(data),textures=textures,materials=materials,nodes=nodes)
+    return dict(bytes=len(data),textures=textures,texture_formats=texture_formats,materials=materials,nodes=nodes)
 
 
 if __name__ == '__main__':

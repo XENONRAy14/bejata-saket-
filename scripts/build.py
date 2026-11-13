@@ -4,6 +4,10 @@ import json
 import math
 from pathlib import Path
 import re
+import subprocess
+import sys
+import time
+import urllib.request
 import xml.etree.ElementTree as ET
 
 import matplotlib
@@ -57,6 +61,11 @@ def load():
         cached = json.loads(cache.read_text())
         if cached['bbox'] == list(BBOX):
             return cached
+    pbf = ROOT / 'data/algeria-latest.osm.pbf'
+    if not pbf.exists():
+        partial = pbf.with_suffix('.pbf.partial')
+        urllib.request.urlretrieve('https://download.geofabrik.de/africa/algeria-latest.osm.pbf', partial)
+        partial.replace(pbf)
     handler = Extract()
     handler.apply_file(str(ROOT / 'data/algeria-latest.osm.pbf'), locations=True, idx='flex_mem')
     data = dict(bbox=BBOX, ways=handler.ways, places=handler.places)
@@ -90,10 +99,21 @@ def graph(ways):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('stage', choices=['route', 'dem', 'centerline', 'mesh', 'acdata', 'decor'])
+    parser.add_argument('stage', nargs='?', default='all', choices=['all', 'route', 'dem', 'centerline', 'mesh', 'acdata', 'decor'])
     parser.add_argument('--blender', default=str(Path.home() / 'tools/blender-3.6.23-linux-x64/blender'))
     parser.add_argument('--list-places', action='store_true')
     args = parser.parse_args()
+    for folder in ('data', 'blend', 'textures', 'out/preview'):
+        (ROOT/folder).mkdir(parents=True, exist_ok=True)
+    if args.stage == 'all':
+        started = time.monotonic()
+        for stage in ('route', 'dem', 'centerline', 'mesh', 'acdata', 'decor'):
+            subprocess.run([sys.executable, str(ROOT/'scripts/build.py'), stage, '--blender', args.blender], check=True)
+        from package import package
+        package()
+        subprocess.run([sys.executable, str(ROOT/'scripts/validate.py')], check=True)
+        print(f'ALL_OK seconds={time.monotonic()-started:.3f}', flush=True)
+        return
     if args.stage == 'decor':
         from decor import build
         build(args.blender)
