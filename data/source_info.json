@@ -1,0 +1,8 @@
+{
+  "url": "https://download.geofabrik.de/africa/algeria-latest.osm.pbf",
+  "download_date_utc": "2026-11-13",
+  "sha256": "057a5d283299c5b18c12afb4e0c18a202d1ea5b4247ce7e670b1d98847308afd",
+  "exporter_commit": "5f0c163cd75f071b21b7f8f98651d50870cf8e85",
+  "blender": "3.6.23 Linux x64 official",
+  "note": "latest URLs are mutable; retain raw PBF locally to reproduce this exact route"
+}
