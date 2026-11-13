@@ -1,7 +1,7 @@
 {
   "file": "out/bejaia_saket/bejaia_saket.kn5",
-  "bytes": 58994247,
-  "seconds": 7.909535380000307,
+  "bytes": 75572299,
+  "seconds": 10.169813095999416,
   "blender": "3.6.23",
   "warnings": [
     "Unknown logical object 'AC_AB_FINISH_L' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it.",
@@ -17,9 +17,9 @@
     "ROAD",
     "WALL"
   ],
-  "mesh_objects": 517,
-  "export_meshes": 517,
+  "mesh_objects": 814,
+  "export_meshes": 814,
   "vertex_limit_splits": 0,
   "max_expanded_vertices_before_split": 10526,
-  "sha256": "7e8974b775abea289e5ad1cc14a2fd70a151efe2e900701ff534849010e51cea"
+  "sha256": "90f944fe9aa5f37bf6bbcf4550a9bc3ec712e7e80814020628cfee87c545b9e1"
 }

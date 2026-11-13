@@ -98,7 +98,7 @@ class ACDataTests(unittest.TestCase):
         for name,value in settings['materials'].items():
             self.assertEqual(value['shaderName'],'ksPerPixel')
             self.assertEqual(value['textures']['txDiffuse']['textureName'],name+'.png')
-        self.assertTrue(settings['nodes']['1*']['castShadows'])
+        self.assertTrue(settings['nodes']['*']['castShadows'])
 
     def test_write_package(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -118,7 +118,9 @@ class ACDataTests(unittest.TestCase):
                 self.assertEqual(image.size,(plan['map_transform']['WIDTH'],plan['map_transform']['HEIGHT']))
             self.assertEqual(list((output/'ai').iterdir()),[output/'ai/README.txt'])
             self.assertFalse((output/'data/cameras.ini').exists())
-            self.assertTrue((output/'docs/AC_NOTES.md').is_file())
+            self.assertFalse((output/'docs').exists())
+            self.assertFalse((output/'settings.json').exists())
+            self.assertTrue((output.parent/'settings.json').is_file())
 
 
 if __name__ == '__main__':

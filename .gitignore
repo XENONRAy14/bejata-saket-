@@ -8,5 +8,6 @@ out/road.png
 out/bejaia_saket/*.kn5
 out/bejaia_saket/*.partial
 blend/*.blend*
+blend/*.kn5*
 !blend/bejaia_saket.blend
 *.log

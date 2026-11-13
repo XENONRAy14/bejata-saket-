@@ -92,10 +92,10 @@ def main():
             counts['export_meshes'] += len(result)
             return result
     exporter.NodeWriter = MeasuredNodeWriter
-    settings = json.loads((output/'settings.json').read_text())
+    settings = json.loads((ROOT/'blend/settings.json').read_text())
     warnings = []
     path = output/'bejaia_saket.kn5'
-    partial = output/'bejaia_saket.kn5.partial'
+    partial = ROOT/'blend/bejaia_saket.kn5.partial'
     started = time.perf_counter()
     try:
         with partial.open('wb') as stream:

@@ -1,0 +1,363 @@
+{
+  "materials": {
+    "asphalt": {
+      "shaderName": "ksPerPixel",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.4
+        },
+        "ksSpecular": {
+          "valueA": 0.1
+        },
+        "ksSpecularEXP": {
+          "valueA": 10
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "asphalt.png"
+        }
+      }
+    },
+    "bark": {
+      "shaderName": "ksPerPixel",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.4
+        },
+        "ksSpecular": {
+          "valueA": 0.1
+        },
+        "ksSpecularEXP": {
+          "valueA": 10
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "bark.png"
+        }
+      }
+    },
+    "grass": {
+      "shaderName": "ksPerPixel",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.4
+        },
+        "ksSpecular": {
+          "valueA": 0.1
+        },
+        "ksSpecularEXP": {
+          "valueA": 10
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "grass.png"
+        }
+      }
+    },
+    "gravel": {
+      "shaderName": "ksPerPixel",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.4
+        },
+        "ksSpecular": {
+          "valueA": 0.1
+        },
+        "ksSpecularEXP": {
+          "valueA": 10
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "gravel.png"
+        }
+      }
+    },
+    "kerb": {
+      "shaderName": "ksPerPixel",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.4
+        },
+        "ksSpecular": {
+          "valueA": 0.1
+        },
+        "ksSpecularEXP": {
+          "valueA": 10
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "kerb.png"
+        }
+      }
+    },
+    "maquis": {
+      "shaderName": "ksPerPixel",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.4
+        },
+        "ksSpecular": {
+          "valueA": 0.1
+        },
+        "ksSpecularEXP": {
+          "valueA": 10
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "maquis.png"
+        }
+      }
+    },
+    "marker_red": {
+      "shaderName": "ksPerPixel",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.4
+        },
+        "ksSpecular": {
+          "valueA": 0.1
+        },
+        "ksSpecularEXP": {
+          "valueA": 10
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "marker_red.png"
+        }
+      }
+    },
+    "metal": {
+      "shaderName": "ksPerPixel",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.4
+        },
+        "ksSpecular": {
+          "valueA": 0.5
+        },
+        "ksSpecularEXP": {
+          "valueA": 20
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "metal.png"
+        }
+      }
+    },
+    "olive_foliage": {
+      "shaderName": "ksPerPixel",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.4
+        },
+        "ksSpecular": {
+          "valueA": 0.1
+        },
+        "ksSpecularEXP": {
+          "valueA": 10
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "olive_foliage.png"
+        }
+      }
+    },
+    "pine_foliage": {
+      "shaderName": "ksPerPixel",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.4
+        },
+        "ksSpecular": {
+          "valueA": 0.1
+        },
+        "ksSpecularEXP": {
+          "valueA": 10
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "pine_foliage.png"
+        }
+      }
+    },
+    "plaster": {
+      "shaderName": "ksPerPixel",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.4
+        },
+        "ksSpecular": {
+          "valueA": 0.1
+        },
+        "ksSpecularEXP": {
+          "valueA": 10
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "plaster.png"
+        }
+      }
+    },
+    "rock": {
+      "shaderName": "ksPerPixel",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.4
+        },
+        "ksSpecular": {
+          "valueA": 0.1
+        },
+        "ksSpecularEXP": {
+          "valueA": 10
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "rock.png"
+        }
+      }
+    },
+    "sand": {
+      "shaderName": "ksPerPixel",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.4
+        },
+        "ksSpecular": {
+          "valueA": 0.1
+        },
+        "ksSpecularEXP": {
+          "valueA": 10
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "sand.png"
+        }
+      }
+    },
+    "water": {
+      "shaderName": "ksPerPixel",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.4
+        },
+        "ksSpecular": {
+          "valueA": 0.1
+        },
+        "ksSpecularEXP": {
+          "valueA": 10
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "water.png"
+        }
+      }
+    }
+  },
+  "nodes": {
+    "*": {
+      "lodIn": 0,
+      "lodOut": 10000,
+      "castShadows": true,
+      "visible": true,
+      "renderable": true
+    }
+  }
+}

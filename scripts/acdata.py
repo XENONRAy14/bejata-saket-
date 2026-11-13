@@ -116,16 +116,16 @@ def surfaces_text():
     return '\n\n'.join(blocks)+'\n'
 
 
-def exporter_settings():
+def exporter_settings(names=('asphalt','grass','gravel','rock','metal','kerb')):
     materials = {}
-    for name in ('asphalt','grass','gravel','rock','metal','kerb'):
+    for name in names:
         materials[name] = dict(shaderName='ksPerPixel',alphaBlendMode='Opaque',alphaTested=False,depthMode='DepthNormal',properties={key:dict(valueA=value) for key,value in dict(ksAmbient=.4,ksDiffuse=.4,ksSpecular=.5 if name=='metal' else .1,ksSpecularEXP=20 if name=='metal' else 10).items()},textures=dict(txDiffuse=dict(textureName=f'{name}.png')))
-    return dict(materials=materials,nodes={'1*':dict(lodIn=0,lodOut=10000,castShadows=True,visible=True,renderable=True)})
+    return dict(materials=materials,nodes={'*':dict(lodIn=0,lodOut=10000,castShadows=True,visible=True,renderable=True)})
 
 
 def write_files(data, output=OUTPUT):
     plan = plan_empties(data)
-    for folder in ('data','ui','ai','docs'):
+    for folder in ('data','ui','ai'):
         (output/folder).mkdir(parents=True,exist_ok=True)
     (output/'data/surfaces.ini').write_text(surfaces_text(),encoding='utf-8')
     route = json.loads((ROOT/'data/route_info.json').read_text())
@@ -140,11 +140,16 @@ def write_files(data, output=OUTPUT):
     ImageDraw.Draw(image).line([tuple(p*3) for p in pixels],fill=(255,255,255,255),width=9,joint='curve')
     image.resize((transform['WIDTH'],transform['HEIGHT']),Image.Resampling.LANCZOS).save(output/'map.png')
     (output/'data/map.ini').write_text('; Coordinate formula verified in third-party code: '+MAP_SOURCE+'\n; MARGIN=0 is assumed: padding is already baked into offsets.\n; MAX_SIZE / DRAWING_SIZE from Hagn sample; engine semantics UNVERIFIED.\n[PARAMETERS]\n'+'\n'.join(f'{key}={value}' for key,value in transform.items())+'\n',encoding='utf-8')
-    (output/'settings.json').write_text(json.dumps(exporter_settings(),indent=2)+'\n')
+    settings_path = ROOT/'blend/settings.json' if output == OUTPUT else output.parent/'settings.json'
+    names = sorted(p.stem for p in (ROOT/'textures').glob('*.png'))
+    settings_path.write_text(json.dumps(exporter_settings(names),indent=2)+'\n')
+    for legacy in (output/'settings.json',output/'docs/AC_NOTES.md'):
+        legacy.unlink(missing_ok=True)
+    if (output/'docs').is_dir() and not any((output/'docs').iterdir()):
+        (output/'docs').rmdir()
     (output/'ai/README.txt').write_text('No AI lines recorded. Empty AI directory is permitted by the basic guide (docs/AC_NOTES.md section 4).\nNo zero-byte fast_lane.ai / pit_lane.ai placeholders. AI driving is unsupported.\n')
     for source in ('CREDITS.md','README.md'):
         shutil.copy2(ROOT/source,output/source)
-    shutil.copy2(ROOT/'docs/AC_NOTES.md',output/'docs/AC_NOTES.md')
     plan['map_transform'] = transform
     return plan
 
