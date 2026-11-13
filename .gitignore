@@ -13,3 +13,5 @@ blend/*.kn5*
 *.log
 out/*.zip*
 data/*.partial
+out_backup_v1/
+data/research_cache/

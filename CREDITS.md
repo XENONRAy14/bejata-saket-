@@ -5,7 +5,21 @@
 - KN5 export uses moppius/blender-assetto-corsa-tools (GPL-3.0), originally based on Thomas Hagnhofer's exporter: https://github.com/moppius/blender-assetto-corsa-tools . Addon is installed externally, not vendored here.
 - Blender 3.6.23 official Linux x64 distribution: https://download.blender.org/release/Blender3.6/blender-3.6.23-linux-x64.tar.xz .
 
-No third-party imagery, textures, or raster map tiles were used. Procedural textures are generated locally with seed 24024.
+The shipped v1 track uses no third-party imagery, textures, or raster map tiles. Procedural textures are generated locally with seed 24024.
+
+## Visual research downloads (not shipped in v1)
+
+- Poly Haven **Worn Asphalt**, Amal Kumar: https://polyhaven.com/a/worn_asphalt,
+  CC0 (individual page checked; https://polyhaven.com/license).
+  Download test: `worn_asphalt_diff_1k.jpg`; derived 64px DDS codec probes remain
+  only in ignored `data/research_cache/`, not the install folder.
+- ambientCG **Asphalt012**: https://ambientcg.com/view?id=Asphalt012,
+  CC0 1.0 Universal (https://docs.ambientcg.com/license).
+  Download test: `Asphalt012_1K-JPG.zip`, CRC-checked, not installed.
+- Other candidate CC0 assets and per-asset license checks are recorded in
+  `docs/CSP_NOTES.md` §7; they are a research plan, not additional shipped content.
+- CSP config/wiki and shader sources were read for syntax only; no other track's
+  meshes, textures or complete config blocks were imported.
 
 ## Copernicus GLO-30 DSM
 

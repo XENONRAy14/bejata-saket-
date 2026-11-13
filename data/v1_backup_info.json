@@ -1,0 +1,15 @@
+{
+  "baseline_commit": "8c91a90831e36aa8f6cccde21b20017aa6cda4b4",
+  "tag": "v1",
+  "install_backup": "out_backup_v1/bejaia_saket",
+  "zip_backup": "out_backup_v1/bejaia_saket.zip",
+  "install_file_count": 10,
+  "backup_file_hashes_match_original": true,
+  "zip_integrity_and_all_members_match_install": true,
+  "kn5_bytes": 75572299,
+  "kn5_sha256": "90f944fe9aa5f37bf6bbcf4550a9bc3ec712e7e80814020628cfee87c545b9e1",
+  "zip_bytes": 26477315,
+  "zip_sha256": "4e89f8ac60a39c3f3842d0bf7f4ceb05a0b025500d58447592c7bf21687f13b1",
+  "reproduction_evidence": "data/clean_rebuild_info.json at v1",
+  "large_backups_are_local_and_gitignored": true
+}
