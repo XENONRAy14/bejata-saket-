@@ -5,6 +5,8 @@ data/*cache*
 data/dem/*.tif
 out/exporter_smoke/
 out/road.png
+out/bejaia_saket/*.kn5
+out/bejaia_saket/*.partial
 blend/*.blend*
 !blend/bejaia_saket.blend
 *.log

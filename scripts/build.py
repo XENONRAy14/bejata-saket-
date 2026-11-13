@@ -90,10 +90,14 @@ def graph(ways):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('stage', choices=['route', 'dem', 'centerline', 'mesh'])
+    parser.add_argument('stage', choices=['route', 'dem', 'centerline', 'mesh', 'acdata'])
     parser.add_argument('--blender', default=str(Path.home() / 'tools/blender-3.6.23-linux-x64/blender'))
     parser.add_argument('--list-places', action='store_true')
     args = parser.parse_args()
+    if args.stage == 'acdata':
+        from acdata import build
+        build(args.blender)
+        return
     if args.stage != 'route':
         from geometry import acquire_dem, centerline, mesh
         {'dem': acquire_dem, 'centerline': centerline, 'mesh': lambda: mesh(args.blender)}[args.stage]()

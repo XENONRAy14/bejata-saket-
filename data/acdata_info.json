@@ -1,0 +1,219 @@
+{
+  "empties": [
+    {
+      "name": "AC_PIT_0",
+      "chainage_m": 135.0,
+      "position_m": [
+        -48.407833009783864,
+        -123.69827217333547,
+        12.973690564763627
+      ],
+      "yaw_deg": -39.050241481296325,
+      "lateral_m": -1.7550000000000001,
+      "road_height_m": 11.473690564763627,
+      "chunk_seam_distance_m": 135.0
+    },
+    {
+      "name": "AC_PIT_1",
+      "chainage_m": 143.0,
+      "position_m": [
+        -53.24593750564481,
+        -130.0748161159296,
+        12.624388999684346
+      ],
+      "yaw_deg": -39.05030734665789,
+      "lateral_m": -1.495,
+      "road_height_m": 11.124388999684346,
+      "chunk_seam_distance_m": 143.0
+    },
+    {
+      "name": "AC_PIT_2",
+      "chainage_m": 151.0,
+      "position_m": [
+        -58.48787175133439,
+        -136.1237602687439,
+        12.339087434573196
+      ],
+      "yaw_deg": -39.05030734665777,
+      "lateral_m": -1.7550000000000001,
+      "road_height_m": 10.839087434573196,
+      "chunk_seam_distance_m": 151.0
+    },
+    {
+      "name": "AC_PIT_3",
+      "chainage_m": 159.0,
+      "position_m": [
+        -63.32597758475748,
+        -142.5003057241294,
+        12.117785869430172
+      ],
+      "yaw_deg": -39.05030734665764,
+      "lateral_m": -1.495,
+      "road_height_m": 10.617785869430172,
+      "chunk_seam_distance_m": 159.0
+    },
+    {
+      "name": "AC_START_0",
+      "chainage_m": 183.0,
+      "position_m": [
+        -78.54699480649317,
+        -161.05663981078632,
+        11.836901511836441
+      ],
+      "yaw_deg": -39.05030734665771,
+      "lateral_m": -1.625,
+      "road_height_m": 10.336901511836441,
+      "chunk_seam_distance_m": 183.0
+    },
+    {
+      "name": "AC_START_1",
+      "chainage_m": 175.0,
+      "position_m": [
+        -73.5069747669368,
+        -154.8438950066864,
+        11.867182739048516
+      ],
+      "yaw_deg": -39.05030734665787,
+      "lateral_m": -1.625,
+      "road_height_m": 10.367182739048516,
+      "chunk_seam_distance_m": 175.0
+    },
+    {
+      "name": "AC_HOTLAP_START_0",
+      "chainage_m": 190.0,
+      "position_m": [
+        -82.95701234110494,
+        -166.49279151437372,
+        11.837018279250824
+      ],
+      "yaw_deg": -39.05030734665765,
+      "lateral_m": -1.625,
+      "road_height_m": 10.337018279250824,
+      "chunk_seam_distance_m": 190.0
+    },
+    {
+      "name": "AC_AB_START_L",
+      "chainage_m": 200.0,
+      "position_m": [
+        -85.47114602555199,
+        -177.32998473110325,
+        11.79095236777978
+      ],
+      "yaw_deg": -39.05030734665765,
+      "lateral_m": 3.25,
+      "road_height_m": 10.29095236777978,
+      "chunk_seam_distance_m": 200.0
+    },
+    {
+      "name": "AC_AB_START_R",
+      "chainage_m": 200.0,
+      "position_m": [
+        -90.51900117888316,
+        -173.23496844896374,
+        11.79095236777978
+      ],
+      "yaw_deg": -39.05030734665765,
+      "lateral_m": -3.25,
+      "road_height_m": 10.29095236777978,
+      "chunk_seam_distance_m": 200.0
+    },
+    {
+      "name": "AC_AB_FINISH_L",
+      "chainage_m": 24036.99719490741,
+      "position_m": [
+        -12849.140404242831,
+        7957.3387950955575,
+        14.928302810495955
+      ],
+      "yaw_deg": -100.91140290294301,
+      "lateral_m": 3.500000000000001,
+      "road_height_m": 13.428302810495955,
+      "chunk_seam_distance_m": 35.997709132905584
+    },
+    {
+      "name": "AC_AB_FINISH_R",
+      "chainage_m": 24036.99719490741,
+      "position_m": [
+        -12847.815368174533,
+        7964.212242514263,
+        14.928302810495955
+      ],
+      "yaw_deg": -100.91140290294301,
+      "lateral_m": -3.500000000000001,
+      "road_height_m": 13.428302810495955,
+      "chunk_seam_distance_m": 35.997709132905584
+    },
+    {
+      "name": "AC_TIME_0_L",
+      "chainage_m": 8145.665731635803,
+      "position_m": [
+        -5302.813180612016,
+        1968.0061230253502,
+        275.1683398524509
+      ],
+      "yaw_deg": -154.7110751635133,
+      "lateral_m": 3.500000000000001,
+      "road_height_m": 273.6683398524509,
+      "chunk_seam_distance_m": 144.01105820401335
+    },
+    {
+      "name": "AC_TIME_0_R",
+      "chainage_m": 8145.665731635803,
+      "position_m": [
+        -5296.484024630479,
+        1970.9964047113065,
+        275.1683398524509
+      ],
+      "yaw_deg": -154.7110751635133,
+      "lateral_m": -3.500000000000001,
+      "road_height_m": 273.6683398524509,
+      "chunk_seam_distance_m": 144.01105820401335
+    },
+    {
+      "name": "AC_TIME_1_L",
+      "chainage_m": 16091.331463271606,
+      "position_m": [
+        -7073.797042736208,
+        4980.325881953998,
+        79.45399981537388
+      ],
+      "yaw_deg": -126.7044643159029,
+      "lateral_m": 3.500000000000001,
+      "road_height_m": 77.95399981537388,
+      "chunk_seam_distance_m": 90.06400744866187
+    },
+    {
+      "name": "AC_TIME_1_R",
+      "chainage_m": 16091.331463271606,
+      "position_m": [
+        -7069.613229416344,
+        4985.93798549051,
+        79.45399981537388
+      ],
+      "yaw_deg": -126.7044643159029,
+      "lateral_m": -3.500000000000001,
+      "road_height_m": 77.95399981537388,
+      "chunk_seam_distance_m": 90.06400744866187
+    }
+  ],
+  "initial_120m_heading_range_deg": 21.20457036524341,
+  "staging_start_m": 120.0,
+  "staging_end_m": 240.0,
+  "staging_heading_range_deg": 2.390851715593288,
+  "start_gate_m": 200.0,
+  "finish_gate_m": 24036.99719490741,
+  "finish_runoff_m": 50.0,
+  "timed_length_m": 23836.99719490741,
+  "spawn_height_offset_m": 1.5,
+  "timing_convention": "AB start/finish; TIME_0 and TIME_1 internal thirds per docs/AC_NOTES.md section 6; UNVERIFIED in AC",
+  "map_transform": {
+    "WIDTH": 1600,
+    "HEIGHT": 1033,
+    "MARGIN": 0,
+    "SCALE_FACTOR": 8.268068116300409,
+    "MAX_SIZE": 1600,
+    "X_OFFSET": 13063.509505115848,
+    "Z_OFFSET": 8130.967550483581,
+    "DRAWING_SIZE": 10
+  }
+}

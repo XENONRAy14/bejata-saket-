@@ -124,6 +124,8 @@ DRAWING_SIZE=10
 
 `WIDTH/HEIGHT` are image dimensions; offsets/scale align map and car position. HM's prose says `Y_OFFSET` but its actual example and sample use **Z_OFFSET**; use the file spelling. Exact meanings of MARGIN/MAX_SIZE/DRAWING_SIZE remain **UNVERIFIED** (source itself calls unknown). [HM; S]
 
+Phase 3 transform cross-check: [assetto-server-manager `RaceControl.ts:491–497`](https://github.com/cj123/assetto-server-manager/blob/master/cmd/server-manager/typescript/src/RaceControl.ts#L491-L497) computes `(world.X + X_OFFSET + margin) / SCALE_FACTOR` and likewise for `world.Z`, before UI resizing. Its `trackMargin` remains initialized to zero; `content_tracks.go:TrackMapData` maps INI `Z_OFFSET` to the JSON `offset_y` field read at lines 368–370. This verifies a third-party implementation using **meter offsets before dividing by meters/pixel**, not pixels added afterward. It is not a vanilla-engine runtime test. Phase 3 uses `MARGIN=0`, bakes explicit 20-pixel padding into offsets and leaves unknown generator fields at sample values. [HM; S; [source code](https://github.com/cj123/assetto-server-manager/blob/master/content_tracks.go)]
+
 ## 5. Exporter settings / headless checklist
 
 Verified by reading `exporter/exporter_utils.py:74–80`: `settings.json` is read **beside the output KN5**, absence returns `{}`. The following illustrative schema uses the **current fork's** names, not all names from the old Hagn sample. [verified by reading exporter code]

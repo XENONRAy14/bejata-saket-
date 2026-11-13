@@ -1,6 +1,6 @@
 # Béjaïa → Saket: Assetto Corsa track preparation
 
-Phases 0–2: OSM route, Copernicus DSM elevation and procedural Blender track geometry. **Not yet an installable or AC-tested track.**
+Phases 0–3: OSM route, Copernicus DSM elevation, procedural Blender geometry and a provisional AC data/KN5 package. **Not yet AC-tested.**
 
 ## What exists / works
 
@@ -31,6 +31,8 @@ curl -fL https://download.geofabrik.de/africa/algeria-latest.osm.pbf -o data/alg
 .venv/bin/python scripts/build.py dem
 .venv/bin/python scripts/build.py centerline
 .venv/bin/python scripts/build.py mesh
+.venv/bin/python scripts/build.py acdata
+.venv/bin/python -m unittest discover -s scripts -p 'test_acdata.py' -v
 .venv/bin/python -m unittest discover -s scripts -p 'test_geometry.py' -v
 .venv/bin/python -m unittest discover -s scripts -p 'test_route.py' -v
 ~/tools/blender-3.6.23-linux-x64/blender -b --python-exit-code 1 -P scripts/test_exporter.py
@@ -44,15 +46,68 @@ Run from project root. The initial country scan takes several minutes; subsequen
 - Approximately 2 m route sampling with fixed endpoints. A 2 m polyline simplification identifies corner tangents; overlapping short corners are merged, then rounded with 19.2 m nominal-radius fillets. A 4 m Gaussian pass eases straight/arc transitions, and a C2 cubic-spline curvature check enforces at least 12 m radius before final resampling. This replaces the previous hard 2.8 m corridor clipping, which produced curvature kinks. Smoothed horizontal length is **24.087 km** versus the original geodesic **24.238 km**; 3D length is **24.114 km**.
 - Elevation: median filter, approximately 48 m full Gaussian window, then a **symmetric least-squares cubic B-spline QP** (OSQP, 10 m control spacing). Derivative-control bounds guarantee ±14% grade and maximum grade-change rate 0.001 per meter throughout the spline. There is no integrated-grade drift correction or arbitrary elevation floor. Elevations **6.00–323.24 m**, climb **464.44 m**. Against the median/Gaussian DEM target, mean/max absolute error is **0.283/5.107 m**; against median-only DEM it is **0.399/6.355 m**. Mean signed target error over 11–19 km is **+0.00029 m**, rather than the previous sustained upward bias. Raw DSM, filtered target and fitted road are plotted in `out/preview/elevation_profile.png`.
 - **Copernicus GLO-30 is a DSM, not bare-earth or surveyed road elevation: it includes buildings and trees.** Filtering does not reconstruct bridge decks, tunnels, retaining structures or true road elevations. The road profile remains provisional.
-- Widths use OSM width, then lanes × 3.25 m, then highway-class defaults, with smoothed transitions. **The road retains its full nominal 6.5–7 m width everywhere**; minimum generated width is **6.50 m**, narrowed length **0 m**. **No banking or road crossfall.** Low 0.3 m kerb rises 2 cm outward; shoulder remains 1.5 m. `1GRAVEL` is a custom physical key to define explicitly in Phase 3; do not assume a stock GRAVEL surface. See `docs/AC_NOTES.md`.
+- Widths use OSM width, then lanes × 3.25 m, then highway-class defaults, with smoothed transitions. **The road retains its full nominal 6.5–7 m width everywhere**; minimum generated width is **6.50 m**, narrowed length **0 m**. **No banking or road crossfall.** Low 0.3 m kerb rises 2 cm outward; shoulder remains 1.5 m. `1GRAVEL` uses the explicit custom physical key supplied in Phase 3; do not assume a stock GRAVEL surface. See `docs/AC_NOTES.md`.
 - Terrain uses five columns including its shared shoulder edge, normally extending 40 m beyond that edge on each side. Shared strip and chunk boundaries have identical coordinates. Only the terrain extent contracts at tight curves/nearby hairpins (minimum centerline offset **8.18 m**); road, kerb and shoulder widths do not. Actual triangle winding and the whole ribbon's boundary crossings are checked, not just an analytic radius bound.
 - **Approved intersection realignment:** the sharp urban reversal formerly near 1.19 km and other tight corners are rounded rather than narrowed. Global minimum discrete centerline radius is now **18.80 m**. Maximum revised-centerline distance to OSM is **14.72 m**; conversely, the omitted OSM corner tip is up to **37.09 m** from the revised centerline (two-sided maximum deviation **37.09 m**, sampled at approximately 1 m). This is an intentional local departure, not surveyed junction geometry. Maximum sampled heading change is **0.05329 rad/m (3.053°/m)**, and maximum curvature-change rate is **0.00489 m⁻²**. The regenerated 70% road view was checked for the earlier sharp center-marking kink.
 - Coastline within 60 m on a side, or DSM 15 m out over 4 m below the road, triggers simple physical `1WALL_GUARD_*` beam/post barriers. Uphill DSM cuts over 4 m trigger `1WALL_CUT_*` rock faces. Gaps up to approximately 12 m merge; runs shorter than 30 m are removed. This is heuristic placement, not a survey; road/DSM mismatch can over-detect barriers. Walls are visible physical geometry, not unverified invisible colliders.
 - All strips and barriers are chunked by actual chainage at approximately **400 m** (61 chunks, **516 mesh objects**, down from 1,051). Largest object: **2,400 vertices**, below the 65k cap. Total: **301,052 vertices / 381,972 triangles**. Road/kerb/gravel/grass faces are explicit +Z-facing triangles. Road UVs span 0–1 across the width and repeat every 7 m along chainage, continuous at chunk seams. Six reproducible 1024² PNG textures under `textures/` use numpy seed 24024; asphalt includes edge lines and dashed center markings.
 - `blend/bejaia_saket.blend` contains geometry and references the committed `textures/` assets. `data/centerline.npz` holds metric arrays; `data/geometry_info.json` reports centerline and mesh counts. Previews: `out/preview/top.png`, `road_10.png`, `road_40.png`, `road_70.png`, `road_95.png` (road cameras 1.2 m high). The blue surround is a background, **not a modelled sea**. Renders/profile were opened and visually inspected; they are coarse blockout geometry, not finished scenery.
 
+## Phase 3 AC package
+
+Conventions, source URLs and runtime caveats: **[docs/AC_NOTES.md](docs/AC_NOTES.md)**, especially sections 1–6. `scripts/build.py acdata` uses pure-Python `scripts/acdata.py` for files/placements and Blender `scripts/blender_acdata.py` for actual empties, end wall and full export. Run it **after mesh**; rerunning mesh resets the scene and requires rerunning acdata. `AC_ADDON_SOURCE` can override `~/tools/blender-assetto-corsa-tools`. Export settings live beside the KN5 as required by the exporter.
+
+### Staging / timing / end protection
+
+- First 0–120 m changes heading by **21.205°**: not a good staging straight. Chose the first 120 m window with heading range ≤3°, scanning in 5 m increments and measuring at 1 m intervals including endpoints: **120–240 m**, range **2.391°**. Pits at **135, 143, 151, 159 m**, staggered within the right-hand lane. Grid pole at **183 m**, second car at **175 m**. Hotlap at **190 m**, AB start at **200 m**. Actual names/Blender east,north,height coordinates/Z yaw and nearest seam distances are in `data/acdata_info.json`.
+- All 15 logical objects are uppercase, unparented, unit scale, with **Z yaw only** and **1.5 m above road** per AC_NOTES §2 (the guide recommends 1–2 m). Spawns sit on the right; gate L/R are at opposite road edges, perpendicular to the road. Level, no banking. Direct exporter matrix conversion is checked numerically; actual car spawn/drop/orientation remains **UNVERIFIED in AC**.
+- **Deliberate timing choice allowed by the request's sector-convention option:** AC_NOTES §6 warns against circuit-style `AC_TIME_0` overlapping the AB start. Thus `AC_AB_START_L/R` and `AC_AB_FINISH_L/R` mark stage ends, while `AC_TIME_0_L/R` is at **8145.666 m** and `AC_TIME_1_L/R` at **16091.331 m**, two intermediate thirds. This community A2B timing convention, sector capture, practice/hotlap persistence and restart behavior remain **UNVERIFIED in AC**.
+- AB finish at **24036.997 m**; modeled road continues **50.000 m** to 24086.997 m. Timed stage length **23836.997 m**; UI length **24087m** describes the full modeled road, including staging/runoff. No dummy is within 2 m of an actual approximately 400 m chunk seam; actual minimum clearance **35.998 m**.
+- Added **visible physical `1WALL_END`**, rock material, 0.5 m thick, following the final terrain/road cross-section end to end. Its center is 0.5 m before the modeled endpoint, top 1.2 m above the sampled cross-section, base 0.2 m below. Existing 50 m road provides runoff; no invented road extension. This is a crude safety boundary, not a realistic Saket feature or a safe stopping distance at racing speed. End-to-end wall geometry was rendered in `out/preview/end_barrier.png`; collision effectiveness remains **UNVERIFIED in AC**. Existing guardrails/cuts remain visible physical barriers; there are **no physics-only/invisible colliders**.
+
+### Files / sourced values vs assumptions
+
+Output is **`out/bejaia_saket/`**. Copy that folder under Windows `assettocorsa/content/tracks/` for the eventual runtime check; installation/loading is **UNVERIFIED**. Generated KN5 files are ignored (this full export exceeds 50 MB); regenerate locally with `acdata`.
+
+| File | Content / provenance |
+|---|---|
+| `bejaia_saket.kn5` | Full current scene, 517 mesh objects (516 original + end wall), 15 AC empties. Blender cameras/lights retain `__` prefixes to exclude them. |
+| `data/surfaces.ini` | Every actual physical key, checked against mesh prefixes: **ROAD, KERB, GRASS, GRAVEL, WALL**. Source: [Hagn example](https://site.hagn.io/assettocorsa/modding/tracks/data/surfaces-ini), also AC_NOTES §1. |
+| `ui/ui_track.json` | UTF-8 requested name/geotags, Algeria/Béjaïa, full-road meter length, width 6.5–7.0m, pitboxes `"4"`, frite, v0.1, 2026. `run` is descriptive **“Béjaïa → Saket · point-to-point”** per Hagn, **not a mode switch**. |
+| `ui/preview.png` / `ui/outline.png` | **355×200** following the inspected sample: resized road-level 70% Eevee render; white route on transparent RGBA. Mandatory dimension claims **UNVERIFIED**. |
+| `map.png` / `data/map.ini` | North-up white route on transparent RGBA; dimensions/transform below. |
+| `ai/README.txt` | No AI line, no fake zero-byte `.ai` file. AI racing unsupported. Empty AI directory allowed by the basic guide, but runtime loading without lines **UNVERIFIED locally**. |
+| `settings.json` | Explicit `ksPerPixel` for all six texture-named materials; each `txDiffuse` maps to its embedded PNG. Current `visible`/`renderable` flags, all physical geometry visible/renderable with shadows on. |
+| `CREDITS.md`, `README.md`, `docs/AC_NOTES.md` | Attribution, limitations and convention sources bundled with the package. Detailed placement/export JSON evidence remains in the repository's root `data/` directory. |
+
+Surface values are **sourced examples, not verified installed Kunos defaults**. ROAD copies Hagn's ASPHALT block under a different KEY; KERB copies its KERB block. GRASS/GRAVEL/WALL inherit the ASPHALT block as an **ASSUMED** base. For GRASS: friction .65, damping .1, dirt 1, validity 0 are **ASSUMED**. For GRAVEL: friction .75, damping .05, dirt 1, validity 0 are **ASSUMED**. WALL's rolling parameters are **ASSUMED** (WALL is a special obstacle name). All differences are also annotated in `surfaces.ini`. Runtime traction/penalties, local/default merge/override behavior, `kerb.wav` availability and FF-effect semantics are **UNVERIFIED**. No separate pit-lane surface/limiter/repair zone was modeled; pit spawns are on ROAD, and pit servicing behavior is **UNVERIFIED**.
+
+Material `ksAmbient=.4`, `ksDiffuse=.4` follow exporter defaults (AC_NOTES §5); explicit specular **.1** for road/terrain/rock/kerb and **.5** for metal, specular exponent **10/20**, and mesh `lodOut=10000` are **ASSUMED appearance/performance choices**, not measured real-world values. PNG shader appearance/shadows and all material behavior remain **UNVERIFIED in AC**, although texture embedding/material references are read back from the exported binary. There are no physics-only colliders to hide. Cameras are skipped: although a Hagn format example exists, no valid route-specific camera splines/set was established, so **no `data/cameras.ini`** is shipped. Lighting/groove configuration and runtime defaults are **UNVERIFIED** and not fabricated.
+
+### Map transform
+
+AC_NOTES §4 links Hagn's sample and the independently inspected [assetto-server-manager transform](https://github.com/cj123/assetto-server-manager/blob/master/cmd/server-manager/typescript/src/RaceControl.ts#L491-L497). That third-party implementation adds offsets **in meters** then divides by meters/pixel. For Blender `(x,y,z)`, exported world `(X,Z)=(x,-y)`:
+
+```text
+px = (X + X_OFFSET) / SCALE_FACTOR
+py = (Z + Z_OFFSET) / SCALE_FACTOR
+scale = max(world X span, world Z span) / (1600 - 2*20)
+offset = 20*scale - minimum_world_coordinate
+image dimensions = ceil(world span / scale + 2*20), capped at 1600
+```
+
+Generated **WIDTH=1600**, **HEIGHT=1033**, **SCALE_FACTOR=8.2680681163 m/pixel**, **X_OFFSET=13063.5095051 m**, **Z_OFFSET=8130.9675505 m**. A 20-pixel border is baked into the offsets, independent of the INI margin field. Round-trip map/world positions and containment are checked, and images inspected; actual car-overlay alignment in vanilla AC remains **UNVERIFIED**. `MARGIN=0` is an **ASSUMED** defensive choice to avoid applying padding twice; its exact engine meaning is **UNVERIFIED**. `MAX_SIZE=1600` and `DRAWING_SIZE=10` are copied from the sample (1600 also chosen as this generator's pixel cap); their engine semantics remain **UNVERIFIED**, not claimed to control rendering here.
+
+### Full export / validation evidence
+
+The stage invokes Blender 3.6.23 headlessly, loads the current scene and enables the unmodified addon. It calls the addon's actual `exporter.KN5FileWriter(...).write()` with settings from beside the output, rather than the operator that can swallow exceptions (AC_NOTES §5). An in-memory NodeWriter subclass only records before/after split counts; no addon files are modified. Exceptions propagate; a temporary output is renamed only after successful writing and header validation.
+
+`data/kn5_export_info.json` records file bytes, writer-only elapsed seconds, SHA-256, warnings and actual split counters. Full output is **58,994,247 bytes (58.99 MB / 56.26 MiB)**. The exporter produced **517 mesh nodes**, **no vertex-limit splits**, maximum **10,526 expanded vertices** before splitting. This verifies this scene's full export, **not** the oversized-mesh split branch, which remains **UNVERIFIED by execution**. Four expected unknown-logical-object warnings are the requested **AC_AB_START/FINISH_L/R** names absent from the addon's allowlist (AC_NOTES §2); names are deliberately retained. The initial export also had six inactive-texture UV fallback warnings; marking the existing image nodes active removes these without changing authored UVs. All meshes have UV maps.
+
+Independent `scripts/check_kn5.py` reads the writer's KN5 v5 subset: header, textures, material properties/references, logical matrices, meshes/indices/flags, exact EOF. It does not constitute a Blender/ksEditor round trip or runtime validation. Unit tests cover normal/empty/error inputs for placements/map generation, file generation and binary readback. Windows acceptance must still cover loading, right-lane spawn/drop and facing, both AB gates/two intermediate sectors, saved practice/hotlap times, return to pits, surface grip and all wall collisions. **`run: "A2B"` as a runtime mode switch is UNVERIFIED and intentionally not used**; the AB object names declare the intended layout, but functioning A2B sessions are still **UNVERIFIED**.
+
 ## Untested / limitations
 
-No Assetto Corsa or Windows runtime validation, ksEditor import, full-track KN5 export/round trip, surveyed physical road widths/elevations, driving/collision validation, AI lines, spawn/timing objects, pits, or packaging. Geometry names prepare physics surfaces but no Phase 3 surface configuration is supplied yet. Successful smoke binary writing does not demonstrate in-game correctness. OSM turn-restriction relations and conditional access/oneway tags are not modelled; this is not navigation certification. Route preview uses vector OSM roads and coastline, not raster tiles. Start/end are snapped to main-road nodes, not the exact square/beach centroid.
+No Assetto Corsa or Windows runtime validation, ksEditor import/round trip, surveyed physical road widths/elevations, driving/collision validation, AI lines or pit-lane/repair-zone geometry. A full KN5/data package now exists; successful binary writing/readback does not demonstrate in-game correctness. OSM turn-restriction relations and conditional access/oneway tags are not modelled; this is not navigation certification. Route preview uses vector OSM roads and coastline, not raster tiles. Start/end are snapped to main-road nodes, not the exact square/beach centroid.
 
 See [CREDITS.md](CREDITS.md) for attribution and licensing.

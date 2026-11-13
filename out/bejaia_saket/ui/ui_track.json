@@ -1,0 +1,23 @@
+{
+  "name": "Béjaïa – Saket (RN24)",
+  "description": "Coastal RN24 from Béjaïa to Saket. Point-to-point mountain road; provisional DSM-derived geometry. © OpenStreetMap contributors; produced using Copernicus WorldDEM-30; see CREDITS.md.",
+  "tags": [
+    "point-to-point",
+    "mountain",
+    "coastal"
+  ],
+  "geotags": [
+    "36.7525243",
+    "5.0858924"
+  ],
+  "country": "Algeria",
+  "city": "Béjaïa",
+  "length": "24087m",
+  "width": "6.5m-7.0m",
+  "pitboxes": "4",
+  "run": "Béjaïa → Saket · point-to-point",
+  "author": "frite",
+  "version": "0.1",
+  "year": 2026,
+  "url": ""
+}
