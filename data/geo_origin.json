@@ -1,0 +1,7 @@
+{
+  "crs": "EPSG:32631",
+  "easting_m": 686206.0,
+  "northing_m": 4069448.0,
+  "z_origin_m": 0,
+  "convention": "Blender X=east Y=north Z=elevation; round projected start to nearest meter"
+}

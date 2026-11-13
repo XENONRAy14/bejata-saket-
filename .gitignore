@@ -2,7 +2,9 @@
 __pycache__/
 data/*.pbf
 data/*cache*
+data/dem/*.tif
 out/exporter_smoke/
 out/road.png
 blend/*.blend*
+!blend/bejaia_saket.blend
 *.log

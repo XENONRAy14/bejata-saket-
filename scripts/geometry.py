@@ -1,0 +1,349 @@
+"""Metric geometry preparation; no Blender dependency."""
+import hashlib
+import json
+import math
+import os
+from pathlib import Path
+import re
+import subprocess
+import urllib.request
+
+import numpy as np
+from PIL import Image
+from pyproj import Transformer
+import rasterio
+from scipy.ndimage import gaussian_filter1d, median_filter, minimum_filter1d, map_coordinates
+from scipy.spatial import cKDTree
+
+ROOT = Path(__file__).resolve().parents[1]
+FORWARD = Transformer.from_crs(4326, 32631, always_xy=True)
+INVERSE = Transformer.from_crs(32631, 4326, always_xy=True)
+
+
+def acquire_dem():
+    folder = ROOT / 'data/dem'
+    folder.mkdir(exist_ok=True)
+    records = []
+    for lon in (4, 5):
+        name = f'Copernicus_DSM_COG_10_N36_00_E{lon:03d}_00_DEM'
+        url = f'https://copernicus-dem-30m.s3.amazonaws.com/{name}/{name}.tif'
+        path = folder / f'N36E{lon:03d}.tif'
+        if not path.exists():
+            urllib.request.urlretrieve(url, path)
+        with rasterio.open(path) as ds:
+            assert ds.crs.to_epsg() == 4326 and ds.count == 1
+            records.append(dict(url=url, file=str(path.relative_to(ROOT)), sha256=hashlib.sha256(path.read_bytes()).hexdigest(), shape=ds.shape, crs=str(ds.crs), nodata=ds.nodata))
+    (folder / 'sources.json').write_text(json.dumps(records, indent=2)+'\n')
+    print('DEM_OK tiles=2 CRS=EPSG:4326 bilinear_sampling=pixel_centers')
+
+
+class DEM:
+    def __init__(self, origin):
+        self.origin = np.asarray(origin)
+        self.tiles = []
+        for path in sorted((ROOT / 'data/dem').glob('*.tif')):
+            with rasterio.open(path) as ds:
+                self.tiles.append((ds.read(1), ds.transform, ds.bounds, ds.nodata))
+        if not self.tiles:
+            raise ValueError('Run build.py dem first')
+
+    def sample(self, xy):
+        xy = np.asarray(xy)
+        x,y = xy[...,0]+self.origin[0],xy[...,1]+self.origin[1]
+        if x.size == 1:
+            lon,lat = INVERSE.transform(x.item(),y.item())
+            lon,lat = np.full(x.shape,lon),np.full(y.shape,lat)
+        else:
+            lon,lat = INVERSE.transform(x,y)
+        result = np.full(lon.shape, np.nan)
+        for data, transform, bounds, nodata in self.tiles:
+            mask = (lon >= bounds.left) & (lon <= bounds.right) & (lat >= bounds.bottom) & (lat <= bounds.top)
+            col, row = (~transform) * (lon[mask], lat[mask])
+            values = map_coordinates(data, [row-.5, col-.5], order=1, mode='nearest')
+            if nodata is not None:
+                invalid = map_coordinates((data == nodata).astype(float), [row-.5,col-.5], order=1, mode='nearest')
+                values = np.where(invalid > 0, np.nan, values)
+            result[mask] = values
+        if not np.isfinite(result).all():
+            raise ValueError('DEM missing or nodata at requested coordinates')
+        return result
+
+
+def resample(points, spacing=2):
+    points = np.asarray(points, dtype=float)
+    if len(points) < 2 or points.ndim != 2 or not np.isfinite(points).all() or not np.isfinite(spacing) or spacing <= 0:
+        raise ValueError('Need at least two finite points')
+    s = np.r_[0, np.cumsum(np.linalg.norm(np.diff(points, axis=0), axis=1))]
+    keep = np.r_[True, np.diff(s) > 1e-8]
+    s, points = s[keep], points[keep]
+    if len(s) < 2:
+        raise ValueError('Route has zero length')
+    target = np.linspace(0, s[-1], math.ceil(s[-1]/spacing)+1)
+    return np.column_stack([np.interp(target, s, points[:, k]) for k in range(points.shape[1])]), target
+
+
+def nearest_on_polyline(points, reference):
+    reference = np.asarray(reference)
+    _, nearest = cKDTree(reference).query(points,k=min(4,len(reference)))
+    nearest = np.asarray(nearest).reshape(len(points),-1)
+    indices = np.clip(np.concatenate([nearest,nearest-1],axis=1),0,len(reference)-2)
+    a,b = reference[indices],reference[indices+1]
+    ab = b-a
+    t = np.clip(np.sum((points[:,None,:]-a)*ab,axis=2)/np.maximum(np.sum(ab*ab,axis=2),1e-12),0,1)
+    projected = a+t[...,None]*ab
+    best = np.argmin(np.sum((points[:,None,:]-projected)**2,axis=2),axis=1)
+    return projected[np.arange(len(points)),best]
+
+
+def smooth_xy(points, max_deviation=2.8, reference=None):
+    base = np.asarray(points,dtype=float).copy()
+    if base.ndim != 2 or len(base) < 2 or not np.isfinite(base).all() or max_deviation < 0:
+        raise ValueError('Need finite points and nonnegative deviation')
+    reference = base if reference is None else reference
+    smooth = base.copy()
+    for _ in range(25):
+        smooth = gaussian_filter1d(smooth, 2, axis=0, mode='nearest')
+        nearest = nearest_on_polyline(smooth,reference)
+        delta = smooth-nearest
+        norm = np.linalg.norm(delta, axis=1)
+        smooth = nearest + delta*np.minimum(1, max_deviation/np.maximum(norm, 1e-9))[:, None]
+        smooth[[0, -1]] = base[[0, -1]]
+    return smooth
+
+
+def smooth_elevation(raw, s):
+    raw, s = np.asarray(raw), np.asarray(s)
+    if len(raw) < 2 or raw.shape != s.shape or not np.isfinite(raw).all() or not np.isfinite(s).all():
+        raise ValueError('Need finite elevations')
+    ds = np.diff(s)
+    if (ds <= 0).any():
+        raise ValueError('Chainage must strictly increase')
+    target = gaussian_filter1d(median_filter(raw, size=11, mode='nearest'), 6, mode='nearest', truncate=2)
+    grade = np.clip(np.diff(target)/ds, -.12, .12)
+    limit = .001 * (ds[:-1]+ds[1:])/2
+    for i in range(1, len(grade)):
+        grade[i] = np.clip(grade[i], grade[i-1]-limit[i-1], grade[i-1]+limit[i-1])
+    for i in range(len(grade)-2, -1, -1):
+        grade[i] = np.clip(grade[i], grade[i+1]-limit[i], grade[i+1]+limit[i])
+    z = np.r_[0, np.cumsum(grade*ds)]
+    return z + max(np.mean(target-z), 1-z.min())
+
+
+def width_from_tags(tags):
+    def number(value):
+        match = re.fullmatch(r'\s*(\d+(?:\.\d+)?)\s*(m)?\s*', str(value))
+        return float(match[1]) if match else None
+    width = number(tags.get('width'))
+    if width and 2 <= width <= 30:
+        return width
+    lanes = number(tags.get('lanes'))
+    if lanes and 1 <= lanes <= 8:
+        return lanes*3.25
+    return {'trunk': 7., 'primary': 7., 'secondary': 6.5}.get(tags.get('highway', '').split('_')[0], 6.)
+
+
+def runs(mask, s, gap=12, minimum=30):
+    mask = np.asarray(mask, dtype=bool).copy()
+    def intervals(m):
+        edges = np.diff(np.r_[False, m, False].astype(int))
+        return zip(np.where(edges == 1)[0], np.where(edges == -1)[0]-1)
+    for a, b in list(intervals(~mask)):
+        if a > 0 and b < len(mask)-1 and s[b]-s[a] <= gap:
+            mask[a:b+1] = True
+    for a, b in list(intervals(mask)):
+        if s[b]-s[a] < minimum:
+            mask[a:b+1] = False
+    return mask
+
+
+def frames(xy, s):
+    xy, s = np.asarray(xy,dtype=float), np.asarray(s,dtype=float)
+    if xy.shape != (len(s),2) or len(s) < 2 or not np.isfinite(xy).all() or not np.isfinite(s).all() or (np.diff(s) <= 0).any():
+        raise ValueError('Need finite planar points and increasing chainage')
+    segment = np.diff(xy,axis=0)
+    if (np.linalg.norm(segment,axis=1) < 1e-8).any():
+        raise ValueError('Repeated centerline point')
+    segment /= np.linalg.norm(segment,axis=1)[:,None]
+    tangent = np.vstack([segment[0],segment[:-1]+segment[1:],segment[-1]])
+    if (np.linalg.norm(tangent,axis=1) < 1e-8).any():
+        raise ValueError('Centerline reverses direction')
+    tangent /= np.linalg.norm(tangent, axis=1)[:, None]
+    normal = np.column_stack([-tangent[:, 1], tangent[:, 0]])
+    derivative = np.gradient(tangent, s, axis=0)
+    curvature = tangent[:, 0]*derivative[:, 1]-tangent[:, 1]*derivative[:, 0]
+    return tangent, normal, curvature
+
+
+def section_offsets(width, budget):
+    half = np.minimum(width/2,budget*.75)
+    kerb = np.minimum(.3,budget*.04)
+    shoulder = np.minimum(1.5,budget*.1)
+    inner = half+kerb+shoulder
+    return np.column_stack([half,half+kerb,inner,*[inner+(budget-inner)*f for f in (.2,.4,.65,1.)]])
+
+
+def safe_sections(xy, normal, width, budget, sign):
+    if len(xy) < 2 or sign not in (-1,1) or not np.isfinite(budget).all() or (budget <= 0).any():
+        raise ValueError('Need positive finite offset budgets and a side')
+    budget = budget.copy()
+    for _ in range(60):
+        cols = section_offsets(width,budget)
+        positions = xy[:,None,:]+sign*normal[:,None,:]*cols[...,None]
+        a,b,c,d = positions[:-1,:-1],positions[1:,:-1],positions[1:,1:],positions[:-1,1:]
+        cross = lambda u,v: u[...,0]*v[...,1]-u[...,1]*v[...,0]
+        bad = np.where(np.any((cross(b-a,c-a)*sign <= 1e-9) | (cross(c-a,d-a)*sign <= 1e-9),axis=1))[0]
+        if not len(bad):
+            return cols, positions
+        for k in (-2,-1,0,1,2,3):
+            indices = np.unique(np.clip(bad+k,0,len(budget)-1))
+            budget[indices] *= .8
+    raise RuntimeError('Cannot construct non-folded cross sections')
+
+
+def boundary_crossings(points):
+    points = np.asarray(points)
+    if not len(points):
+        return np.empty((0,2),dtype=int)
+    if points.ndim != 2 or points.shape[1] != 2 or len(points) < 3 or not np.isfinite(points).all():
+        raise ValueError('Need a finite polygon boundary')
+    a,b = points,np.roll(points,-1,axis=0)
+    pairs = cKDTree((a+b)/2).query_pairs(np.linalg.norm(b-a,axis=1).max(),output_type='ndarray')
+    i,j = pairs.T
+    cross = lambda u,v: u[:,0]*v[:,1]-u[:,1]*v[:,0]
+    bad = (cross(b[i]-a[i],a[j]-a[i])*cross(b[i]-a[i],b[j]-a[i]) < -1e-9) & (cross(b[j]-a[j],a[i]-a[j])*cross(b[j]-a[j],b[i]-a[j]) < -1e-9)
+    return pairs[bad]
+
+
+def safe_ribbon(xy,normal,width,budget):
+    budget = budget.copy()
+    n = len(xy)
+    sample_index = np.r_[np.arange(n),np.arange(n)[::-1]]
+    for _ in range(60):
+        sections = [safe_sections(xy,normal,width,budget[:,side],sign) for side,sign in enumerate((1,-1))]
+        budget = np.column_stack([cols[:,-1] for cols,_ in sections])
+        outline = np.concatenate([sections[0][1][:,-1],sections[1][1][::-1,-1]])
+        crossings = boundary_crossings(outline)
+        road = np.stack([sections[1][1][:,0],sections[0][1][:,0]],axis=1)
+        a,b,c,d = road[:-1,0],road[1:,0],road[1:,1],road[:-1,1]
+        cross = lambda u,v: u[:,0]*v[:,1]-u[:,1]*v[:,0]
+        folded = np.where((cross(b-a,c-a) <= 1e-9) | (cross(c-a,d-a) <= 1e-9))[0]
+        if not len(crossings) and not len(folded):
+            return sections
+        edges = crossings.ravel()
+        bad = np.r_[sample_index[edges],sample_index[(edges+1)%(2*n)],folded,folded+1]
+        for k in range(-4,5):
+            budget[np.unique(np.clip(bad+k,0,n-1))] *= .85
+    raise RuntimeError('Cannot construct a simple non-folded ribbon')
+
+
+def centerline():
+    route = json.loads((ROOT/'data/route.geojson').read_text())['features'][0]['geometry']['coordinates']
+    xy = np.column_stack(FORWARD.transform(*np.asarray(route).T))
+    origin = np.round(xy[0])
+    (ROOT/'data/geo_origin.json').write_text(json.dumps(dict(crs='EPSG:32631', easting_m=origin[0], northing_m=origin[1], z_origin_m=0, convention='Blender X=east Y=north Z=elevation; round projected start to nearest meter'), indent=2)+'\n')
+    source = xy-origin
+    reference = np.concatenate([*[np.linspace(a,b,math.ceil(np.linalg.norm(b-a)/2)+1)[:-1] for a,b in zip(source,source[1:])],source[-1:]])
+    base, original_s = resample(source)
+    xy = smooth_xy(base,reference=reference)
+    s = np.r_[0, np.cumsum(np.linalg.norm(np.diff(xy, axis=0), axis=1))]
+    tangent, normal, curvature = frames(xy, s)
+    dem = DEM(origin)
+    raw = dem.sample(xy)
+    z = smooth_elevation(raw, s)
+    info = json.loads((ROOT/'data/route_info.json').read_text())
+    road_ends = np.cumsum([r['length_m'] for r in info['roads']])
+    road_index = np.minimum(np.searchsorted(road_ends, original_s/original_s[-1]*road_ends[-1]), len(road_ends)-1)
+    widths = np.array([width_from_tags(info['roads'][i]) for i in road_index])
+    widths = gaussian_filter1d(widths, 7.5, mode='nearest', truncate=2)
+    # Conservative inner-curve limits and non-local centerline proximity.
+    radius = 1/np.maximum(np.abs(curvature), 1e-8)
+    limits = np.full((len(s), 2), 60.)
+    for side, sign in enumerate((1, -1)):
+        inner = curvature*sign > 0
+        limits[inner, side] = radius[inner]*.8
+    tree = cKDTree(xy)
+    for i, neighbors in enumerate(tree.query_ball_point(xy, 100)):
+        neighbors = np.asarray(neighbors)
+        neighbors = neighbors[np.abs(s[neighbors]-s[i]) > 120]
+        if len(neighbors):
+            delta = xy[neighbors]-xy[i]
+            for side, sign in enumerate((1, -1)):
+                same_side = delta @ normal[i]*sign > 0
+                if same_side.any():
+                    limits[i, side] = min(limits[i, side], np.linalg.norm(delta[same_side], axis=1).min()*.44)
+    limits = minimum_filter1d(limits, size=7, axis=0, mode='nearest')
+    # Contract cross sections before the curve's focal point.
+    terrain_extent = np.minimum(widths[:, None]/2+41.8, limits)
+    points, offsets = [], []
+    sections = safe_ribbon(xy,normal,widths,terrain_extent)
+    for side, (cols,positions) in enumerate(sections):
+        terrain_extent[:,side] = cols[:,-1]
+        sampled = gaussian_filter1d(dem.sample(positions), 3, axis=0, mode='nearest')
+        heights = np.empty_like(cols)
+        heights[:, 0] = z
+        heights[:, 1] = z+.02
+        heights[:, 2] = z-.08
+        blend = np.array([.2, .4, .65, 1.])**1.5
+        heights[:, 3:] = (z[:, None]-.08)*(1-blend) + sampled[:, 3:]*blend
+        heights[:, 3] = np.minimum(heights[:, 3], z-.04)
+        points.append(np.dstack([positions, heights]))
+        offsets.append(cols)
+    points = np.array(points)
+    coast = []
+    cache = json.loads((ROOT/'data/area_cache.json').read_text())
+    for w in cache['ways']:
+        if w['tags'].get('natural') == 'coastline':
+            projected = np.column_stack(FORWARD.transform(*np.asarray(w['coords']).T))-origin
+            dense, _ = resample(projected, 10)
+            coast.extend(dense)
+    coast = np.asarray(coast)
+    coast_distance, coast_index = cKDTree(coast).query(xy)
+    guard, cut = [], []
+    for side, sign in enumerate((1, -1)):
+        side_z = dem.sample(xy+normal*sign*15)
+        sea = (coast_distance < 60) & (np.sum((coast[coast_index]-xy)*normal, axis=1)*sign > 0)
+        guard.append(runs(sea | (side_z < z-4), s))
+        cut.append(runs((side_z > z+4) & ~guard[-1], s))
+    grade = np.diff(z)/np.diff(s)
+    actual_width = offsets[0][:,0]+offsets[1][:,0]
+    metrics = dict(length_m=float(s[-1]), length_3d_m=float(np.linalg.norm(np.diff(np.column_stack([xy,z]), axis=0), axis=1).sum()), samples=len(s), min_elevation_m=float(z.min()), max_elevation_m=float(z.max()), max_grade_percent=float(abs(grade).max()*100), total_climb_m=float(np.maximum(np.diff(z),0).sum()), min_radius_m=float(radius.min()), max_xy_deviation_m=float(np.linalg.norm(xy-nearest_on_polyline(xy,reference),axis=1).max()), max_sample_displacement_m=float(np.linalg.norm(xy-base,axis=1).max()), max_grade_change_per_m=float(np.max(abs(np.diff(grade))/((np.diff(s)[:-1]+np.diff(s)[1:])/2))), width_range_m=[float(widths.min()),float(widths.max())], actual_min_width_m=float(actual_width.min()), narrowed_length_m=float(np.diff(s)[actual_width[:-1]<widths[:-1]-.01].sum()), min_terrain_extent_m=float(terrain_extent.min()), ribbon_boundary_crossings=0, guardrail_m=[float(np.sum(np.diff(s)*a[:-1])) for a in guard], cut_m=[float(np.sum(np.diff(s)*a[:-1])) for a in cut])
+    np.savez_compressed(ROOT/'data/centerline.npz', xy=xy, z=z, s=s, raw=raw, width=widths, normal=normal, tangent=tangent, sides=points, offsets=np.array(offsets), guard=np.array(guard), cut=np.array(cut))
+    (ROOT/'data/geometry_info.json').write_text(json.dumps(metrics, indent=2)+'\n')
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(figsize=(14,4))
+    ax.plot(s/1000, raw, color='#a4a4a4', lw=.7, label='Raw bilinear DSM')
+    ax.plot(s/1000, z, color='#d44a2d', lw=1.4, label='Filtered / grade-limited road')
+    ax.set(xlabel='Chainage (km)', ylabel='Elevation (m, DSM datum)', title='Béjaïa → Saket | elevation profile (DSM, not surveyed road)')
+    ax.legend()
+    ax.grid(alpha=.2)
+    fig.tight_layout()
+    fig.savefig(ROOT/'out/preview/elevation_profile.png', dpi=160)
+    print('CENTERLINE_OK', json.dumps(metrics))
+
+
+def textures():
+    rng = np.random.default_rng(24024)
+    folder = ROOT/'textures'
+    folder.mkdir(exist_ok=True)
+    palettes = dict(asphalt=(60,63,65), grass=(89,105,60), gravel=(153,143,119), rock=(139,128,108), metal=(157,164,167), kerb=(188,179,151))
+    for name, color in palettes.items():
+        noise = rng.normal(0, 8 if name != 'metal' else 2, (1024,1024,1))
+        rgb = np.clip(np.array(color)+noise,0,255).astype('uint8')
+        if name == 'asphalt':
+            rgb[:, 24:38] = (224,221,202)
+            rgb[:, 986:1000] = (224,221,202)
+            rgb[:440, 506:518] = (229,223,193)
+        Image.fromarray(rgb).save(folder/f'{name}.png')
+
+
+def mesh(blender):
+    if not (ROOT/'data/centerline.npz').exists():
+        raise ValueError('Run build.py centerline first')
+    textures()
+    env = os.environ.copy()
+    runtime = Path('/run/user')/str(os.getuid())
+    if not env.get('XDG_RUNTIME_DIR') and runtime.is_dir() and runtime.stat().st_uid == os.getuid():
+        env['XDG_RUNTIME_DIR'] = str(runtime)
+    subprocess.run([blender, '-b', '--python-exit-code', '1', '-P', str(ROOT/'scripts/blender_mesh.py')], check=True, cwd=ROOT, env=env)

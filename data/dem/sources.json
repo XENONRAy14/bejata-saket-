@@ -1,0 +1,24 @@
+[
+  {
+    "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N36_00_E004_00_DEM/Copernicus_DSM_COG_10_N36_00_E004_00_DEM.tif",
+    "file": "data/dem/N36E004.tif",
+    "sha256": "7673998bddca306d29d3b996b2cbfa69029bc0e1871420a51bdeaa3fc1bfaf3c",
+    "shape": [
+      3600,
+      3600
+    ],
+    "crs": "EPSG:4326",
+    "nodata": null
+  },
+  {
+    "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N36_00_E005_00_DEM/Copernicus_DSM_COG_10_N36_00_E005_00_DEM.tif",
+    "file": "data/dem/N36E005.tif",
+    "sha256": "27c02ee126c67d1f90b4a06bf17d602bbddde5419696bfc027625efff70af49f",
+    "shape": [
+      3600,
+      3600
+    ],
+    "crs": "EPSG:4326",
+    "nodata": null
+  }
+]

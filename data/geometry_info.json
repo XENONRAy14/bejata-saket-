@@ -1,0 +1,34 @@
+{
+  "length_m": 24008.34437396228,
+  "length_3d_m": 24033.631571408197,
+  "samples": 12127,
+  "min_elevation_m": 1.0,
+  "max_elevation_m": 320.9362428326781,
+  "max_grade_percent": 12.000000000001366,
+  "total_climb_m": 446.23756101933634,
+  "min_radius_m": 1.2834205382523685,
+  "max_xy_deviation_m": 2.800000000001364,
+  "max_sample_displacement_m": 14.645593296824373,
+  "max_grade_change_per_m": 0.001000000000019425,
+  "width_range_m": [
+    6.5,
+    7.000000000000002
+  ],
+  "actual_min_width_m": 3.0874591900148003,
+  "narrowed_length_m": 117.7442559630939,
+  "min_terrain_extent_m": 0.4555684087953483,
+  "ribbon_boundary_crossings": 0,
+  "guardrail_m": [
+    10014.320967274789,
+    13911.508829246413
+  ],
+  "cut_m": [
+    2150.4947350373586,
+    5428.374281957732
+  ],
+  "mesh_objects": 1051,
+  "vertices": 404756,
+  "triangles": 539694,
+  "max_object_vertices": 1208,
+  "downward_strip_triangles": 0
+}

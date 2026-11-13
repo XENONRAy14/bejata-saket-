@@ -1,4 +1,4 @@
-"""Route-only build; coordinates are WGS84 longitude, latitude."""
+"""Staged route, DEM, centerline and headless Blender mesh build."""
 import argparse
 import json
 import math
@@ -90,9 +90,14 @@ def graph(ways):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('stage', choices=['route'])
+    parser.add_argument('stage', choices=['route', 'dem', 'centerline', 'mesh'])
+    parser.add_argument('--blender', default=str(Path.home() / 'tools/blender-3.6.23-linux-x64/blender'))
     parser.add_argument('--list-places', action='store_true')
     args = parser.parse_args()
+    if args.stage != 'route':
+        from geometry import acquire_dem, centerline, mesh
+        {'dem': acquire_dem, 'centerline': centerline, 'mesh': lambda: mesh(args.blender)}[args.stage]()
+        return
     data = load()
     if args.list_places:
         print(json.dumps(data['places'], ensure_ascii=False, indent=2))
