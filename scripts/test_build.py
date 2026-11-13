@@ -15,7 +15,7 @@ class BuildTests(unittest.TestCase):
     def test_default_and_explicit_all_order(self):
         for arguments in (['build.py'],['build.py','all']):
             with self.subTest(arguments=arguments),tempfile.TemporaryDirectory() as folder:
-                with patch.object(build,'ROOT',Path(folder)),patch('sys.argv',arguments),patch('build.subprocess.run') as run,patch('package.package') as package,contextlib.redirect_stdout(io.StringIO()):
+                with patch.object(build,'ROOT',Path(folder)),patch('sys.argv',arguments),patch('build.subprocess.run') as run,patch('build.package') as package,contextlib.redirect_stdout(io.StringIO()):
                     build.main()
                 self.assertEqual([c.args[0][2] for c in run.call_args_list[:-1]],['route','dem','centerline','mesh','acdata','decor'])
                 self.assertTrue(run.call_args_list[-1].args[0][1].endswith('scripts/validate.py'))
@@ -23,7 +23,7 @@ class BuildTests(unittest.TestCase):
                 package.assert_called_once()
 
     def test_all_stops_on_failure(self):
-        with tempfile.TemporaryDirectory() as folder,patch.object(build,'ROOT',Path(folder)),patch('sys.argv',['build.py','all']),patch('build.subprocess.run',side_effect=subprocess.CalledProcessError(1,'route')),patch('package.package') as package:
+        with tempfile.TemporaryDirectory() as folder,patch.object(build,'ROOT',Path(folder)),patch('sys.argv',['build.py','all']),patch('build.subprocess.run',side_effect=subprocess.CalledProcessError(1,'route')),patch('build.package') as package:
             with self.assertRaises(subprocess.CalledProcessError):
                 build.main()
             package.assert_not_called()

@@ -1,6 +1,6 @@
 # Béjaïa → Saket: Assetto Corsa track preparation
 
-Phases 0–4: OSM route, Copernicus DSM elevation, procedural Blender geometry/decor and a provisional AC data/KN5 package. **Not yet AC-tested.**
+Phases 0–5: a 24.24 km OSM-derived Béjaïa city-center → Saket coastal RN24 track, with Copernicus DSM elevation, procedural Blender geometry/decor, validated KN5 install folder and ZIP. **Not yet AC-tested.** This is a provisional, unsurveyed low-poly reconstruction, not a claim of racing accuracy.
 
 ## What exists / works
 
@@ -25,7 +25,10 @@ Road names: Rue Bouchebbah Youcef; Avenue Mustapha Ben Boulaid; Avenue Touati La
 ```sh
 python3 -m venv .venv
 .venv/bin/pip install -r scripts/requirements.txt
-curl -fL https://download.geofabrik.de/africa/algeria-latest.osm.pbf -o data/algeria-latest.osm.pbf
+.venv/bin/python scripts/build.py                 # default: all
+# Equivalent: .venv/bin/python scripts/build.py all
+.venv/bin/python scripts/validate.py              # standalone package check
+# Individual stages for development:
 .venv/bin/python scripts/build.py route
 .venv/bin/python scripts/build.py route --list-places
 .venv/bin/python scripts/build.py dem
@@ -41,6 +44,16 @@ curl -fL https://download.geofabrik.de/africa/algeria-latest.osm.pbf -o data/alg
 ```
 
 Run from project root. The initial country scan takes several minutes; subsequent runs use `data/area_cache.json` (remove it to refresh after replacing the PBF). `centerline` needs this cache for coastline detection; run `route` first on a fresh checkout. `dem` downloads two large GeoTIFFs, ignored by Git, and records exact URLs/checksums in `data/dem/sources.json`. `mesh` uses Blender's bundled numpy, not the project's venv; override its binary with `--blender /path/to/blender`. Committed centerline arrays allow regenerating the mesh without downloading the DEM again. Addon location for the independent exporter smoke check can be overridden with `AC_ADDON_SOURCE`. Smoke outputs: `blend/exporter_smoke.blend`, `out/exporter_smoke/smoke.kn5`, `out/exporter_smoke/settings.json`, `out/road.png`. Binary smoke outputs are not source assets.
+
+### Linux prerequisites and complete build
+
+Building on Windows is **UNVERIFIED**; scripts currently use Linux runtime-directory handling. On Linux install Python 3.10+ with venv support, official [Blender 3.6.23](https://download.blender.org/release/Blender3.6/) at `~/tools/blender-3.6.23-linux-x64/blender` (or pass `--blender`), and clone the [exporter](https://github.com/moppius/blender-assetto-corsa-tools) to `~/tools/blender-assetto-corsa-tools` (or set `AC_ADDON_SOURCE`). The export stage imports/registers the addon headlessly; no interactive addon setup is needed. Eevee rendering needs a working headless OpenGL/Mesa environment. The pinned Python dependencies are in `scripts/requirements.txt`; Blender uses its own bundled Python/numpy.
+
+`all` runs **route → dem → centerline → mesh → acdata → decor → ZIP → validate**, failing immediately on a stage error. It creates missing output directories and downloads missing `data/algeria-latest.osm.pbf` plus `data/dem/N36E004.tif` and `N36E005.tif`. Only those raw downloads need copying to another checkout to avoid bandwidth; do not copy generated arrays, Blender scenes, extracted area caches or outputs for a clean-rebuild proof. Upstream `algeria-latest` is mutable: identical results require the same PBF/DEM bytes and pinned tools, not a later live download. Preserve `data/source_info.json` and `data/dem/sources.json` as provenance.
+
+Deliverables: `out/bejaia_saket/` and `out/bejaia_saket.zip`, whose root is `bejaia_saket/`, not loose install files. ZIP entries have normalized timestamps/permissions and sorted order. `scripts/package.py` recreates only the ZIP. `scripts/validate.py [folder]` needs no Blender or generated centerline arrays: it independently reads the exported KN5 and install files, checks naming/surfaces, UI/pits, logical transforms and raycasts road triangles for spawn/gate heights, physical-track bounds (excluding visual sea), sampled road-triangle cross-width edges, vertex limits, texture signatures/references and map dimensions. **PASS is static validation, not proof of engine compatibility.**
+
+Regression tests: `PYTHONPATH=scripts .venv/bin/python -m unittest test_build test_route test_geometry test_acdata test_decor test_validate -v`. Do not use a blanket `test_*.py` discovery: `test_exporter.py` is a separate Blender smoke script requiring `bpy`, invoked with Blender as shown above, not a pure-Python unittest.
 
 ## Phase 2 geometry
 
@@ -118,7 +131,51 @@ Run **`scripts/build.py decor`** after geometry (it also rebuilds AC metadata/em
 - Eight seeded 512² noise textures: bark, pine foliage, olive foliage, maquis, plaster, sand, water and marker red. All are embedded PNGs using `ksPerPixel`; water is an opaque blue low-cost placeholder. Total decor triangles are asserted **≤150,000**, each object below 65k vertices. Actual counts and export growth are recorded in the JSON evidence, not inferred from instance counts.
 - Updated previews: `out/preview/top.png`, `road_10.png`, `road_40.png`, `road_70.png`, `road_95.png`; new road-level views `decor_town.png`, `decor_saket.png`, plus the end barrier check. `ui/preview.png` is refreshed from the decorated road-level render. The sea polygon is limited to the coastal section; the blue world background elsewhere is still not modeled water.
 
-## Untested / limitations
+## Known issues
+
+- **Distant terrain ribbon edges can look like floating slabs on the horizon.** Only approximately 40 m of terrain per side is modeled; distant ribbon undersides/edges are visible across bends. This cosmetic limitation is intentionally not fixed in Phase 5.
+- No AI fast lane is bundled; use **Practice**, not an AI race. Timing, launcher acceptance without AI and pit servicing remain **UNVERIFIED on Windows**.
+- Decor is pass-through, sea/beach are simplified visual placeholders, and there is a crude physical end wall. Do not approach the finish at racing speed during initial tests.
+- DSM includes trees/buildings; widths, elevations, local intersection realignment and generic props are not surveyed. The KN5 split branch, map overlay alignment, runtime shaders, surface response and collisions remain **UNVERIFIED** despite static validation.
+
+## HUMAN STEPS — install
+
+Back up any existing version. Extract `out/bejaia_saket.zip` directly into `<Steam>/steamapps/common/assettocorsa/content/tracks/`, or copy `out/bejaia_saket/` there. Final path must be **`<Steam>/steamapps/common/assettocorsa/content/tracks/bejaia_saket`**, with `bejaia_saket.kn5` directly inside it, not another nested `bejaia_saket/`. This conventional track-folder location is documented in the [basic guide](https://assettocorsamods.net/threads/build-your-first-track-basic-guide.12/). No CSP dependency is intentionally required; vanilla compatibility is **UNVERIFIED**.
+
+## HUMAN STEPS — first Windows test and logs
+
+This is an acceptance checklist, **not an observed Windows result**:
+
+1. In Content Manager or the vanilla launcher choose **Béjaïa – Saket (RN24)**, an official Kunos road car, **Practice**, no opponents, daylight/dry conditions. Avoid Race/AI modes; [modding troubleshooting recommends Practice when no fast lane exists](https://assettocorsamods.net/threads/cant-load-my-own-track.1543/). Exact launcher UI/version behavior is **UNVERIFIED locally**.
+2. On spawn, wait for the assumed 1.5 m drop: check the car settles on asphalt rather than falling through, is on the right-hand lane, faces down-road and has plausible lane/car scale. Check return-to-pits and hotlap spawns separately when basic loading works.
+3. Drive slowly first. Check road/kerb/shoulder contact, seams, slopes, guardrails/end-wall collision at walking speed, scenery clearances and visible ocean height. Record FPS/resolution, car, GPU and AC/CM/CSP versions; monitor town and coastal stretches. Pass-through decor is intentional, not a collision bug.
+4. Drive through AB start at 200 m, both intermediate timing lines (~8.146/16.091 km), and finish 50 m before the end. Check timer start, sector capture, finish and whether a saved time survives restarting. All A2B timing behavior is **UNVERIFIED** until this test. Brake early; 50 m runoff is not adequate at racing speeds.
+5. Immediately after failure (before another session replaces evidence), send **`Documents/Assetto Corsa/logs/log.txt`** and the other files in that logs folder, plus screenshot/error text and the exact install path. This filename/location is explicitly identified in [Can't load my own track](https://assettocorsamods.net/threads/cant-load-my-own-track.1543/). Use your actual Windows Documents location, including OneDrive/redirection if applicable.
+6. If using CM, also send its recent **`%LOCALAPPDATA%\AcTools Content Manager\Logs\`** files. Verified from CM source: [EntryPoint.cs](https://github.com/gro-ove/actools/blob/master/AcManager/EntryPoint.cs) selects `LocalApplicationData/AcTools Content Manager`, and [App.xaml.cs](https://github.com/gro-ove/actools/blob/master/AcManager/App.xaml.cs) initializes logging under `Logs`. EntryPoint also supports a custom data directory and a local/portable executable mode; these override that default, so collect `Logs` from the actual CM data directory in those cases. Exact current-build log filenames are **UNVERIFIED**; send the folder's recent files rather than guessing one.
+
+Review logs for personal filesystem paths/usernames before sharing. The rebuild/validator logs and `data/kn5_export_info.json` are useful companion evidence, but do not replace Windows logs.
+
+## HUMAN STEPS — record an AI line (not bundled)
+
+Sources: administrator luchian's [AI recording procedure, post #2](https://assettocorsamods.net/threads/how-can-i-make-ai-path.234/) and [hill-climb recording tutorial/correction](https://assettocorsamods.net/threads/basic-fast_lane-and-cameras-tutorial.1265/). Back up game configuration first.
+
+1. Edit **`<Steam>/steamapps/common/assettocorsa/system/cfg/assetto_corsa.ini`** and set the documented section/key (not an invented `[AUTOSPAWN]` switch):
+   ```ini
+   [AC_APPS]
+   ENABLE_DEV_APPS=1
+   ```
+2. Load this track in Practice with a car, open the in-game **AI** developer app, and press **start recording**. Drive a smooth continuous line staying on valid asphalt; lap speed is less important than smoothness.
+3. For this open stage, the hill-climb tutorial says to finish the run and exit the track. The circuit guide alternatively describes stopping via the **recording** button and **Save ai**, then exiting; saving can take time on a long track. The circuit guide's “at least two laps” instruction does **not** apply literally to this open road. Recording start/end relative to this track's AB gates and reliable A2B saving remain **UNVERIFIED**; do not drive through the end wall or invent a closing loop.
+4. Inspect **`content/tracks/bejaia_saket/ai/fast_lane.ai.candidate`**. With Windows file extensions visible, rename the candidate to **`fast_lane.ai`** (back up an existing line). The cited guide also suggests copying the chosen ideal line to `data/ideal_line.ai`. No such generated file is currently supplied.
+5. Test the recorded line before enabling AI opponents. [Reported A2B spline-closing problems](https://assettocorsamods.net/threads/is-it-possible-to-do-a-proper-ai-lane-in-a_to_b-track-hill-climb.1077/) mean successful recording alone is not proof of correct hill-climb AI. Pit-line recording uses **start pits** according to the guide, but this track has no modeled pit lane: pit AI and race use are **UNVERIFIED**, not recommended yet. Restore the dev-app setting when finished.
+
+## HUMAN STEPS — fallback if KN5 will not load
+
+First check folder nesting and Practice mode, collect the logs above, and run `scripts/validate.py` on the exact installed folder if Python dependencies are available. A static PASS cannot rule out runtime/exporter incompatibility.
+
+The sourced alternative workflow is **Blender/modeler → FBX → KsEditor → KN5** ([workflow discussion](https://assettocorsamods.net/threads/need-some-advices-to-start-workflow.2757/), [FBX import/shader/export explanation](https://assettocorsamods.net/threads/is-there-a-guide-to-adding-cones-to-a-mod-track.1682/)). On a Windows machine with the AC SDK, use the supplied `blend/bejaia_saket.blend` as the source, export an FBX, import that FBX in KsEditor, assign/check shaders/textures and logical objects, and export a replacement KN5 under the same filename; preserve the original and revalidate/retest. This is a high-level fallback, **not a verified click-by-click recipe**. Directly opening this KN5 in KsEditor, exact FBX export settings/axis conversion, material persistence, UI menu labels and a full KsEditor round trip are **UNVERIFIED** here. Do not blindly reuse the direct exporter's empty rotations for a different FBX conversion; recheck axes against repository `docs/AC_NOTES.md` and the basic guide before testing.
+
+### Remaining runtime limitations
 
 No Assetto Corsa or Windows runtime validation, ksEditor import/round trip, surveyed physical road widths/elevations, driving/collision validation, AI lines or pit-lane/repair-zone geometry. A full KN5/data package now exists; successful binary writing/readback does not demonstrate in-game correctness. OSM turn-restriction relations and conditional access/oneway tags are not modelled; this is not navigation certification. Route preview uses vector OSM roads and coastline, not raster tiles. Start/end are snapped to main-road nodes, not the exact square/beach centroid.
 

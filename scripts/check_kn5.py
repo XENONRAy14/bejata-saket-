@@ -8,9 +8,10 @@ from pathlib import Path
 import struct
 import sys
 
+import numpy as np
+
 
 def inspect_kn5(path, geometry=False):
-    import numpy as np
     data = memoryview(Path(path).read_bytes())
     offset = 0
     def take(size):

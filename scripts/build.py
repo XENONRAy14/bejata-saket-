@@ -17,6 +17,8 @@ from matplotlib.collections import LineCollection
 import networkx as nx
 import osmium
 
+from package import package
+
 ROOT = Path(__file__).resolve().parents[1]
 BBOX = (4.85, 36.68, 5.10, 36.85)
 HIGHWAYS = {'motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'unclassified', 'residential'}
@@ -109,7 +111,6 @@ def main():
         started = time.monotonic()
         for stage in ('route', 'dem', 'centerline', 'mesh', 'acdata', 'decor'):
             subprocess.run([sys.executable, str(ROOT/'scripts/build.py'), stage, '--blender', args.blender], check=True)
-        from package import package
         package()
         subprocess.run([sys.executable, str(ROOT/'scripts/validate.py')], check=True)
         print(f'ALL_OK seconds={time.monotonic()-started:.3f}', flush=True)
