@@ -1,0 +1,96 @@
+{
+  "clone_path": "/tmp/bs_clean",
+  "tested_commit": "2d39bbfebf4c8d9edba41ef4ef03f4fb95d2ec4d",
+  "command": "/home/ubuntu/repos/bejaia_saket/.venv/bin/python scripts/build.py",
+  "working_directory": "/tmp/bs_clean",
+  "elapsed_seconds": 469.127,
+  "environment": "Shared preinstalled pinned Python venv, Blender 3.6.23 and exporter; no generated outputs reused",
+  "raw_download_cache": {
+    "algeria-latest.osm.pbf": "057a5d283299c5b18c12afb4e0c18a202d1ea5b4247ce7e670b1d98847308afd",
+    "dem/N36E004.tif": "7673998bddca306d29d3b996b2cbfa69029bc0e1871420a51bdeaa3fc1bfaf3c",
+    "dem/N36E005.tif": "27c02ee126c67d1f90b4a06bf17d602bbddde5419696bfc027625efff70af49f"
+  },
+  "removed_before_build": [
+    "blend/",
+    "textures/",
+    "out/",
+    "all data files except tracked source_info.json provenance"
+  ],
+  "copied_cache_excludes": "No extracted area cache, centerline arrays, textures, blend, install folder or KN5",
+  "kn5_sha256": "90f944fe9aa5f37bf6bbcf4550a9bc3ec712e7e80814020628cfee87c545b9e1",
+  "kn5_bytes": 75572299,
+  "comparison": "All ten install files and ZIP bit-identical to first clean rebuild; KN5, route.geojson, centerline.npz and decor_plan.npz also bit-identical to accepted Phase 4 (README intentionally updated since Phase 4)",
+  "validation_checks_passed": 11,
+  "zip": {
+    "path": "out/bejaia_saket.zip",
+    "bytes": 26477315,
+    "sha256": "4e89f8ac60a39c3f3842d0bf7f4ceb05a0b025500d58447592c7bf21687f13b1",
+    "entries": 10,
+    "top_level": "bejaia_saket/"
+  },
+  "log": "out/phase5_clean_build.log",
+  "initial_clean_build": {
+    "tested_commit": "4fbad407832efd566a4894696fb06199766216d7",
+    "elapsed_seconds": 457.259,
+    "kn5_sha256": "90f944fe9aa5f37bf6bbcf4550a9bc3ec712e7e80814020628cfee87c545b9e1",
+    "zip": {
+      "path": "out/bejaia_saket.zip",
+      "bytes": 26477315,
+      "sha256": "4e89f8ac60a39c3f3842d0bf7f4ceb05a0b025500d58447592c7bf21687f13b1",
+      "entries": 10,
+      "top_level": "bejaia_saket/"
+    }
+  },
+  "preview_comparison_against_previous_clean_build": {
+    "decor_saket.png": {
+      "pixel_identical": true,
+      "mean_absolute_channel_difference": 0.0,
+      "maximum_channel_difference": 0.0
+    },
+    "decor_town.png": {
+      "pixel_identical": false,
+      "mean_absolute_channel_difference": 0.00017686631944444444,
+      "maximum_channel_difference": 17.0
+    },
+    "elevation_profile.png": {
+      "pixel_identical": true,
+      "mean_absolute_channel_difference": 0.0,
+      "maximum_channel_difference": 0.0
+    },
+    "end_barrier.png": {
+      "pixel_identical": true,
+      "mean_absolute_channel_difference": 0.0,
+      "maximum_channel_difference": 0.0
+    },
+    "road_10.png": {
+      "pixel_identical": false,
+      "mean_absolute_channel_difference": 1.7722800925925927e-05,
+      "maximum_channel_difference": 9.0
+    },
+    "road_40.png": {
+      "pixel_identical": true,
+      "mean_absolute_channel_difference": 0.0,
+      "maximum_channel_difference": 0.0
+    },
+    "road_70.png": {
+      "pixel_identical": true,
+      "mean_absolute_channel_difference": 0.0,
+      "maximum_channel_difference": 0.0
+    },
+    "road_95.png": {
+      "pixel_identical": true,
+      "mean_absolute_channel_difference": 0.0,
+      "maximum_channel_difference": 0.0
+    },
+    "route_preview.png": {
+      "pixel_identical": true,
+      "mean_absolute_channel_difference": 0.0,
+      "maximum_channel_difference": 0.0
+    },
+    "top.png": {
+      "pixel_identical": true,
+      "mean_absolute_channel_difference": 0.0,
+      "maximum_channel_difference": 0.0
+    }
+  }
+}
