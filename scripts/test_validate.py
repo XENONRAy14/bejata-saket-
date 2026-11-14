@@ -18,11 +18,14 @@ from validate import EMPTIES, REQUIRED, UI_KEYS, validate
 def scene():
     matrix=np.eye(4);matrix[3,1]=1.5
     nodes=[dict(kind=1,name=name,matrix=matrix.ravel().tolist()) for name in sorted(EMPTIES)]
+    nodes.append(dict(kind=2,name='DECOR_SEA',vertices=3,triangles=1,material=1,
+        positions=np.array([[0,0,0],[0,0,1500],[1500,0,0]]),indices=np.array([[0,1,2]]),
+        bounds=(np.zeros(3),np.array([1500,0,1500])),uv_stats=dict(finite=True,extent=[375,375])))
     nodes.append(dict(kind=2,name='1ROAD_000',vertices=3,triangles=1,material=0,
                       positions=np.array([[-1,0,-3.5],[-1,0,3.5],[1,0,-3.5]]),
                       indices=np.array([[0,1,2]]),bounds=(np.zeros(3),np.array([13000,338,8300]))))
     material=dict(name='asphalt',shader='ksPerPixel',textures={'txDiffuse':'road.png'},texture_slots={'txDiffuse':0},properties={'ksDiffuse':.4},blend=0,alpha_tested=False,depth=0)
-    return dict(bytes=100,textures=['road.png'],texture_formats={'road.png':'PNG'},texture_info={},materials=[material],nodes=nodes)
+    return dict(bytes=100,textures=['road.png'],texture_formats={'road.png':'PNG'},texture_info={},materials=[material,dict(material,name='water'),dict(material,name='grass')],nodes=nodes)
 
 
 class ValidationTests(unittest.TestCase):
@@ -37,6 +40,7 @@ class ValidationTests(unittest.TestCase):
         (self.folder/'data/surfaces.ini').write_text('[SURFACE_0]\nKEY=ROAD\n')
         (self.folder/'data/map.ini').write_text('[PARAMETERS]\nWIDTH=2\nHEIGHT=3\nX_OFFSET=0\nZ_OFFSET=0\nSCALE_FACTOR=1\nMARGIN=0\nDRAWING_SIZE=10\nMAX_SIZE=3\n')
         Image.new('RGBA',(2,3)).save(self.folder/'map.png')
+        (self.folder/'extension/ext_config.ini').write_text('[GRASS_FX]\nGRASS_MATERIALS=grass\n[RAIN_FX]\nPUDDLES_MATERIALS=asphalt\n[INCLUDE: common/materials_track.ini]\n[Material_Water]\nMaterials=water\nType=SEA\n')
 
     def run_check(self,parsed):
         output=io.StringIO()
@@ -47,7 +51,7 @@ class ValidationTests(unittest.TestCase):
     def test_valid_package(self):
         passed,output=self.run_check(scene())
         self.assertTrue(passed,output)
-        self.assertIn('VALIDATION_PASS checks=13 passed=13',output)
+        self.assertIn('VALIDATION_PASS checks=15 passed=15',output)
 
     def test_geometry_and_binary_semantic_failures(self):
         mutations={
@@ -74,6 +78,15 @@ class ValidationTests(unittest.TestCase):
         (self.folder/'settings.json').write_text('{}')
         passed,output=self.run_check(scene())
         self.assertFalse(passed);self.assertIn('FAIL map_dimensions',output);self.assertIn('FAIL required_files',output)
+
+    def test_csp_unknown_material_and_sea_normals(self):
+        path=self.folder/'extension/ext_config.ini'
+        path.write_text(path.read_text().replace('PUDDLES_MATERIALS=asphalt','PUDDLES_MATERIALS=missing'))
+        passed,output=self.run_check(scene())
+        self.assertFalse(passed);self.assertIn('FAIL csp_config',output)
+        parsed=scene();parsed['nodes'][-2]['indices']=np.array([[0,2,1]])
+        passed,output=self.run_check(parsed)
+        self.assertFalse(passed);self.assertIn('FAIL sea_surface',output)
 
     def test_empty_folder_and_corrupt_kn5(self):
         for folder in (Path(self.temp.name)/'Invalid-Name',self.folder):

@@ -59,7 +59,7 @@ def grade_diffuse(role, pixels):
     pixels=np.asarray(pixels,dtype=np.float32)
     if pixels.ndim!=3 or pixels.shape[2]!=3 or not pixels.size:
         raise ValueError('Expected nonempty RGB pixels')
-    targets=dict(asphalt=(95,95,95),repair=(70,70,72),grass=(80,112,48),gravel=(139,137,123))
+    targets=dict(asphalt=(83.6,83.6,83.6),repair=(61.6,61.6,63.36),grass=(80,112,48),gravel=(139,137,123),sand=(207,189,139))
     if role not in targets:return pixels
     luminance=pixels.mean(2,keepdims=True)
     variation=np.clip(luminance/max(float(luminance.mean()),.01),.45,1.65)
@@ -257,26 +257,34 @@ def export(blender):
 
 def package_output():
     for name in ('README.md','CREDITS.md'):shutil.copy2(ROOT/name,ROOT/'out/bejaia_saket'/name)
+    from csp import generate as generate_csp
+    generate_csp()
     from package import package
     package()
 
 
-def render(blender):
-    comparison=ROOT/'out/preview/v2_materials'
+def render(blender, views=None):
+    comparison=ROOT/'out/preview'/('csp_material_fixes' if views else 'v2_materials')
     comparison.mkdir(parents=True,exist_ok=True)
     baseline=comparison/'v1.blend'
-    with baseline.open('wb') as output:
-        subprocess.run(['git','show','v1:blend/bejaia_saket.blend'],cwd=ROOT,stdout=output,check=True)
-    for label,scene in (('before',baseline),('after',ROOT/'blend/bejaia_saket.blend')):
-        subprocess.run([blender,'-b',str(scene),'--python-exit-code','1','-P',str(ROOT/'scripts/blender_material_preview.py'),'--',label],check=True,cwd=ROOT)
-    canvas = Image.new('RGB',(1536,6*454),(25,25,25))
+    if views:
+        (comparison/'before').mkdir(exist_ok=True)
+        for name in views:shutil.copy2(ROOT/'out/preview/v2_materials/before'/(name+'.png'),comparison/'before'/(name+'.png'))
+    else:
+        with baseline.open('wb') as output:
+            subprocess.run(['git','show','v1:blend/bejaia_saket.blend'],cwd=ROOT,stdout=output,check=True)
+    scenes=(('after',ROOT/'blend/bejaia_saket.blend'),) if views else (('before',baseline),('after',ROOT/'blend/bejaia_saket.blend'))
+    for label,scene in scenes:
+        subprocess.run([blender,'-b',str(scene),'--python-exit-code','1','-P',str(ROOT/'scripts/blender_material_preview.py'),'--',label,*(views or [])],check=True,cwd=ROOT,env=dict(os.environ,BS_COMPARISON_DIR=str(comparison)))
+    names=views or ('road_10','road_40','road_70','road_95','decor_town','decor_saket')
+    canvas = Image.new('RGB',(1536,len(names)*454),(25,25,25))
     draw = ImageDraw.Draw(canvas)
-    for i,name in enumerate(('road_10','road_40','road_70','road_95','decor_town','decor_saket')):
+    for i,name in enumerate(names):
         for j,label in enumerate(('before','after')):
             image = Image.open(comparison/label/(name+'.png')).convert('RGB')
             canvas.paste(ImageOps.fit(image,(768,432)),(j*768,i*454+22))
             draw.text((j*768+8,i*454+5),name+' / '+label+' (Cycles CPU approximation)',fill='white')
     canvas.save(comparison/'side_by_side.jpg',quality=92)
-    ImageOps.fit(Image.open(comparison/'after/road_70.png').convert('RGB'),(355,200),method=Image.Resampling.LANCZOS).save(ROOT/'out/bejaia_saket/ui/preview.png')
-    baseline.unlink()
+    ImageOps.fit(Image.open(comparison/'after'/('road_70.png' if 'road_70' in names else names[0]+'.png')).convert('RGB'),(355,200),method=Image.Resampling.LANCZOS).save(ROOT/'out/bejaia_saket/ui/preview.png')
+    baseline.unlink(missing_ok=True)
     package_output()

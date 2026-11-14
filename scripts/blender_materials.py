@@ -195,7 +195,7 @@ def main():
     for name,expected in info['textures'].items():assert parsed['texture_info'][name]['sha256']==expected['sha256'],name
     partial.replace(path)
     info.update(geometry_sha256_before_and_after=original,kn5_bytes=parsed['bytes'],kn5_sha256=hashlib.sha256(path.read_bytes()).hexdigest(),export_seconds=time.monotonic()-started,warnings=warnings,
-                embedded_texture_count=len(parsed['textures']),texture_gpu_bytes=sum(t['gpu_bytes'] for t in parsed['texture_info'].values()),embedded_textures=parsed['texture_info'])
+                embedded_texture_count=len(parsed['textures']),texture_gpu_bytes=sum(t['gpu_bytes'] for t in parsed['texture_info'].values()),embedded_textures=parsed['texture_info'],kn5_materials=sorted(actual))
     (ROOT/'data/materials_info.json').write_text(json.dumps(info,indent=2)+'\n')
     ui_path=path.parent/'ui/ui_track.json';ui=json.loads(ui_path.read_text());ui['version']='0.2';ui_path.write_text(json.dumps(ui,ensure_ascii=False,indent=2)+'\n')
     print(f'MATERIAL_EXPORT_OK materials={len(actual)} textures={len(parsed["textures"])} bytes={parsed["bytes"]} geometry_unchanged=True')

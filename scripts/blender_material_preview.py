@@ -1,6 +1,7 @@
 """Optional, matched v1/v2 Cycles CPU comparisons; no scene/export changes."""
 from pathlib import Path
 import json
+import os
 import sys
 
 import bpy
@@ -13,8 +14,10 @@ from blender_mesh import camera
 
 def main():
     label=sys.argv[sys.argv.index('--')+1]
+    selected=sys.argv[sys.argv.index('--')+2:]
+    if set(selected)-{'road_10','road_40','road_70','road_95','decor_town','decor_saket'}:raise ValueError('Unknown view')
     if label not in ('before','after'):raise ValueError('Expected before or after')
-    output=ROOT/'out/preview/v2_materials'/label;output.mkdir(parents=True,exist_ok=True)
+    output=Path(os.environ.get('BS_COMPARISON_DIR',str(ROOT/'out/preview/v2_materials')))/label;output.mkdir(parents=True,exist_ok=True)
     for image in bpy.data.images:
         if image.source=='FILE':
             source=Path(bpy.path.abspath(image.filepath))
@@ -46,10 +49,11 @@ def main():
         if name=='saket':point[:2]+=np.array([0,18])
         views.append(('decor_'+name,[*data['xy'][i],data['z'][i]+1.6],point))
     for name,origin,target in views:
+        if selected and name not in selected:continue
         camera('__COMPARISON_'+name,origin,target)
         scene.render.filepath=str(output/(name+'.png'))
         bpy.ops.render.render(write_still=True)
-    print(f'COMPARISON_RENDER_OK side={label} views={len(views)} engine=CYCLES device=CPU samples=16 denoising=True')
+    print(f'COMPARISON_RENDER_OK side={label} views={len(selected) if selected else len(views)} engine=CYCLES device=CPU samples=16 denoising=True')
 
 
 if __name__=='__main__':main()

@@ -18,3 +18,4 @@ data/research_cache/
 data/asset_cache/
 textures/v2/
 out/preview/v2_materials/*.blend
+out/preview/csp_material_fixes/*.blend

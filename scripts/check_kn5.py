@@ -128,6 +128,7 @@ def inspect_kn5(path, geometry=False, texture_data=False):
             if material >= len(materials):
                 raise ValueError('Missing material')
             values = np.frombuffer(vertex_data,dtype='<f4').reshape(-1,11)
+            entry['uv_stats']=dict(finite=bool(np.isfinite(values[:,6:8]).all()),extent=np.ptp(values[:,6:8],axis=0).tolist())
             normal_lengths=np.linalg.norm(values[:,3:6],axis=1)
             tangent_lengths=np.linalg.norm(values[:,8:11],axis=1)
             entry['tangent_stats']=dict(finite=bool(np.isfinite(values).all()),

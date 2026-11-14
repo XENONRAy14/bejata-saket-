@@ -38,9 +38,11 @@ class AssetTests(unittest.TestCase):
 class TextureTests(unittest.TestCase):
     def test_neutral_grades_and_green_terrain(self):
         pixels=np.random.default_rng(5).uniform(.1,.8,(64,64,3)).astype('float32')
-        for role,target in [('asphalt',(95,95,95)),('repair',(70,70,72)),('gravel',(139,137,123))]:
+        for role,target in [('asphalt',(83.6,83.6,83.6)),('repair',(61.6,61.6,63.36)),('gravel',(139,137,123))]:
             mean=grade_diffuse(role,pixels).mean((0,1))*255
             np.testing.assert_allclose(mean,target,atol=1)
+        sand=grade_diffuse('sand',np.full((16,16,3),.2))
+        np.testing.assert_allclose(sand.mean((0,1))*255,(207,189,139),atol=1)
         grass=grade_diffuse('grass',pixels).mean((0,1))
         self.assertGreater(grass[1],grass[0]*1.3)
         for coverage in (.25,.35):

@@ -951,7 +951,7 @@
       "mips": 11,
       "bytes": 1398256,
       "gpu_bytes": 1398128,
-      "sha256": "aa4f3e92585f6eada70a9b548b690001116f6fc87d9ffae2cfc71c4b762d91e7",
+      "sha256": "28684698755a5e3cda48d5c0862b435914969fbf35f8d76b66b4d77aa3e66601",
       "file": "textures/v2/asphalt_diffuse.dds"
     },
     "asphalt_normal.dds": {
@@ -971,7 +971,7 @@
       "mips": 11,
       "bytes": 1398256,
       "gpu_bytes": 1398128,
-      "sha256": "d69d66b8e95571cb6ec8dbd2134c349687b0b88493956b7779e70ed34883cc73",
+      "sha256": "cd868340e2769a5bdd8530dc83f24b22dd421b5f4df40a32d0fcda2bd3ed874b",
       "file": "textures/v2/repair_diffuse.dds"
     },
     "repair_normal.dds": {
@@ -1091,7 +1091,7 @@
       "mips": 11,
       "bytes": 699192,
       "gpu_bytes": 699064,
-      "sha256": "ab07db088a4fa6ae2a33949a74623b80f7b2a0e994d2f132b1d57eac1441ae2b",
+      "sha256": "bb82220e5f5ac84dbc8078fb11db89c85f6c402b0ab491d65642fd1ddb8c176b",
       "file": "textures/v2/sand_diffuse.dds"
     },
     "sand_normal.dds": {
@@ -1328,8 +1328,8 @@
   "dds_gpu_bytes": 68508264,
   "geometry_sha256_before_and_after": "c32e92f3fb5f23cc72a2e4623056975c82311bfef3acfd36a400ea41d88c642d",
   "kn5_bytes": 136842509,
-  "kn5_sha256": "3b8659693d5cc5ba6499da3ecd81fd872b926e68b0490600db61e08ec4511d51",
-  "export_seconds": 12.012942258999828,
+  "kn5_sha256": "f62fae10ca69213549cd5df732f388fee5aeeb89ee9bf049cc6240caae88dfca",
+  "export_seconds": 12.236457705999783,
   "warnings": [
     "Unknown logical object 'AC_AB_FINISH_L' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it.",
     "Unknown logical object 'AC_AB_FINISH_R' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it.",
@@ -1481,7 +1481,7 @@
       "mips": 11,
       "bytes": 1398256,
       "gpu_bytes": 1398128,
-      "sha256": "aa4f3e92585f6eada70a9b548b690001116f6fc87d9ffae2cfc71c4b762d91e7"
+      "sha256": "28684698755a5e3cda48d5c0862b435914969fbf35f8d76b66b4d77aa3e66601"
     },
     "repair_diffuse.dds": {
       "width": 1024,
@@ -1490,7 +1490,7 @@
       "mips": 11,
       "bytes": 1398256,
       "gpu_bytes": 1398128,
-      "sha256": "d69d66b8e95571cb6ec8dbd2134c349687b0b88493956b7779e70ed34883cc73"
+      "sha256": "cd868340e2769a5bdd8530dc83f24b22dd421b5f4df40a32d0fcda2bd3ed874b"
     },
     "gravel_diffuse.dds": {
       "width": 1024,
@@ -1688,7 +1688,7 @@
       "mips": 11,
       "bytes": 699192,
       "gpu_bytes": 699064,
-      "sha256": "ab07db088a4fa6ae2a33949a74623b80f7b2a0e994d2f132b1d57eac1441ae2b"
+      "sha256": "bb82220e5f5ac84dbc8078fb11db89c85f6c402b0ab491d65642fd1ddb8c176b"
     },
     "sand_normal.dds": {
       "width": 1024,
@@ -1726,5 +1726,24 @@
       "mips": 1,
       "sha256": "4139d1694ec016e64e4d32e7222f3bd9929d86afb9b361ff02e584b878a345b3"
     }
-  }
+  },
+  "kn5_materials": [
+    "asphalt",
+    "asphalt_v1",
+    "asphalt_v2",
+    "bark",
+    "grass",
+    "grass_mountain",
+    "gravel",
+    "kerb",
+    "maquis",
+    "marker_red",
+    "metal",
+    "olive_foliage",
+    "pine_foliage",
+    "plaster",
+    "rock",
+    "sand",
+    "water"
+  ]
 }

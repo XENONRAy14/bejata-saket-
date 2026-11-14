@@ -2,14 +2,74 @@
 
 Phases 0–5 plus v2 materials: a 24.24 km OSM-derived Béjaïa city-center → Saket coastal RN24 track, with Copernicus DSM elevation, procedural Blender geometry/decor, validated KN5 install folder and ZIP. **The user reports v1 loads and drives in AC; v2 materials still require AC/CSP/Pure acceptance testing.** This is a provisional, unsurveyed low-poly reconstruction, not a claim of racing accuracy.
 
-## v2 material build and comparison
+## CSP / Content Manager settings
+
+`scripts/build.py csp` generates `out/bejaia_saket/extension/ext_config.ini`
+from `scripts/ext_config.ini.template`, reading the exact KN5 inventory in
+`data/materials_info.json`. The default `all` and `materials` builds include it.
+Reinstall the whole folder, including `extension/`, not just the KN5.
+
+In Content Manager **Settings > Custom Shaders Patch**, enable **Grass FX**,
+**Rain FX** and **Weather FX**; select the installed **Pure** weather script in
+Weather FX. RainFX requires a compatible preview build (the user's Patreon
+preview provides it). Enable **Lighting FX** for CSP lighting features;
+**Extra FX** is optional for richer reflections and is not required for this
+basic config. Menu labels can vary by preview/CM/Pure version; these are human
+setup instructions, not INI keys. Pure's exact current UI remains UNVERIFIED
+locally; no guessed Pure track keys or atmospheric overrides are shipped.
+
+Sources for each shipped section (paths relative to CSP's config repo/wiki):
+- `[GRASS_FX]`: wiki `Tracks-–-Grass-FX.md:5–54`; real example
+  `config/tracks/putnam_park.ini`. Only `grass` and `grass_mountain` spawn grass.
+  Multilayer txMask G selects shorter grass over dry soil, using
+  `[GRASS_FX_CONFIGURATION_A]` / `[GRASS_FX_ADJUSTMENT_0]` from wiki
+  `Tracks-–-Grass-FX.md:79–129,187–204` and real example
+  `config/tracks/ks_silverstone.ini` (multilayer GrassFX adjustments).
+  Color rejection is disabled because the macro diffuse is neutral; material
+  selectors still prevent blades on roads or beaches.
+  Ground's green-olive/dry-soil textures provide the intended palette; no
+  unverified blade COLOR property is invented. Color masking/shape values are
+  artist tuning requiring an in-game check, especially with multilayer terrain.
+- `[RAIN_FX]`: wiki `Tracks-–-RainFX.md:3–18`; real example
+  `config/tracks/putnam_park.ini`. Roads puddle; porous surfaces soak; vegetation,
+  rock and sand stay rough; metal is smooth. Markings are baked into road atlases:
+  `LINES_FILTER_MATERIALS` selects bright texels, rather than classifying the
+  entire asphalt as paint. No arbitrary atlas-mask-channel binding was verified.
+  Bright repairs/aggregate can also be picked up; exact filtering on our
+  multilayer road shader and wet grip require AC testing.
+- `[INCLUDE: common/materials_track.ini]` and `[Material_Water]`:
+  `config/tracks/common/materials_track.ini:53–69,310–364`, real example
+  `config/tracks/monaco_2017.ini:16–23`; wiki `Tracks-–-Water-shader.md:5–15`.
+  SEA mode uses CSP's installed recommended normal textures, not copied assets.
+  Existing visual-only sea is flat at datum zero, upward-facing, ~6.23×4.26 km,
+  with finite planar UVs (~4 m repeat); no displacement geometry is added.
+  Reflections/wave scale and shore blending still require CSP runtime inspection.
+
+No `[LIGHTING]` overrides: wiki `Tracks-–-General-options.md:10–17` says ground
+ambient should only be overridden if needed. With Pure and no lamps, default
+lighting is retained. Lamp posts and `[LIGHT_SERIES_...]` are deferred to Phase 4.
+Wind/tree conversion is also deferred: current trees are merged solid blobs,
+not weighted cards (`Tracks-–-General-options.md:39–47`, `Tracks-–-Trees.md`).
+No `[BASIC]` or seasonal/ambient overrides are needed; defaults/Pure remain in
+control. Source links and runtime limitations are expanded in `docs/CSP_NOTES.md`.
+
+Sand correction: the bound CC0 diffuse itself averaged ~66/58/45 sRGB, versus
+v1's ~207/189/138. Bindings, upward normals and finite UVs were checked; the
+warm pale grade restores the beach while retaining its normal/detail maps.
+Asphalt and repair diffuse targets are now 12% darker (~84/84/84 and ~62/62/63).
+Only `road_95` and `decor_saket` were re-rendered for this pass, under
+`out/preview/csp_material_fixes/`; the earlier complete v2 comparison is retained
+as an accepted historical snapshot. Reproduce this subset with:
+`scripts/build.py render --views road_95 decor_saket`.
+
+## v2 material build and comparison (previous pass)
 
 `v1` remains tagged and its install/ZIP are locally backed up under
 `out_backup_v1/`. These large ignored backups are not part of a clone; the tag
 retains the v1 scripts, pinned dependencies and clean-rebuild evidence.
 
 The default full build now runs **assets → route → dem → centerline → mesh →
-acdata → decor → materials → ZIP → validate**. Linux additionally needs `curl`
+acdata → decor → materials → csp → ZIP → validate**. Linux additionally needs `curl`
 and ImageMagick's `convert` with its DDS encoder. Development commands:
 
 ```sh
@@ -52,9 +112,9 @@ RGBA8 base levels in `texture_gpu_bytes`. Driver overhead/PNG runtime mip
 generation is not measured VRAM. Artist-chosen properties are not stock defaults.
 
 Physical names, surfaces.ini, mesh coordinates/topology/transforms, all foliage,
-and water remain unchanged. Bark, buildings and beach change **materials/UVs
-only**; decor placement and geometry are untouched. No GrassFX, RainFX, lights
-or Pure configuration is added in this phase. See `docs/CSP_NOTES.md` §9 for
+and water geometry remain unchanged. Bark, buildings and beach change **materials/UVs
+only**; decor placement and geometry are untouched. The previous material pass
+added no CSP configuration; the section above supersedes that status. See `docs/CSP_NOTES.md` §9 for
 new source citations, verified sampler order and exporter trap handling.
 
 Comparisons: `out/preview/v2_materials/before/` and `after/` contain the same six
@@ -159,7 +219,8 @@ Output is **`out/bejaia_saket/`**. Copy that folder under Windows `assettocorsa/
 | `bejaia_saket.kn5` | Full current scene, 517 mesh objects (516 original + end wall), 15 AC empties. Blender cameras/lights retain `__` prefixes to exclude them. |
 | `data/surfaces.ini` | Every actual physical key, checked against mesh prefixes: **ROAD, KERB, GRASS, GRAVEL, WALL**. Source: [Hagn example](https://site.hagn.io/assettocorsa/modding/tracks/data/surfaces-ini), also AC_NOTES §1. |
 | `ui/ui_track.json` | UTF-8 requested name/geotags, Algeria/Béjaïa, full-road meter length, width 6.5–7.0m, pitboxes `"4"`, frite, v0.1, 2026. `run` is descriptive **“Béjaïa → Saket · point-to-point”** per Hagn, **not a mode switch**. |
-| `ui/preview.png` / `ui/outline.png` | **355×200** following the inspected sample: resized road-level 70% preview (Cycles after optional `render`); white route on transparent RGBA. Mandatory dimension claims **UNVERIFIED**. |
+| `ui/preview.png` / `ui/outline.png` | **355×200** following the inspected sample: resized road-level preview (latest selected view, otherwise road_70); white route on transparent RGBA. Mandatory dimension claims **UNVERIFIED**. |
+| `extension/ext_config.ini` | Generated CSP GrassFX, RainFX and SEA water setup; template, sources and CM settings are documented above. |
 | `map.png` / `data/map.ini` | North-up white route on transparent RGBA; dimensions/transform below. |
 | `ai/README.txt` | No AI line, no fake zero-byte `.ai` file. AI racing unsupported. Empty AI directory allowed by the basic guide, but runtime loading without lines **UNVERIFIED locally**. |
 | `CREDITS.md`, `README.md` | Attribution and limitations bundled with the install package. Settings (`blend/settings.json`), convention sources (`docs/AC_NOTES.md`) and detailed placement/export JSON evidence (`data/`) remain in the repository, not the install folder. All texture-named materials use explicit `ksPerPixel` settings with embedded `txDiffuse` PNGs. |

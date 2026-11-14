@@ -10,10 +10,11 @@ from PIL import Image
 from scipy.spatial import cKDTree
 
 from check_kn5 import inspect_kn5, mask_mip_error
+from csp import config_materials
 
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = ('README.md','CREDITS.md','data/surfaces.ini','data/map.ini','ui/ui_track.json',
-            'ui/preview.png','ui/outline.png','map.png','ai/README.txt')
+            'ui/preview.png','ui/outline.png','map.png','ai/README.txt','extension/ext_config.ini')
 UI_KEYS = {'name','description','tags','geotags','country','city','length','width','pitboxes','run','author','version','year'}
 EMPTIES = {f'AC_PIT_{i}' for i in range(4)} | {'AC_START_0','AC_START_1','AC_HOTLAP_START_0'}
 EMPTIES |= {f'AC_{gate}_{side}' for gate in ('AB_START','AB_FINISH','TIME_0','TIME_1') for side in ('L','R')}
@@ -49,7 +50,7 @@ def validate(folder):
     check('required_files', files)
     parsed = {}
     def readback():
-        parsed.update(inspect_kn5(folder/(folder.name+'.kn5'), geometry=True, texture_data=True))
+        parsed.update(inspect_kn5(folder/(folder.name+'.kn5'), geometry='all', texture_data=True))
         return f"v5, {parsed['bytes']} bytes"
     check('kn5_readback', readback)
     nodes = parsed.get('nodes',[])
@@ -174,6 +175,29 @@ def validate(folder):
             require(mask_mip_error(parsed['texture_blobs'][name])<.15,f'blend weights lost in mip chain: {name}')
         return f'{len(dds)} DXT1/DXT5 headers/payloads and {len(masks)} mask mip weight means verified; compressed DDS bytes={sum(v["gpu_bytes"] for v in dds)}'
     check('dds_headers',dds_headers)
+    def csp_config():
+        config,references=config_materials((folder/'extension/ext_config.ini').read_text(encoding='utf-8'))
+        names={m['name'] for m in parsed.get('materials',[])}
+        require(references and references<=names,f'CSP references missing materials: {sorted(references-names)}')
+        require({'GRASS_FX','RAIN_FX','INCLUDE: common/materials_track.ini','Material_Water'}<=set(config.sections()),'missing CSP sections/include')
+        grass={n.strip() for n in config['GRASS_FX']['GRASS_MATERIALS'].split(',')}
+        require(grass<=set(('grass','grass_mountain')),'GrassFX on non-terrain materials')
+        require(config['Material_Water']['Type']=='SEA','unexpected water type')
+        return f'{len(references)} exact KN5 material references; GrassFX/RainFX/water sections present'
+    check('csp_config',csp_config)
+    def sea_surface():
+        entries=parsed.get('materials',[])
+        water=[n for n in meshes if entries[n['material']]['name']=='water']
+        require(water,'missing sea mesh/material')
+        for mesh in water:
+            p=mesh['positions'];tri=p[mesh['indices']]
+            require(np.allclose(p[:,1],0,atol=.001),'sea not flat at datum zero')
+            require(np.all(np.cross(tri[:,1]-tri[:,0],tri[:,2]-tri[:,0])[:,1]>0),'sea winding not upward')
+            require(mesh['uv_stats']['finite'] and min(mesh['uv_stats']['extent'])>0,'invalid sea UVs')
+            extent=np.ptp(p,axis=0)
+            require(1000<min(extent[[0,2]]) and max(extent)<10000,'unexpected sea dimensions')
+        return f'{len(water)} flat upward sea mesh, finite nondegenerate UVs, coastal dimensions'
+    check('sea_surface',sea_surface)
     def map_image():
         ini = configparser.ConfigParser();ini.read(folder/'data/map.ini');params=ini['PARAMETERS']
         with Image.open(folder/'map.png') as im:

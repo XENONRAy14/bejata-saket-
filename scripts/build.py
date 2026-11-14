@@ -102,7 +102,8 @@ def graph(ways):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('stage', nargs='?', default='all', choices=['all', 'assets', 'route', 'dem', 'centerline', 'mesh', 'acdata', 'decor', 'materials', 'render'])
+    parser.add_argument('stage', nargs='?', default='all', choices=['all', 'assets', 'route', 'dem', 'centerline', 'mesh', 'acdata', 'decor', 'materials', 'csp', 'render'])
+    parser.add_argument('--views',nargs='+',choices=['road_10','road_40','road_70','road_95','decor_town','decor_saket'])
     parser.add_argument('--blender', default=str(Path.home() / 'tools/blender-3.6.23-linux-x64/blender'))
     parser.add_argument('--list-places', action='store_true')
     args = parser.parse_args()
@@ -111,7 +112,7 @@ def main():
         (ROOT/folder).mkdir(parents=True, exist_ok=True)
     if args.stage == 'all':
         started = time.monotonic()
-        for stage in ('assets', 'route', 'dem', 'centerline', 'mesh', 'acdata', 'decor', 'materials'):
+        for stage in ('assets', 'route', 'dem', 'centerline', 'mesh', 'acdata', 'decor', 'materials', 'csp'):
             subprocess.run([sys.executable, str(ROOT/'scripts/build.py'), stage, '--blender', args.blender], check=True)
         package()
         subprocess.run([sys.executable, str(ROOT/'scripts/validate.py')], check=True)
@@ -123,7 +124,12 @@ def main():
         return
     if args.stage == 'render':
         from materials import render
-        render(args.blender)
+        render(args.blender,views=args.views)
+        return
+    if args.stage == 'csp':
+        from csp import generate
+        generate()
+        package()
         return
     if args.stage == 'materials':
         from materials import build

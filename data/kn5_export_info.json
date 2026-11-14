@@ -1,8 +1,8 @@
 {
   "file": "out/bejaia_saket/bejaia_saket.kn5",
   "bytes": 136842509,
-  "seconds": 12.012942258999828,
-  "sha256": "3b8659693d5cc5ba6499da3ecd81fd872b926e68b0490600db61e08ec4511d51",
+  "seconds": 12.236457705999783,
+  "sha256": "f62fae10ca69213549cd5df732f388fee5aeeb89ee9bf049cc6240caae88dfca",
   "warnings": [
     "Unknown logical object 'AC_AB_FINISH_L' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it.",
     "Unknown logical object 'AC_AB_FINISH_R' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it.",
