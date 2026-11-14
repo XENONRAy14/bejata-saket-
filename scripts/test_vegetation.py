@@ -5,12 +5,46 @@ import unittest
 import numpy as np
 
 from foliage import atlas_pixels,coverage_mips,encode_coverage_dds,coverage_report,prototype,tile_uv
-from vegetation import Terrain
+from vegetation import Terrain,corridor_candidates
 from check_kn5 import inspect_dds
 from treefx import checksum,mesh_blob,read_mesh,vector_ac
 
 
 class FoliageTests(unittest.TestCase):
+    def test_oriented_hedge_footprint_preserves_true_crossroad_clearance(self):
+        import shapely
+        from vegetation import footprint
+        p=np.array([[-4,-1],[4,-1],[4,1],[-4,1]])
+        road=shapely.box(-20,-2,20,2)
+        self.assertEqual(shapely.distance(road,footprint(p,[0,8],0,1)),5)
+        self.assertAlmostEqual(shapely.distance(road,footprint(p,[0,8],np.pi/2,1)),2)
+        with self.assertRaises(ValueError):footprint([], [0,8],0,1)
+    def test_mesh_batches_split_and_reject_oversized_prototypes(self):
+        from foliage import mesh_batch_key
+        self.assertEqual(mesh_batch_key({},('leaf',),0),('leaf',0))
+        batches={('leaf',0):([0]*59999,[],[],[])}
+        self.assertEqual(mesh_batch_key(batches,('leaf',),2),('leaf',1))
+        with self.assertRaises(ValueError):mesh_batch_key({},('leaf',),60001)
+    def test_continuous_corridor_candidates_normal_empty_invalid(self):
+        s=np.arange(0,1000,2.);xy=np.column_stack([s,s*0]);sides=np.zeros((2,len(s),7,3))
+        sides[0,:,:,:2]=xy[:,None]+[0,10];sides[1,:,:,:2]=xy[:,None]+[0,-10];sides[0,:,:,2]=10
+        data=dict(s=s,xy=xy,sides=sides,width=np.full(len(s),7.),tangent=np.tile([1.,0.],(len(s),1)))
+        p,k,a,scale=corridor_candidates(data);q=corridor_candidates(data)
+        np.testing.assert_array_equal(p,q[0]);self.assertLess(abs(p[:,1]).max(),40)
+        hedge=np.sort(p[(k==4)&(p[:,1]>0),0]);self.assertLess(np.diff(hedge).max(),8)
+        self.assertGreater(((k==4)&(p[:,1]<0)).sum(),75)
+        self.assertGreater(((k<4)&(p[:,1]<0)).sum(),35)
+        self.assertGreater((k<3).sum(),100)
+        empty=dict(data,s=np.array([0.,10.]),xy=xy[:2],sides=sides[:,:2],width=np.full(2,7.),tangent=data['tangent'][:2])
+        self.assertEqual(corridor_candidates(empty)[0].shape,(0,2))
+        with self.assertRaises(ValueError):corridor_candidates(dict(s=[]))
+
+    def test_full_quality_crowns_and_ground_touching_shrub_groups(self):
+        for kind in (0,1,2):
+            leaves=prototype(kind,0,quality=True)['leaves']
+            self.assertGreaterEqual(len(leaves.faces),576)
+        bush=prototype(4,0,quality=True)['leaves'];p=np.asarray(bush.vertices)
+        self.assertLess(p[:,2].min(),0);self.assertGreater(np.ptp(p[:,0]),4)
     def test_twig_extraction_removes_opaque_uv_gutters(self):
         from PIL import Image,ImageDraw
         from foliage import extract_twig
@@ -25,6 +59,8 @@ class FoliageTests(unittest.TestCase):
         pixels=atlas_pixels(256,twig=twig)
         self.assertGreater(pixels[:128,:64,3].max(),200)
         self.assertTrue(((pixels[:,:,3]>0)&(pixels[:,:,3]<255)).any())
+        visible=pixels[:,:,3]>76
+        self.assertFalse((pixels[:,:,:3][visible].max(axis=1)<12).any())
     def test_branched_treefx_models_keep_variants(self):
         for kind in range(4):
             for variant in range(3):

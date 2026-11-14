@@ -1,7 +1,7 @@
 {
   "counts": {
     "retaining_walls": 41,
-    "stone_blocks": 1221,
+    "stone_blocks": 891,
     "chevrons": 36,
     "speed_signs": 4,
     "fences": 40,
@@ -9,8 +9,9 @@
     "reflectors": 602,
     "guardrail_m": 10272,
     "drain_m": 488,
-    "stones": 368,
-    "cut_cliff_facing_triangles": 17212
+    "stones": 531,
+    "cut_cliff_facing_triangles": 17212,
+    "litter_patches": 1600
   },
   "walls": [
     {
@@ -718,8 +719,8 @@
       12.86740413237499
     ]
   ],
-  "triangles": 115428,
-  "meshes": 285,
+  "triangles": 154834,
+  "meshes": 357,
   "visual_only": true,
   "sign_material": {
     "shaderName": "ksPerPixel",
@@ -748,6 +749,64 @@
     "preview": {
       "kind": "sign",
       "roughness": 0.75
+    }
+  },
+  "litter_material": {
+    "shaderName": "ksPerPixelAT",
+    "alphaBlendMode": "AlphaToCoverage",
+    "alphaTested": true,
+    "depthMode": "DepthNormal",
+    "properties": {
+      "ksAmbient": {
+        "valueA": 0.4
+      },
+      "ksDiffuse": {
+        "valueA": 0.6
+      },
+      "ksSpecular": {
+        "valueA": 0.01
+      },
+      "ksSpecularEXP": {
+        "valueA": 10.0
+      }
+    },
+    "textures": {
+      "txDiffuse": {
+        "textureName": "roadside_litter.dds"
+      }
+    },
+    "preview": {
+      "kind": "foliage",
+      "roughness": 0.98
+    }
+  },
+  "concrete_material": {
+    "shaderName": "ksPerPixel",
+    "alphaBlendMode": "Opaque",
+    "alphaTested": false,
+    "depthMode": "DepthNormal",
+    "properties": {
+      "ksAmbient": {
+        "valueA": 0.4
+      },
+      "ksDiffuse": {
+        "valueA": 0.6
+      },
+      "ksSpecular": {
+        "valueA": 0.03
+      },
+      "ksSpecularEXP": {
+        "valueA": 10.0
+      }
+    },
+    "textures": {
+      "txDiffuse": {
+        "textureName": "roadside_concrete.dds"
+      }
+    },
+    "preview": {
+      "kind": "sign",
+      "roughness": 0.95
     }
   }
 }

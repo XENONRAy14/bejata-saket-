@@ -1,19 +1,19 @@
 {
   "seed": 24025,
   "species": {
-    "aleppo_pine": 248,
-    "stone_pine": 110,
-    "olive": 290,
-    "cypress": 72,
-    "maquis": 1727,
-    "reeds": 4,
-    "dry_grass": 1549
+    "aleppo_pine": 2349,
+    "stone_pine": 466,
+    "olive": 700,
+    "cypress": 7,
+    "maquis": 4478,
+    "reeds": 0,
+    "dry_grass": 0
   },
-  "instances": 4000,
+  "instances": 8000,
   "variants_per_species": 3,
-  "maximum_root_road_distance_m": 82.30329670332316,
-  "minimum_canopy_road_clearance_m": 4.0051836333545925,
-  "maximum_slope_degrees": 34.978849165992735,
+  "maximum_root_road_distance_m": 31.35761959415195,
+  "minimum_canopy_road_clearance_m": 4.002985755688071,
+  "maximum_slope_degrees": 34.99487326404282,
   "lod0_range_m": [
     0,
     150
@@ -22,19 +22,19 @@
     150,
     600
   ],
-  "far_clumps": "skipped beyond 300 m road distance",
+  "far_clumps": "none beyond 80m road edge",
   "double_sided": "explicit reversed faces, duplicated vertices; canopy-outward custom normals",
   "before_triangles": 1057188,
-  "estimated_plant_triangles": 505078,
+  "estimated_plant_triangles": 5237994,
   "wind": "deferred for KN5 fallback; native TreeFX height-driven wind exists in source, runtime unverified",
   "root_snap": "highest actual exported terrain triangle; trunk base embedded",
   "after_triangles": 958588,
-  "lod0_triangles": 504058,
-  "lod1_triangles": 32000,
+  "lod0_triangles": 5173994,
+  "lod1_triangles": 64000,
   "nonvegetation_sha256_before_and_after": "0bcd2bb1b4c45a3efd9fe11a1dab5c3abc05e656c287ef8257f24011dc0bab30",
-  "vegetation_objects": 425,
-  "max_vegetation_vertices": 34220,
-  "preview_triangles": 1494646,
+  "vegetation_objects": 472,
+  "max_vegetation_vertices": 59992,
+  "preview_triangles": 6196582,
   "kn5_vegetation_objects": 0,
   "mode": "TreeFX + GrassFX"
 }

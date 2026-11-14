@@ -15,7 +15,6 @@ from blender_mesh import camera
 def main():
     label=sys.argv[sys.argv.index('--')+1]
     selected=sys.argv[sys.argv.index('--')+2:]
-    if set(selected)-{'road_10','road_40','road_70','road_95','decor_town','decor_saket'}:raise ValueError('Unknown view')
     if label not in ('before','after'):raise ValueError('Expected before or after')
     output=Path(os.environ.get('BS_COMPARISON_DIR',str(ROOT/'out/preview/v2_materials')))/label;output.mkdir(parents=True,exist_ok=True)
     for image in bpy.data.images:
@@ -60,18 +59,19 @@ def main():
         selected_plants=plants[(plants[:,0]==2)&(plants[:,12]<35)&(plants[:,13]<15)]
         if not len(selected_plants):selected_plants=plants[plants[:,0]<3]
         plant=selected_plants[len(selected_plants)//2];point=plant[2:5];nearest=np.argmin(np.linalg.norm(data['xy']-point[:2],axis=1))
-        direction=data['xy'][nearest]-point[:2];direction/=np.linalg.norm(direction)
-        origin=np.r_[point[:2]+direction*10,point[2]+2.2]
+        origin=np.r_[data['xy'][nearest],data['z'][nearest]+2.2]
         views.append(('trees_closeup',origin,point+np.array([0,0,SIZES[int(plant[0])][1]*plant[6]*.55])))
         if os.environ.get('BS_ROADSIDE_PREVIEW'):
             heroes=plants[(plants[:,0]<3)&(plants[:,6]>1.3)]
             if not len(heroes):heroes=plants[plants[:,0]<3]
             hero=heroes[len(heroes)//2];point=hero[2:5];nearest=np.argmin(np.linalg.norm(data['xy']-point[:2],axis=1))
             inward=data['xy'][nearest]-point[:2];inward/=np.linalg.norm(inward)
-            views.append(('hero_tree',point+np.r_[inward*18,3.0],point+[0,0,SIZES[int(hero[0])][1]*hero[6]*.55]))
+            views.append(('hero_tree',point+np.r_[inward*24,3.2],point+[0,0,SIZES[int(hero[0])][1]*hero[6]*.63]))
+            nearest=int(np.searchsorted(data['s'],data['s'][-1]*.4))
             i=max(0,nearest-12);j=min(len(data['s'])-1,nearest+16)
+            higher=int(np.argmax(data['sides'][:,j,-1,2]));inward=data['xy'][j]-data['sides'][higher,j,2,:2];inward/=np.linalg.norm(inward)
             views.append(('low_sun',[*data['xy'][i],data['z'][i]+1.6],[*data['xy'][j],data['z'][j]+1.6]))
-            shadow_direction=np.r_[inward*np.cos(np.radians(12)),-np.sin(np.radians(12))]
+            shadow_direction=np.r_[inward*np.cos(np.radians(20)),-np.sin(np.radians(20))]
     if os.environ.get('BS_ROADSIDE_PREVIEW'):
         info=json.loads((ROOT/'data/roadside_info.json').read_text())
         wall=min(info['walls'],key=lambda w:abs(w['chainage_m']-data['s'][-1]*.4))
@@ -93,9 +93,11 @@ def main():
             elevation=float(nearby.max()+500) if len(nearby) else 1200
             views.append(('elevated_'+name,[*xy,elevation],[*data['xy'][i],data['z'][i]]))
     views.sort(key=lambda view:view[0]=='low_sun')
+    if set(selected)-{view[0] for view in views}:raise ValueError('Unknown view')
     for name,origin,target in views:
         if selected and name not in selected:continue
         view=camera('__COMPARISON_'+name,origin,target,32000 if name=='top' else None)
+        if name=='hero_tree':view.data.lens=28
         if terrain:view.data.clip_end=100000
         if name=='low_sun':
             from mathutils import Vector

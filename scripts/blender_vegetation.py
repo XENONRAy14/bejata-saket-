@@ -12,7 +12,7 @@ import numpy as np
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'scripts'))
 from blender_mesh import object_mesh
 from blender_decor import prototype as old_prototype
-from foliage import prototype,TINTS
+from foliage import prototype,TINTS,mesh_batch_key
 
 
 def replaced(obj):
@@ -63,11 +63,12 @@ def main():
             for material,mesh in groups.items():
                 if not mesh.faces:continue
                 name='bark' if material=='bark' else ('veg_impostor' if lod else 'veg_canopy')+TINTS[int(p[7])]
-                v,f,uv,n=batches.setdefault((int(p[8]),lod,name),([],[],[],[]));start=len(v)
+                key=mesh_batch_key(batches,(int(p[8]),lod,name),len(mesh.vertices))
+                v,f,uv,n=batches.setdefault(key,([],[],[],[]));start=len(v)
                 v.extend((np.asarray(mesh.vertices)*scale@rotation.T+p[2:5]).tolist());f.extend([tuple(start+k for k in face) for face in mesh.faces]);uv.extend(mesh.uv);n.extend((np.asarray(mesh.normals)@rotation.T).tolist())
     counts={0:0,1:0}
-    for (chunk,lod,material),(v,f,uv,n) in sorted(batches.items()):
-        name=f'DECOR_VEG_L{lod}_{chunk:03d}_{material}'
+    for (chunk,lod,material,part),(v,f,uv,n) in sorted(batches.items()):
+        name=f'DECOR_VEG_L{lod}_{chunk:03d}_{part:02d}_{material}'
         if material not in bpy.data.materials:bpy.data.materials.new(material)
         obj=object_mesh(name,v,f,bpy.data.materials[material]);obj.data.use_auto_smooth=True
         for p in obj.data.polygons:

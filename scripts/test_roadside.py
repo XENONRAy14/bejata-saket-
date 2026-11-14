@@ -6,6 +6,16 @@ from vegetation import Terrain
 
 
 class RoadsideTests(unittest.TestCase):
+    def test_concrete_base_stain(self):
+        from roadside import concrete_atlas
+        p=concrete_atlas(64);np.testing.assert_array_equal(p,concrete_atlas(64))
+        self.assertLess(p[-8:].mean(),p[:8].mean()-20)
+        with self.assertRaises(ValueError):concrete_atlas(0)
+    def test_litter_atlas_normal_empty_edges_invalid(self):
+        from roadside import litter_atlas
+        image=litter_atlas(64);np.testing.assert_array_equal(image,litter_atlas(64))
+        self.assertEqual(image.shape,(64,64,4));self.assertEqual(image[0,0,3],0);self.assertGreater(image[32,32,3],128)
+        with self.assertRaises(ValueError):litter_atlas(0)
     def test_box_and_board_geometry(self):
         mesh=Mesh();mesh.box([3,4,5],[4,2,2],[0,1])
         vertices=np.asarray(mesh.vertices)

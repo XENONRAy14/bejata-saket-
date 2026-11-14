@@ -11,6 +11,7 @@ from geometry import ROOT
 from check_kn5 import inspect_kn5
 from materials import material_spec
 from vegetation import Terrain, blender_triangles
+from foliage import encode_coverage_dds
 
 
 class Mesh:
@@ -93,9 +94,12 @@ def plan(data,houses,terrain):
         for position in np.arange(-9,10,2):
             xy=center[:2]+tangent*position;z,n=terrain.sample(xy[None])
             if not np.isfinite(z[0]) or n[0,2]<.65:continue
-            for course in range(3):
-                point=np.r_[xy+tangent*(.35 if course%2 else 0),z[0]+course*.43+.12]
-                batch(i,'rock').box(point,[1.96,.48,.42],tangent);counts['stone_blocks']+=1
+            if len(walls)%4==0:
+                batch(i,'roadside_concrete').box(np.r_[xy,z[0]+.55],[1.96,.48,1.25],tangent)
+            else:
+                for course in range(3):
+                    point=np.r_[xy+tangent*(.35 if course%2 else 0),z[0]+course*.43+.12]
+                    batch(i,'rock').box(point,[1.96,.48,.42],tangent);counts['stone_blocks']+=1
             placed+=1
         if placed:
             counts['retaining_walls']+=1;walls.append(dict(center=center.tolist(),tangent=tangent.tolist(),chainage_m=float(data['s'][i])))
@@ -127,10 +131,12 @@ def plan(data,houses,terrain):
             batch(i,'metal').slab(np.r_[endpoints[0],z[0]],np.r_[endpoints[1],z[1]],.12,.51,.79)
             for distance in (-3,1):
                 xy=point[:2]+tangent*distance;z,_=terrain.sample(xy[None])
-                if np.isfinite(z[0]):batch(i,'metal').box(np.r_[xy,z[0]+.4],[.09,.09,.88],tangent)
+                if np.isfinite(z[0]):
+                    batch(i,'metal').box(np.r_[xy,z[0]+.4],[.09,.09,.88],tangent)
+                    batch(i,'marker_red').box(np.r_[xy,z[0]+.82],[.105,.105,.07],tangent)
             counts['guardrail_m']+=8
     rng=np.random.default_rng(24026)
-    for chainage in np.arange(80,data['s'][-1]-40,65):
+    for chainage in np.arange(80,data['s'][-1]-40,45):
         i=int(np.searchsorted(data['s'],chainage));side=int(np.argmax(data['sides'][:,i,-1,2]));point=at(i,side,float(rng.uniform(2,12)))
         if point is None:continue
         r=float(rng.uniform(.14,.46));top=point+[0,0,r*.8];bottom=point-[0,0,r*.2]
@@ -192,14 +198,58 @@ def generate(root=ROOT):
             i=int(np.argmin(np.linalg.norm(data['xy']-tri.mean(0)[:2],axis=1)))
             batch=batches.setdefault((int(data['s'][i]//400),'rock'),Mesh());batch.triangle(tri+n*.025);facings+=1
     info['counts']['cut_cliff_facing_triangles']=facings
+    litter=0
+    for plant in np.load(root/'data/vegetation.npz')['plants'][::5]:
+        if plant[0]>=5:continue
+        radius=min(2.4,float(plant[12])-4.1)
+        if radius<.5:continue
+        angles=np.arange(6)*np.pi/3
+        xy=np.vstack([plant[2:4],plant[2:4]+np.column_stack([np.cos(angles),np.sin(angles)])*radius])
+        z,_=terrain.sample(xy)
+        if not np.isfinite(z).all():continue
+        mesh=batches.setdefault((int(plant[8]),'roadside_litter'),Mesh());vertices=np.column_stack([xy,z+.025]);uv=(xy-plant[2:4])/(2*radius)+.5
+        for j in range(6):
+            ids=[0,1+j,1+(j+1)%6];mesh.triangle(vertices[ids]);mesh.uv[-3:]=uv[ids].tolist()
+        litter+=1
+    info['counts']['litter_patches']=litter
     for i,((chunk,material),mesh) in enumerate(sorted(batches.items())):
         names.append((f'DETAIL_{chunk:03d}_{material}',material));arrays[f'v{i}']=np.asarray(mesh.vertices);arrays[f'f{i}']=np.asarray(mesh.faces);arrays[f'uv{i}']=np.asarray(mesh.uv)
     np.savez_compressed(root/'data/roadside.npz',names=np.asarray(names),**arrays)
-    info.update(triangles=sum(len(m.faces) for m in batches.values()),meshes=len(batches),visual_only=True,sign_material=sign_spec())
+    litter_spec=material_spec('ksPerPixelAT',dict(ksAmbient=.4,ksDiffuse=.6,ksSpecular=.01,ksSpecularEXP=10),dict(txDiffuse='roadside_litter.dds'),kind='foliage',roughness=.98)
+    litter_spec.update(alphaBlendMode='AlphaToCoverage',alphaTested=True)
+    concrete_spec=material_spec('ksPerPixel',dict(ksAmbient=.4,ksDiffuse=.6,ksSpecular=.03,ksSpecularEXP=10),dict(txDiffuse='roadside_concrete.dds'),kind='sign',roughness=.95)
+    info.update(triangles=sum(len(m.faces) for m in batches.values()),meshes=len(batches),visual_only=True,sign_material=sign_spec(),litter_material=litter_spec,concrete_material=concrete_spec)
     (root/'data/roadside_info.json').write_text(json.dumps(info,indent=2)+'\n')
     image=sign_atlas();path=root/'textures/v2/roadside_signs.png';image.save(path)
     subprocess.run(['convert',str(path),'-define','dds:compression=dxt1',str(path.with_suffix('.dds'))],check=True)
+    path=root/'textures/v2/roadside_concrete.png';Image.fromarray(concrete_atlas()).save(path)
+    subprocess.run(['convert',str(path),'-define','dds:compression=dxt1',str(path.with_suffix('.dds'))],check=True)
+    pixels=litter_atlas();Image.fromarray(pixels).save(root/'textures/v2/roadside_litter.png');encode_coverage_dds(pixels,root/'textures/v2/roadside_litter.dds')
     return info
+
+
+def litter_atlas(size=1024):
+    if size<32 or size%4:raise ValueError('Litter atlas requires size divisible by four and >=32')
+    rng=np.random.default_rng(24028);yy,xx=np.mgrid[:size,:size]/size
+    radius=np.sqrt(((xx-.5)/.48)**2+((yy-.5)/.48)**2)
+    noise=rng.normal(0,1,(size,size));pixels=np.empty((size,size,4),dtype='uint8')
+    pixels[:,:,:3]=np.clip(np.array([89,84,56])+noise[:,:,None]*9,0,255)
+    pixels[:,:,3]=np.clip((1-radius)*500+noise*14,0,240).astype('uint8')
+    image=Image.fromarray(pixels);draw=ImageDraw.Draw(image)
+    for _ in range(size*3):
+        x,y=rng.uniform(.1,.9,2)*size
+        if ((x/size-.5)/.42)**2+((y/size-.5)/.42)**2>1:continue
+        dx,dy=rng.normal(0,size*.004,2);shade=int(rng.integers(65,130))
+        draw.line((x,y,x+dx,y+dy),fill=(shade,int(shade*.91),int(shade*.57),210),width=1)
+    return np.asarray(image)
+
+
+def concrete_atlas(size=1024):
+    if size<32:raise ValueError('Concrete atlas requires size >=32')
+    rng=np.random.default_rng(24029);yy,xx=np.mgrid[:size,:size]/size
+    base=np.clip((yy-.52)*2.4+.12*np.sin(xx*32)+.07*np.cos(xx*81),0,1)
+    stain=base[:,:,None]*np.array([43,38,49])
+    return np.clip(np.array([148,150,139])+rng.normal(0,5,(size,size,1))-stain,0,255).astype('uint8')
 
 
 def build(blender):

@@ -1,5 +1,48 @@
 # Phase 4c: enclosed, quality-first RN24 corridor
 
+## Focused art pass after checkpoint `9ca71cd`
+
+The functional checkpoint was committed before the art pass. The user replaced
+the former 1.6M expanded-both-LOD soft limit with **KN5 ≤2.0M vertices**, **≤8,000
+TreeFX instances**, all roots **within 80m of the road edge**. The validator checks
+these directly. Expanded triangle totals remain diagnostics, not a hard limit:
+TreeFX instances share model buffers and select LODs rather than drawing both
+LODs for every instance. This is not a measured FPS/VRAM guarantee.
+
+The revised plan uses DEM-sided, noise-modulated bands: overlapping four-mound
+maquis groups behind both verges, with staggered pine/olive bands behind them
+(mostly 10–40m from the verge). Sea-side scrub is slightly lower, with tree and
+scrub bands broken by deliberate sea-view openings. Native GrassFX scattering remains
+enabled for low weeds/tufts; it is not represented by thousands of extra KN5 meshes.
+
+Pine and olive terminal branch clusters now have eighteen overlapping, larger cards
+instead of four. Pine card textures combine twelve photographic sprigs; slight
+alpha expansion retains needle coverage at the 0.5 mip-test threshold; the existing
+Blender cutout preview uses 0.3, without adding an AC/CSP cutoff key.
+The coverage-preserving mip tests and external archive checks remain in place.
+Golden-angle orientations and wider cluster scatter avoid stacks of nearly
+parallel cards. RGB bleeding excludes black pixels introduced by alpha dilation.
+Maquis groups have four dense ground-touching mounds. Physics is unchanged.
+The verge belt roots sit around 6.5m from the road edge, with full trees around
+12.5m and a second layer near 25m. Elongated maquis follow the road tangent;
+their far LOD uses two overlapping tangent-facing cards rather than a wide
+cross-road card. Planning and exported-archive validation measure their rotated
+convex footprint across both LODs, preserving at least 4m canopy clearance without
+mistaking the hedge's along-road length for its cross-road width. Other species
+retain the conservative enclosing-radius clearance check.
+
+Terrain macros gain stronger low-frequency olive/yellow-green/brown hue variation.
+Procedural soil/needle-litter patches conform to actual terrain beneath a sampled
+subset of tree/shrub roots; they use the already verified alpha-test shader,
+with no collision or shadow casting. More small corridor stones reuse the existing
+rock material. RainFX classifies litter as rough, and GrassFX treats it as occluding.
+The low-sun camera looks along road_40 with the mountain band between sun and road.
+The resumed style pass adds procedural base-stained concrete panels among the
+moss/strata stone walls and reflector caps to extended rail posts. Existing rubber,
+wear, repair patches and junction arrows are retained. There are no copied banners,
+brands or third-party tree models. Denser preview batches are split below 60k vertices
+instead of exceeding Blender/export mesh limits; external TreeFX geometry stays instanced.
+
 The initially requested 2–3× density increase was cancelled after the user's
 in-game TreeFX/GrassFX test. Existing 4b TreeFX loading and GrassFX operation are
 user-reported working; the revised models/placement still require acceptance.
@@ -84,7 +127,8 @@ procedural art, not claimed photographs of those species.
   sampling and alpha output. These sources do not establish this CSP version's
   runtime shadow-pass dispatch; test shadows in-game.
 - `blender-assetto-corsa-tools/exporter/node_writer.py:42,162` verifies KN5
-  `castShadows`; new kit meshes explicitly enable it and KN5 readback checks it.
+  `castShadows`; solid kit meshes explicitly enable it and KN5 readback checks it;
+  ground-conforming litter patches explicitly disable it.
 - Existing verified RainFX groups include metal/signs/reflectors as smooth,
   rock/bark as rough and plaster/concrete as soaking. GrassFX still uses only
   grass/grass_mountain surfaces and verified custom atlas groups; no guessed
@@ -94,6 +138,18 @@ procedural art, not claimed photographs of those species.
   grey. The low-sun render uses Cycles CPU stand-ins, not AC/CSP/Pure lighting.
 
 ## Concrete in-game acceptance checklist
+
+### Linux visual review and remaining limitations
+
+The eleven-view contact sheet is `out/preview/v2_roadside/contact_sheet.jpg`.
+Repeated Cycles CPU renders show stronger overlapping verge belts on both sides,
+retained sea openings, stained concrete panels and vegetation shadows crossing
+the roadway at low sun. This is not a fully roofed forest tunnel: open sky and
+some grass remain visible, and close-up crowns still expose dark, faceted
+alpha-card clusters. Treat those as remaining art limitations, not proven native
+TreeFX appearance. Windows acceptance is still required before visual sign-off.
+
+### Windows checklist
 
 1. Install the whole ZIP (including KN5 and `extension/trees`), not only the KN5.
    Confirm TreeFX and GrassFX still load; note missing-model/config warnings.

@@ -13,6 +13,8 @@ URL and SHA-256 are pinned in `data/foliage_assets.lock.json`. Only the top-left
 twig island is cropped/resampled with alpha edge filtering; no model geometry
 is imported. All other leaf silhouettes remain original procedural art.
 No third-party model pack is integrated in this phase.
+The focused art pass adds original procedural stained-concrete and soil/needle-litter atlases and
+ground-conforming patches, also dedicated under CC0-1.0; no new art downloads.
 
 Phase 4a landscape and distant foothills reuse the existing Copernicus GLO-30
 DEM tiles; the expanded shoreline is derived from the cached OpenStreetMap

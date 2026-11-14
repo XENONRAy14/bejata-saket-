@@ -431,6 +431,14 @@ and FPS remain runtime-unverified; Cycles previews show LOD0, not AC LOD switchi
 
 ### Phase 4c: quality-first enclosed roadside corridor
 
+Functional checkpoint: **`9ca71cd`**. The subsequent focused art pass uses overlapping
+DEM-sided maquis groups and staggered pine/olive bands on both sides, fuller crowns, stronger
+terrain hue variation and conforming visual litter patches under vegetation.
+The current limits are **KN5 ≤2.0M vertices**, **TreeFX ≤8,000 instances**, all roots
+within **80m of the road edge** (maquis near 6.5m, full trees mostly within 10–40m). Expanded-both-LOD triangles
+are reported only: instancing shares models and LOD selection does not draw both
+LODs simultaneously. The former 1.6M expanded-geometry budget is superseded.
+
 TreeFX remains the default. The proposed density increase was cancelled in favor
 of tapered, bent trunks, recursive branching and many smaller canopy cards.
 Pines use a checksum-pinned CC0 photographic Poly Haven twig crop; olive, cypress

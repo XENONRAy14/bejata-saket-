@@ -12,6 +12,7 @@ from scipy.spatial import cKDTree
 
 from check_kn5 import inspect_kn5, mask_mip_error
 from csp import config_materials
+from vegetation import footprint
 
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = ('README.md','CREDITS.md','data/surfaces.ini','data/map.ini','ui/ui_track.json',
@@ -245,14 +246,15 @@ def validate(folder):
                 listing=folder/'extension'/config['TREES']['LIST_0']
                 require(listing.is_file(),'missing external TreeFX list')
                 lines=listing.read_text().splitlines();require(bool(lines),'empty TreeFX list')
-                names=set();instances=[]
+                names=set();instances=[];angles=[]
                 for line in lines:
                     parts=line.split(';');name=parts[0].removeprefix('tree: ').strip()
                     require(Path(name).name==name and name.endswith('.bin'),'unsafe external tree model name')
                     values=dict(p.strip().split('=',1) for p in parts[1:]);xyz=[float(v) for v in values['pos'].split(',')]
                     require(len(xyz)==3 and np.isfinite(xyz).all() and float(values['size'])>0,'invalid external tree transform')
                     require(np.isfinite([float(values['angle']),float(values['width']),*[float(v) for v in values['color'].split(',')]]).all(),'invalid external tree colour/rotation')
-                    names.add(name);instances.append((name,xyz,float(values['size'])))
+                    require(float(values['width'])==1,'unexpected external tree width')
+                    names.add(name);instances.append((name,xyz,float(values['size'])));angles.append(np.radians(float(values['angle'])))
                 metrics={name:validate_model(listing.parent/name,geometry=True) for name in names}
                 require(all(len(lods)==2 for lods in metrics.values()),'external TreeFX LOD missing')
                 radii={name:max(np.linalg.norm(lod['positions'][:,[0,2]],axis=1).max() for lod in lods) for name,lods in metrics.items()}
@@ -260,10 +262,15 @@ def validate(folder):
                 centers=np.asarray([xyz for _,xyz,_ in instances])[:,[0,2]]
                 distances=shapely.distance(road,shapely.points(centers))
                 clearance=distances-np.array([radii[name]*scale for name,_,scale in instances])
+                outlines={name:shapely.get_coordinates(shapely.convex_hull(shapely.multipoints(np.concatenate([lod['positions'][:,[0,2]] for lod in lods])))) for name,lods in metrics.items() if name.startswith('maquis_')}
+                for i,(name,xyz,scale) in enumerate(instances):
+                    if name in outlines:clearance[i]=shapely.distance(road,footprint(outlines[name],np.asarray(xyz)[[0,2]],angles[i],scale))
                 require(clearance.min()>3.999,'external canopy violates 4m road-edge clearance')
                 require(not any(n['name'].endswith(('_pine_foliage','_olive_foliage','_maquis')) for n in meshes),'old foliage remains')
                 total=sum(n['triangles'] for n in meshes)+sum(sum(lod['triangles'] for lod in metrics[name]) for name,_,_ in instances)
-                require(total<1600000,'base plus instantiated tree LOD triangle budget exceeded')
+                require(sum(n['vertices'] for n in meshes)<=2000000,'KN5 exceeds 2M vertices')
+                require(len(instances)<=8000,'TreeFX instance budget exceeded')
+                require(distances.max()<=80.001,'TreeFX outside 80m corridor')
                 require(config['GRASS_FX'].get('TEXTURE_GROUP_0_CHANCE')=='0.14','missing GrassFX replacement group')
                 validate_foliage_texture((folder/'extension'/config['GRASS_FX']['TEXTURE']).read_bytes())
                 return f'external TreeFX: {len(lines)} instances / {len(names)} models; {total} base+instantiated LOD triangles; clearance min={clearance.min():.3f} m; binary/alpha coverage valid; GrassFX tufts/scrub'
@@ -298,7 +305,8 @@ def validate(folder):
         road=shapely.union_all(shapely.polygons(triangles[:,:,[0,2]]))
         require(not shapely.intersects(road.buffer(1),shapely.polygons(faces[:,:,[0,2]])).any(),'roadside inside 1m road-edge clearance')
         require(all((n['lod_in'],n['lod_out'])==(0,1400) for n in detail),'wrong roadside LOD range')
-        require(all(n['castShadows'] for n in detail),'roadside shadow casting disabled')
+        require(all(n['castShadows'] for n in detail if not n['name'].endswith('_roadside_litter')),'roadside shadow casting disabled')
+        require(all(not n['castShadows'] for n in detail if n['name'].endswith('_roadside_litter')),'ground litter casts shadows')
         require(all(n['name'].startswith('DETAIL_') for n in detail),'physical roadside name')
         signs=[m for m in parsed['materials'] if m['name']=='roadside_signs']
         require(len(signs)==1 and signs[0]['shader']=='ksPerPixel','missing procedural sign material')

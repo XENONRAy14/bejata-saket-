@@ -76,10 +76,15 @@ def atlas_pixels(size=1024,impostor=False,twig=None):
                         draw.polygon([tuple(p),tuple(p+[-48,-68]),tuple(p+[3,-14])],fill=(103,126,65,255))
         if twig is not None and kind in (0,1):
             tile=Image.new('RGBA',(256,512))
-            sprig=extract_twig(twig).resize((112,218),Image.Resampling.LANCZOS)
-            for angle,center in ((-22,(80,175)),(25,(174,190)),(0,(124,332))):
+            sprig=extract_twig(twig).resize((136,250),Image.Resampling.LANCZOS)
+            for cluster in range(12):
+                angle=float(rng.uniform(-75,75));center=(int(rng.uniform(64,193)),int(rng.uniform(125,365)))
                 branch=sprig.rotate(angle,Image.Resampling.BICUBIC,expand=True)
                 tile.alpha_composite(branch,(center[0]-branch.width//2,center[1]-branch.height//2))
+            pixels=np.array(tile);yy,xx=np.mgrid[:512,:256]
+            feather=np.clip((1-((xx-128)/119)**2-((yy-250)/237)**2)*8,0,1)
+            pixels[:,:,3]=(pixels[:,:,3]*feather).astype('uint8');tile=Image.fromarray(pixels)
+            tile.putalpha(tile.getchannel('A').filter(ImageFilter.MaxFilter(3)))
         alpha=tile.getchannel('A').filter(ImageFilter.GaussianBlur(.45));tile.putalpha(alpha)
         if impostor and kind<5:
             crown=tile.copy();tile=Image.new('RGBA',(256,512));draw=ImageDraw.Draw(tile)
@@ -90,7 +95,7 @@ def atlas_pixels(size=1024,impostor=False,twig=None):
             tile.alpha_composite(crown,(a,b))
         image.alpha_composite(tile,((kind%4)*256,(kind//4)*512))
     pixels=np.asarray(image).copy()
-    alpha=pixels[:,:,3]>0
+    alpha=(pixels[:,:,3]>0)&(pixels[:,:,:3].max(axis=2)>8)
     _,indices=distance_transform_edt(~alpha,return_indices=True)
     pixels[:,:,:3]=pixels[indices[0],indices[1],:3]
     if size!=1024:pixels=np.asarray(Image.fromarray(pixels).resize((size,size),Image.Resampling.BOX)).copy()
@@ -167,6 +172,13 @@ def generate_textures(root=ROOT):
     return info
 
 
+def mesh_batch_key(batches,key,count,limit=60000):
+    if count<0 or count>limit:raise ValueError('Prototype exceeds mesh batch limit')
+    part=0
+    while len(batches.get((*key,part),([],))[0])+count>limit:part+=1
+    return (*key,part)
+
+
 class Mesh:
     def __init__(self):self.vertices=[];self.faces=[];self.uv=[];self.normals=[]
 
@@ -192,13 +204,17 @@ def prototype(kind,variant,lod=0,quality=False):
     rng=np.random.default_rng(SEED+kind*101+variant*17);width,height=SIZES[kind]
     width*=1+variant*.06;height*=1+(variant-1)*.06
     bark,leaves=Mesh(),Mesh();uv=tile_uv(kind)
+    if quality and lod and kind==4:width,height=7.4,2.5
     def card(center,w,h,angle,tilt=0,canopy=None):
         center=np.asarray(center,float);x=np.array([math.cos(angle),math.sin(angle),0]);y=np.array([-math.sin(angle)*math.sin(tilt),math.cos(angle)*math.sin(tilt),math.cos(tilt)])
         p=np.array([center-x*w/2-y*h/2,center+x*w/2-y*h/2,center+x*w/2+y*h/2,center-x*w/2+y*h/2])
         n=p-np.asarray(canopy if canopy is not None else center-[0,0,h*.1]);n[:,2]+=h*.2;n/=np.maximum(np.linalg.norm(n,axis=1)[:,None],1e-8)
         leaves.quad(p,uv,n,True)
     if lod:
-        for angle in (0,np.pi/2):card([0,0,height/2-.08],width,height,angle,canopy=[0,0,height*.45])
+        if quality and kind==4:
+            for x,angle in ((-1.6,-.18),(1.6,.18)):card([x,0,height/2-.08],4.2,height,angle,canopy=[x,0,height*.45])
+        else:
+            for angle in (0,np.pi/2):card([0,0,height/2-.08],width,height,angle,canopy=[0,0,height*.45])
     elif kind<3 and quality:
         olive=kind==2;trunk_height=height*(.40 if olive else .56)
         radius=.38 if olive else .23;centers=[]
@@ -220,9 +236,9 @@ def prototype(kind,variant,lod=0,quality=False):
                     tip=b+np.array([math.cos(phase+sign*.7)*width*.13,math.sin(phase+sign*.7)*width*.13,rng.uniform(-.15,.5)])
                     branch(b,tip,r*.43,depth-1,phase+sign*.7)
             else:
-                for j in range(4):
-                    point=b+rng.normal(0,[width*.065,width*.065,height*.045])
-                    card(point,width*(.20 if olive else .14),height*(.21 if olive else .22),phase+j*1.6,rng.uniform(-.9,.9),crown)
+                for j in range(18):
+                    point=b+rng.normal(0,[width*.14,width*.14,height*.085])
+                    card(point,width*(.25 if olive else .19),height*(.25 if olive else .23),phase+j*2.39996,rng.uniform(-1.2,1.2),crown)
         for limb in range(6):
             angle=limb*2.39996+variant*.71
             reach=width*(.25 if kind==0 else .29)*(1+rng.uniform(-.16,.12))
@@ -259,13 +275,15 @@ def prototype(kind,variant,lod=0,quality=False):
             z=height*(.15+.07*i);radius=width*.5*(1-z/height)**.45
             card([0,0,z],radius*2,height*.37,i*2.39996,rng.uniform(-.2,.2),[0,0,height*.48])
     elif kind==4 and quality:
-        for i in range(3):
-            angle=i*2.4;tip=[math.cos(angle)*width*.18,math.sin(angle)*width*.18,height*.5]
-            bark.cylinder([0,0,-.1],tip,.035,3)
-        for i in range(12):
-            angle=i*2.39996;radius=width*.24*math.sqrt((i+.5)/12)
-            point=[math.cos(angle)*radius,math.sin(angle)*radius,height*(.43+.16*math.sin(angle))]
-            card(point,width*.48,height*.65,angle,rng.uniform(-.65,.65),[0,0,height*.4])
+        for mound in range(4):
+            center=np.array([(mound-1.5)*1.6,.23*math.sin(mound+variant),0])
+            for i in range(3):
+                angle=i*2.4;tip=center+[math.cos(angle)*.35,math.sin(angle)*.35,1.1]
+                bark.cylinder(center+[0,0,-.16],tip,.035,3)
+            for i in range(8):
+                angle=i*2.39996;radius=.58*math.sqrt((i+.5)/8)
+                point=center+[math.cos(angle)*radius,math.sin(angle)*radius,1.0+.3*math.sin(angle)]
+                card(point,1.9,2.25,angle,rng.uniform(-.7,.7),center+[0,0,.95])
     elif kind==4:
         for i in range(8):
             theta=i*2.4;r=width*.22*(i%3)/2;c=[math.cos(theta)*r,math.sin(theta)*r,height*.53+rng.uniform(-.2,.2)]

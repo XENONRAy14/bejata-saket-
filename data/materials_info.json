@@ -1294,6 +1294,64 @@
         "kind": "sign",
         "roughness": 0.75
       }
+    },
+    "roadside_litter": {
+      "shaderName": "ksPerPixelAT",
+      "alphaBlendMode": "AlphaToCoverage",
+      "alphaTested": true,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.6
+        },
+        "ksSpecular": {
+          "valueA": 0.01
+        },
+        "ksSpecularEXP": {
+          "valueA": 10.0
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "roadside_litter.dds"
+        }
+      },
+      "preview": {
+        "kind": "foliage",
+        "roughness": 0.98
+      }
+    },
+    "roadside_concrete": {
+      "shaderName": "ksPerPixel",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.6
+        },
+        "ksSpecular": {
+          "valueA": 0.03
+        },
+        "ksSpecularEXP": {
+          "valueA": 10.0
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "roadside_concrete.dds"
+        }
+      },
+      "preview": {
+        "kind": "sign",
+        "roughness": 0.95
+      }
     }
   },
   "textures": {
@@ -1714,7 +1772,7 @@
       "mips": 12,
       "bytes": 2796344,
       "gpu_bytes": 2796216,
-      "sha256": "ae5933365165c7c9653f430d98c4e176b1522baac6f78a708ad279df1cb5fb0b",
+      "sha256": "38b8cb121084322d33c9ae86ebb12c5f16c21358cc1b8ab57da07fc8eed17dfe",
       "file": "textures/v2/terrain_macro.dds"
     },
     "terrain_mask.dds": {
@@ -1746,6 +1804,26 @@
       "gpu_bytes": 699064,
       "sha256": "35cfd569c9b5005f0d5640c6c50650aa4877d65e2f2d843403ff85fbadae260b",
       "file": "textures/v2/roadside_signs.dds"
+    },
+    "roadside_litter.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT5",
+      "mips": 11,
+      "bytes": 1398256,
+      "gpu_bytes": 1398128,
+      "sha256": "f96e32a58d0df6e5df20f3f4140a4ee42cad9017b2fa2f2b62a666e63dfad22b",
+      "file": "textures/v2/roadside_litter.dds"
+    },
+    "roadside_concrete.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT1",
+      "mips": 11,
+      "bytes": 699192,
+      "gpu_bytes": 699064,
+      "sha256": "bfc1277a537dafa4f8c63fe03634672b48b3bc8eaaa6ac4b1b1b297de651dc3f",
+      "file": "textures/v2/roadside_concrete.dds"
     }
   },
   "junction_arrows": [
@@ -1765,19 +1843,19 @@
       "material": "asphalt_junction_2"
     }
   ],
-  "dds_gpu_bytes": 94373272,
-  "geometry_sha256_before_and_after": "66386ba6e5a15e894a7f229a95d5be9a459176f441434be5140027efc6e4ee15",
-  "kn5_bytes": 182419447,
-  "kn5_sha256": "a380f06e7dd6cb1856b7d020af628f10c47c3aae072d671de84134426a00d0da",
-  "export_seconds": 25.99959342099828,
+  "dds_gpu_bytes": 96470464,
+  "geometry_sha256_before_and_after": "2cccc85ba9459638354400429eb33d40a63647d62f4b60db3c8c1baff6d45559",
+  "kn5_bytes": 189724615,
+  "kn5_sha256": "fb1e21f779b09ab154d56ab598c5db39408d2f112675a064b462a474e042330c",
+  "export_seconds": 28.78485132700007,
   "warnings": [
     "Unknown logical object 'AC_AB_FINISH_L' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it.",
     "Unknown logical object 'AC_AB_FINISH_R' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it.",
     "Unknown logical object 'AC_AB_START_L' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it.",
     "Unknown logical object 'AC_AB_START_R' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it."
   ],
-  "embedded_texture_count": 47,
-  "texture_gpu_bytes": 96470424,
+  "embedded_texture_count": 49,
+  "texture_gpu_bytes": 98567616,
   "embedded_textures": {
     "terrain_mountain_mask.dds": {
       "width": 2048,
@@ -2040,6 +2118,15 @@
       "gpu_bytes": 699064,
       "sha256": "04b4336f72c4ae8b0255e1e456c34c080a904de2d99c1dbac69a7906df6027b9"
     },
+    "roadside_concrete.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT1",
+      "mips": 11,
+      "bytes": 699192,
+      "gpu_bytes": 699064,
+      "sha256": "bfc1277a537dafa4f8c63fe03634672b48b3bc8eaaa6ac4b1b1b297de651dc3f"
+    },
     "roadside_signs.dds": {
       "width": 1024,
       "height": 1024,
@@ -2112,6 +2199,15 @@
       "gpu_bytes": 699064,
       "sha256": "bf8d2ab2a4d8974228a6eb0c2104031be4b9cc50338c0dc77c2e2bdbf72b65f7"
     },
+    "roadside_litter.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT5",
+      "mips": 11,
+      "bytes": 1398256,
+      "gpu_bytes": 1398128,
+      "sha256": "f96e32a58d0df6e5df20f3f4140a4ee42cad9017b2fa2f2b62a666e63dfad22b"
+    },
     "terrain_macro.dds": {
       "width": 2048,
       "height": 2048,
@@ -2119,7 +2215,7 @@
       "mips": 12,
       "bytes": 2796344,
       "gpu_bytes": 2796216,
-      "sha256": "ae5933365165c7c9653f430d98c4e176b1522baac6f78a708ad279df1cb5fb0b"
+      "sha256": "38b8cb121084322d33c9ae86ebb12c5f16c21358cc1b8ab57da07fc8eed17dfe"
     },
     "terrain_mask.dds": {
       "width": 2048,
@@ -2218,6 +2314,8 @@
     "marker_red",
     "metal",
     "plaster",
+    "roadside_concrete",
+    "roadside_litter",
     "roadside_signs",
     "rock",
     "sand",

@@ -1337,6 +1337,56 @@
           "textureName": "roadside_signs.dds"
         }
       }
+    },
+    "roadside_litter": {
+      "shaderName": "ksPerPixelAT",
+      "alphaBlendMode": "AlphaToCoverage",
+      "alphaTested": true,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.6
+        },
+        "ksSpecular": {
+          "valueA": 0.01
+        },
+        "ksSpecularEXP": {
+          "valueA": 10.0
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "roadside_litter.dds"
+        }
+      }
+    },
+    "roadside_concrete": {
+      "shaderName": "ksPerPixel",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.6
+        },
+        "ksSpecular": {
+          "valueA": 0.03
+        },
+        "ksSpecularEXP": {
+          "valueA": 10.0
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "roadside_concrete.dds"
+        }
+      }
     }
   },
   "nodes": {
@@ -4131,6 +4181,11 @@
       "lodIn": 0,
       "lodOut": 1400,
       "castShadows": true
+    },
+    "DETAIL_*_roadside_litter": {
+      "lodIn": 0,
+      "lodOut": 1400,
+      "castShadows": false
     }
   }
 }

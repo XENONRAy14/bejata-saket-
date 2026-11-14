@@ -35,9 +35,9 @@ def generate(root=ROOT):
         if not values or not set(values)<=names:raise ValueError('Unknown/empty CSP material group')
         return ', '.join(values)
     groups=dict(grass=selected(roles['terrain']),road=selected(roles['road']),
-        occluders=selected(roles['road']+['kerb','gravel','rock','sand','plaster','metal']),
-        soaking=selected(roles['road']+['kerb','gravel','plaster']),smooth=selected(['metal']+[n for n in ('roadside_signs','marker_red') if n in names]),
-        rough=selected(roles['terrain']+['gravel','rock','sand','bark']+[n for n in names if n in ('maquis','olive_foliage','pine_foliage') or n.startswith(('veg_canopy','veg_impostor'))]),
+        occluders=selected(roles['road']+['kerb','gravel','rock','sand','plaster','metal']+[n for n in ('roadside_litter','roadside_concrete') if n in names]),
+        soaking=selected(roles['road']+['kerb','gravel','plaster']+(['roadside_concrete'] if 'roadside_concrete' in names else [])),smooth=selected(['metal']+[n for n in ('roadside_signs','marker_red') if n in names]),
+        rough=selected(roles['terrain']+['gravel','rock','sand','bark']+[n for n in names if n in ('maquis','olive_foliage','pine_foliage','roadside_litter') or n.startswith(('veg_canopy','veg_impostor'))]),
         water=selected(['water']))
     text=Template((root/'scripts/ext_config.ini.template').read_text()).substitute(groups)
     tree_info=root/'data/treefx_info.json'
