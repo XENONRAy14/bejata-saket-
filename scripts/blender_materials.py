@@ -47,6 +47,9 @@ def material_nodes(mat, spec):
         node.assettoCorsa.shaderInputName = slot
         node.show_texture = True
         textures[slot] = node
+    if spec['preview']['kind']=='sign':
+        links.new(textures['txDiffuse'].outputs['Color'],shader.inputs['Base Color'])
+        return
     if spec['preview']['kind']=='foliage':
         links.new(textures['txDiffuse'].outputs['Color'],shader.inputs['Base Color'])
         clip=nodes.new('ShaderNodeMath');clip.operation='GREATER_THAN';clip.inputs[1].default_value=.3
@@ -105,10 +108,11 @@ def apply(info):
         if obj.type!='MESH':continue
         if obj.name.startswith('1ROAD_'):
             chunk=int(obj.name.split('_')[1]);variant=chunk%3
-            obj.data.materials.clear();obj.data.materials.append(bpy.data.materials['asphalt' if variant==0 else f'asphalt_v{variant}'])
+            material=next((j['material'] for j in info.get('junction_arrows',[]) if j['chunk']==chunk),'asphalt' if variant==0 else f'asphalt_v{variant}')
+            obj.data.materials.clear();obj.data.materials.append(bpy.data.materials[material])
             uv=obj.data.uv_layers.active
             previous=float(obj.data.get('road_uv_period_m',7))
-            period=specs['asphalt']['preview']['period_m']
+            period=specs[material]['preview']['period_m']
             for loop in uv.data:loop.uv.y *= previous/period
             obj.data['road_uv_period_m']=period
         else:
@@ -118,7 +122,7 @@ def apply(info):
                 mat=obj.data.materials[poly.material_index]
                 if mat.name not in specs:continue
                 spec=specs[mat.name]
-                if spec['preview']['kind']=='foliage':continue
+                if spec['preview']['kind'] in ('foliage','sign'):continue
                 scale=spec['preview'].get('tile_m',spec['preview'].get('period_m',1))
                 normal=np.abs(poly.normal)
                 for index in poly.loop_indices:

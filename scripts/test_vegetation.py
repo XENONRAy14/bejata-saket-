@@ -11,6 +11,27 @@ from treefx import checksum,mesh_blob,read_mesh,vector_ac
 
 
 class FoliageTests(unittest.TestCase):
+    def test_twig_extraction_removes_opaque_uv_gutters(self):
+        from PIL import Image,ImageDraw
+        from foliage import extract_twig
+        source=Image.new('RGBA',(1024,1024));draw=ImageDraw.Draw(source)
+        draw.rectangle((0,0,25,474),fill=(0,0,0,255));draw.ellipse((60,70,220,440),fill=(55,95,48,255))
+        result=np.asarray(extract_twig(source))
+        self.assertEqual(result[100,0,3],0);self.assertEqual(result[200,140,3],255)
+        self.assertEqual(np.asarray(extract_twig(Image.new('RGBA',(1024,1024))))[:,:,3].max(),0)
+    def test_photographic_twig_input_and_soft_edges(self):
+        from PIL import Image,ImageDraw
+        twig=Image.new('RGBA',(1024,1024));ImageDraw.Draw(twig).ellipse((60,70,220,440),fill=(55,95,48,255))
+        pixels=atlas_pixels(256,twig=twig)
+        self.assertGreater(pixels[:128,:64,3].max(),200)
+        self.assertTrue(((pixels[:,:,3]>0)&(pixels[:,:,3]<255)).any())
+    def test_branched_treefx_models_keep_variants(self):
+        for kind in range(4):
+            for variant in range(3):
+                small=prototype(kind,variant,quality=True)
+                if kind<3:self.assertGreater(len(small['bark'].faces),200)
+                self.assertIn('bark',small)
+                for mesh in small.values():self.assertTrue(np.isfinite(mesh.vertices).all())
     def test_treefx_wire_round_trip_and_corruption(self):
         self.assertEqual(checksum(b''),0x02cc5d05)
         for kind in range(7):

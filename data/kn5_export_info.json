@@ -1,20 +1,20 @@
 {
   "file": "out/bejaia_saket/bejaia_saket.kn5",
-  "bytes": 141232395,
-  "seconds": 22.694682917001046,
-  "sha256": "1fc772c8d45a46d7482929d29635ab4f1bdb10d4805c2e4764b65b2cdf639904",
+  "bytes": 182419447,
+  "seconds": 25.99959342099828,
+  "sha256": "a380f06e7dd6cb1856b7d020af628f10c47c3aae072d671de84134426a00d0da",
   "warnings": [
     "Unknown logical object 'AC_AB_FINISH_L' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it.",
     "Unknown logical object 'AC_AB_FINISH_R' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it.",
     "Unknown logical object 'AC_AB_START_L' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it.",
     "Unknown logical object 'AC_AB_START_R' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it."
   ],
-  "mesh_objects": 1284,
-  "export_meshes": 1284,
+  "mesh_objects": 1569,
+  "export_meshes": 1569,
   "vertex_limit_splits": 0,
   "max_exported_vertices": 10523,
-  "triangles": 958588,
-  "materials": 14,
-  "textures": 40,
+  "triangles": 1074016,
+  "materials": 18,
+  "textures": 47,
   "material_recipe": "data/materials_info.json"
 }

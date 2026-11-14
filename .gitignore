@@ -21,4 +21,5 @@ out/preview/v2_materials/*.blend
 out/preview/csp_material_fixes/*.blend
 data/landscape.npz
 data/vegetation.npz
+data/roadside.npz
 out/bejaia_saket/extension/trees/

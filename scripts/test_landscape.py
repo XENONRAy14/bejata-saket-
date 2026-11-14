@@ -45,7 +45,7 @@ class LandscapeTests(unittest.TestCase):
             root=Path(folder);(root/'data').mkdir()
             beach=np.array([[-2,-2,5],[2,-2,5],[0,2,5]])
             points=np.array([[0,0],[10,0]])
-            for faces,expected in ((np.array([[0,1,2]]),[4.9,0]),(np.empty((0,3),int),[0,0])):
+            for faces,expected in ((np.array([[0,1,2]]),[4.985,0]),(np.empty((0,3),int),[0,0])):
                 np.savez(root/'data/decor_plan.npz',beach=beach,beach_faces=faces)
                 with patch('landscape.ROOT',root):
                     z=height_field(points,{'xy':np.array([[0,0]])},FlatDEM(),box(-100,-100,100,100),LineString([[-100,-100],[-100,100]]),np.array([[[-100,-100,0],[100,-100,0]]]))

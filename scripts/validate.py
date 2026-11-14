@@ -77,7 +77,7 @@ def validate(folder):
                 require(match[1] in keys, f"undefined surface {match[1]} for {mesh['name']}")
                 physical.append(mesh)
             else:
-                require(mesh['name'].startswith(('DECOR_','LAND_')), f"invalid physical/visual mesh name {mesh['name']}")
+                require(mesh['name'].startswith(('DECOR_','LAND_','DETAIL_')), f"invalid physical/visual mesh name {mesh['name']}")
         require(physical, 'no physical meshes')
         return 'physical keys '+','.join(sorted(keys))
     check('mesh_names_and_surfaces', surfaces)
@@ -232,7 +232,7 @@ def validate(folder):
         xy=vertices[:,[0,2]].copy();xy[:,1]*=-1
         distance,edge_z=edge_height(xy,segments);near=distance<1.5
         clearance=edge_z-vertices[:,1]
-        require(near.any() and clearance[near].min()>.04,f'landscape above ribbon join: {clearance[near].min() if near.any() else "none"}')
+        require(near.any() and clearance[near].min()>.008,f'landscape above ribbon join: {clearance[near].min() if near.any() else "none"}')
         return f'{len(all_tri)} triangles; physical/visual meshes={len(land)-len(visual)}/{len(visual)}; road overlap={overlap:.6f} m2; join clearance min={clearance[near].min():.3f} m'
     check('landscape_geometry',landscape)
     def vegetation():
@@ -290,6 +290,22 @@ def validate(folder):
             require(np.max(abs(coverage[:7]-coverage[0]))<.13,'foliage alpha coverage lost in mips')
         return f'{len(lod0)} LOD0 / {len(lod1)} LOD1 meshes; six 1K BC3 atlases; alpha coverage verified'
     check('vegetation',vegetation)
+    def roadside():
+        detail=[n for n in meshes if n['name'].startswith('DETAIL_')]
+        if not detail:return 'not built (optional roadside stage)'
+        require(not any(n['name'].startswith('1') for n in detail),'roadside must be visual-only')
+        faces=np.concatenate([n['positions'][n['indices']] for n in detail])
+        road=shapely.union_all(shapely.polygons(triangles[:,:,[0,2]]))
+        require(not shapely.intersects(road.buffer(1),shapely.polygons(faces[:,:,[0,2]])).any(),'roadside inside 1m road-edge clearance')
+        require(all((n['lod_in'],n['lod_out'])==(0,1400) for n in detail),'wrong roadside LOD range')
+        require(all(n['castShadows'] for n in detail),'roadside shadow casting disabled')
+        require(all(n['name'].startswith('DETAIL_') for n in detail),'physical roadside name')
+        signs=[m for m in parsed['materials'] if m['name']=='roadside_signs']
+        require(len(signs)==1 and signs[0]['shader']=='ksPerPixel','missing procedural sign material')
+        info=parsed['texture_info'].get('roadside_signs.dds',{})
+        require((info.get('width'),info.get('height'),info.get('mips'),info.get('format'))==(1024,1024,11,'DXT1'),'invalid procedural sign atlas')
+        return f'{len(detail)} visual meshes / {sum(n["triangles"] for n in detail)} triangles; road clearance >=1m; 1K procedural signs'
+    check('roadside',roadside)
     def map_image():
         ini = configparser.ConfigParser();ini.read(folder/'data/map.ini');params=ini['PARAMETERS']
         with Image.open(folder/'map.png') as im:

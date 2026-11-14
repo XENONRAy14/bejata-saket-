@@ -63,6 +63,26 @@ def main():
         direction=data['xy'][nearest]-point[:2];direction/=np.linalg.norm(direction)
         origin=np.r_[point[:2]+direction*10,point[2]+2.2]
         views.append(('trees_closeup',origin,point+np.array([0,0,SIZES[int(plant[0])][1]*plant[6]*.55])))
+        if os.environ.get('BS_ROADSIDE_PREVIEW'):
+            heroes=plants[(plants[:,0]<3)&(plants[:,6]>1.3)]
+            if not len(heroes):heroes=plants[plants[:,0]<3]
+            hero=heroes[len(heroes)//2];point=hero[2:5];nearest=np.argmin(np.linalg.norm(data['xy']-point[:2],axis=1))
+            inward=data['xy'][nearest]-point[:2];inward/=np.linalg.norm(inward)
+            views.append(('hero_tree',point+np.r_[inward*18,3.0],point+[0,0,SIZES[int(hero[0])][1]*hero[6]*.55]))
+            i=max(0,nearest-12);j=min(len(data['s'])-1,nearest+16)
+            views.append(('low_sun',[*data['xy'][i],data['z'][i]+1.6],[*data['xy'][j],data['z'][j]+1.6]))
+            shadow_direction=np.r_[inward*np.cos(np.radians(12)),-np.sin(np.radians(12))]
+    if os.environ.get('BS_ROADSIDE_PREVIEW'):
+        info=json.loads((ROOT/'data/roadside_info.json').read_text())
+        wall=min(info['walls'],key=lambda w:abs(w['chainage_m']-data['s'][-1]*.4))
+        point=np.asarray(wall['center']);tangent=np.asarray(wall['tangent'])
+        nearest=np.argmin(np.linalg.norm(data['xy']-point[:2],axis=1));inward=data['xy'][nearest]-point[:2];inward/=np.linalg.norm(inward)
+        origin=point+np.r_[inward*5-tangent*8,2.0]
+        views.append(('wall_closeup',origin,point+[0,0,.7]))
+        dangerous=np.argwhere(data['guard'])
+        side,index=dangerous[len(dangerous)//2];point=data['sides'][side,index,2];tangent=data['tangent'][index]
+        inward=data['xy'][index]-point[:2];inward/=np.linalg.norm(inward)
+        views.append(('guardrail_closeup',point+np.r_[inward*2-tangent*7,1.6],point+np.r_[tangent*12,.5]))
     if terrain:
         midpoint=(data['xy'].min(0)+data['xy'].max(0))/2
         views.insert(0,('top',[*midpoint,45000],[*midpoint,0]))
@@ -72,10 +92,19 @@ def main():
             nearby=landscape[np.linalg.norm(landscape[:,:2]-xy,axis=1)<1000,2]
             elevation=float(nearby.max()+500) if len(nearby) else 1200
             views.append(('elevated_'+name,[*xy,elevation],[*data['xy'][i],data['z'][i]]))
+    views.sort(key=lambda view:view[0]=='low_sun')
     for name,origin,target in views:
         if selected and name not in selected:continue
         view=camera('__COMPARISON_'+name,origin,target,32000 if name=='top' else None)
         if terrain:view.data.clip_end=100000
+        if name=='low_sun':
+            from mathutils import Vector
+            for light in bpy.data.objects:
+                if light.type=='LIGHT' and light.data.type=='SUN':
+                    light.rotation_euler=Vector(shadow_direction).to_track_quat('-Z','Y').to_euler();light.data.energy=3
+            if scene.world and scene.world.use_nodes:
+                for node in scene.world.node_tree.nodes:
+                    if node.type=='BACKGROUND':node.inputs['Strength'].default_value=.18
         scene.render.filepath=str(output/(name+'.png'))
         bpy.ops.render.render(write_still=True)
     print(f'COMPARISON_RENDER_OK side={label} views={len(selected) if selected else len(views)} engine=CYCLES device=CPU samples=16 denoising=True')

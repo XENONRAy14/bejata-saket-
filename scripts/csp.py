@@ -36,7 +36,7 @@ def generate(root=ROOT):
         return ', '.join(values)
     groups=dict(grass=selected(roles['terrain']),road=selected(roles['road']),
         occluders=selected(roles['road']+['kerb','gravel','rock','sand','plaster','metal']),
-        soaking=selected(roles['road']+['kerb','gravel','plaster']),smooth=selected(['metal']),
+        soaking=selected(roles['road']+['kerb','gravel','plaster']),smooth=selected(['metal']+[n for n in ('roadside_signs','marker_red') if n in names]),
         rough=selected(roles['terrain']+['gravel','rock','sand','bark']+[n for n in names if n in ('maquis','olive_foliage','pine_foliage') or n.startswith(('veg_canopy','veg_impostor'))]),
         water=selected(['water']))
     text=Template((root/'scripts/ext_config.ini.template').read_text()).substitute(groups)

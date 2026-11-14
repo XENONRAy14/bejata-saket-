@@ -37,19 +37,19 @@ def blender_triangles(node):
     return p
 
 
-def radius_and_cost():
+def radius_and_cost(quality=False):
     radii=np.zeros((7,3));cost=np.zeros((7,3),int)
     for kind in range(7):
         for variant in range(3):
             for lod in (0,1):
-                groups=prototype(kind,variant,lod)
+                groups=prototype(kind,variant,lod,quality=quality)
                 cost[kind,variant]+=sum(len(m.faces) for m in groups.values())
                 for mesh in groups.values():
                     if mesh.vertices:radii[kind,variant]=max(radii[kind,variant],np.linalg.norm(np.asarray(mesh.vertices)[:,:2],axis=1).max())
     return radii,cost
 
 
-def generate(root=ROOT):
+def generate(root=ROOT,quality=True):
     root=Path(root)
     parsed=inspect_kn5(root/'out/bejaia_saket/bejaia_saket.kn5',geometry='all')
     meshes=[n for n in parsed['nodes'] if n['kind']==2]
@@ -61,13 +61,24 @@ def generate(root=ROOT):
     exclusion=shapely.union_all([sea,beach]).buffer(7);shapely.prepare(exclusion)
     data=np.load(root/'data/centerline.npz');plan=np.load(root/'data/decor_plan.npz');houses=plan['placements'][plan['placements'][:,0]==5,2:4]
     road_index=cKDTree(data['xy']);buildings=cKDTree(houses)
-    rng=np.random.default_rng(SEED);count=1600
+    rng=np.random.default_rng(SEED);count=1200 if quality else 1600
     indices=rng.integers(0,len(data['xy']),count)
     side=np.where(rng.random(count)<.74,1,-1)
-    centers=data['xy'][indices]+data['normal'][indices]*side[:,None]*rng.uniform(15,260,count)[:,None]
-    centers=np.repeat(centers,14,axis=0);spread=np.repeat(rng.uniform(8,30,count),14)
+    centers=data['xy'][indices]+data['normal'][indices]*side[:,None]*rng.uniform(12,70 if quality else 260,count)[:,None]
+    centers=np.repeat(centers,14,axis=0);spread=np.repeat(rng.uniform(5,16 if quality else 30,count),14)
     xy=centers+rng.normal(size=centers.shape)*spread[:,None]
-    distance,nearest=road_index.query(xy);keep=(distance<300)&(rng.random(len(xy))<np.clip((300-distance)/90,0,1))
+    if quality:
+        row_ids=rng.choice(np.flatnonzero((data['s']<2600)|(data['s']>22500)),70)
+        rows=data['xy'][row_ids,None,:]+data['normal'][row_ids,None,:]*rng.uniform(16,45,(len(row_ids),1,1))+data['tangent'][row_ids,None,:]*np.arange(-12,13,6)[None,:,None]
+        belt_ids=np.searchsorted(data['s'],np.arange(30,data['s'][-1]-30,10))
+        higher=np.argmax(data['sides'][:,belt_ids,-1,2],axis=0)
+        rise=data['sides'][higher,belt_ids,-1,2]-data['z'][belt_ids]
+        belt_ids=belt_ids[rise>1];higher=higher[rise>1]
+        outward=data['sides'][higher,belt_ids,2,:2]-data['xy'][belt_ids]
+        outward/=np.linalg.norm(outward,axis=1)[:,None]
+        belt=data['xy'][belt_ids]+outward*(data['width'][belt_ids]/2+7)[:,None]
+        xy=np.vstack([belt,rows.reshape(-1,2),xy])
+    distance,nearest=road_index.query(xy);keep=(distance<(83 if quality else 300))&(rng.random(len(xy))<np.clip(((90 if quality else 300)-distance)/(20 if quality else 90),0,1))
     xy=xy[keep];nearest=nearest[keep];distance=distance[keep]
     heights,normals=terrain.sample(xy);slope=np.degrees(np.arccos(np.clip(normals[:,2],0,1)))
     keep=np.isfinite(heights)&(heights>.4)&(slope<=35)&~shapely.covers(exclusion,shapely.points(xy))
@@ -76,22 +87,27 @@ def generate(root=ROOT):
     coast=shapely.STRtree(shapely.get_parts(sea.boundary))
     _,coast_distance=coast.query_nearest(shapely.points(xy),return_distance=True,all_matches=False)
     building_distance=buildings.query(xy)[0]
-    radii,cost=radius_and_cost();plants=[];grid={};total_cost=0
+    radii,cost=radius_and_cost(quality=quality);plants=[];grid={};total_cost=0
+    if quality:cost[6]=0
     legacy=lambda n:n['name'].startswith('DECOR_') and n['name'].endswith(('_pine_foliage','_olive_foliage','_maquis','_bark'))
     baseline=sum(n['triangles'] for n in meshes if not n['name'].startswith('DECOR_VEG_') and not legacy(n))
     # Retained pole trunks and building joinery are rebuilt separately from old bark batches.
-    reserve=6000;budget=1590000-baseline-reserve
+    reserve=130000;budget=1590000-baseline-reserve
     for i,point in enumerate(xy):
         s=data['s'][nearest[i]];near_building=building_distance[i]<50
         mountain=np.dot(point-data['xy'][nearest[i]],data['normal'][nearest[i]])>0
         r=rng.random()
-        if r<.12:kind=6
+        if quality and mountain and edge_distance[i]<18 and r<.8:kind=4
+        elif r<.12:kind=6
         elif coast_distance[i]<65 and r<.42:kind=5
         elif near_building and r<.47:kind=3
         elif (s<2400 or s>22600 or not mountain) and slope[i]<21 and r<.69:kind=2
-        elif r<.42:kind=4
+        elif r<(.66 if quality else .42):kind=4
         else:kind=0 if rng.random()<.7 else 1
-        variant=int(rng.integers(3));scale=float(rng.uniform(.76,1.2));radius=radii[kind,variant]*scale
+        variant=int(rng.integers(3));scale=float(rng.uniform(.82,1.18))
+        if quality and kind<3 and edge_distance[i]<22 and rng.random()<.18:variant=2;scale=1.38
+        radius=radii[kind,variant]*scale
+        if quality and edge_distance[i]>80:continue
         if edge_distance[i]<radius+4 or building_distance[i]<radius+5:continue
         cell=tuple(np.floor(point/5).astype(int));valid=True
         for dx in (-1,0,1):
@@ -103,7 +119,7 @@ def generate(root=ROOT):
         tint=int(rng.choice(3,p=(.25,.18,.57) if kind==2 else (.56,.32,.12)))
         entry=[kind,variant,*point,float(heights[i]),float(rng.uniform(0,2*np.pi)),scale,tint,int(s//400),*normals[i],float(edge_distance[i]),float(slope[i])]
         plants.append(entry);grid.setdefault(cell,[]).append(len(plants)-1);total_cost+=cost[kind,variant]
-        if len(plants)>=5000:break
+        if len(plants)>=(4000 if quality else 5000):break
     if not plants:raise ValueError('No valid vegetation placements')
     plants=np.asarray(plants)
     np.savez_compressed(root/'data/vegetation.npz',plants=plants)
@@ -117,7 +133,7 @@ def generate(root=ROOT):
 
 
 def build(blender,kn5_fallback=False):
-    generate_textures();generate()
+    generate_textures();generate(quality=not kn5_fallback)
     from treefx import generate as external
     if not kn5_fallback:external()
     else:

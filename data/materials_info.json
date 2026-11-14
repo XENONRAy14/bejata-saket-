@@ -726,6 +726,330 @@
         "roughness": 0.84
       }
     },
+    "asphalt_junction_0": {
+      "shaderName": "ksMultilayer_fresnel_nm4",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.6
+        },
+        "ksSpecularEXP": {
+          "valueA": 28.0
+        },
+        "fresnelC": {
+          "valueA": 0.012
+        },
+        "fresnelEXP": {
+          "valueA": 5.0
+        },
+        "fresnelMaxLevel": {
+          "valueA": 0.16
+        },
+        "tarmacSpecularMultiplier": {
+          "valueA": 0.16
+        },
+        "magicMult": {
+          "valueA": 1.0
+        },
+        "multTilingFix": {
+          "valueA": 0.0
+        },
+        "tilingFixR": {
+          "valueA": 0.0
+        },
+        "tilingFixG": {
+          "valueA": 0.0
+        },
+        "tilingFixB": {
+          "valueA": 0.0
+        },
+        "tilingFixA": {
+          "valueA": 0.0
+        },
+        "extColoredReflection": {
+          "valueA": 0.0
+        },
+        "extColoredReflectionNorm": {
+          "valueA": 0.0
+        },
+        "extLocalAO": {
+          "valueA": 0.0
+        },
+        "detailNMMult": {
+          "valueA": 1.0
+        },
+        "multR": {
+          "valueA": 0.5714285714285714
+        },
+        "multG": {
+          "valueA": 0.5714285714285714
+        },
+        "multB": {
+          "valueA": 0.5714285714285714
+        },
+        "multA": {
+          "valueA": 0.5714285714285714
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "asphalt_junction_0_macro.dds"
+        },
+        "txMask": {
+          "textureName": "asphalt_junction_0_mask.dds"
+        },
+        "txDetailR": {
+          "textureName": "asphalt_diffuse.dds"
+        },
+        "txDetailG": {
+          "textureName": "repair_diffuse.dds"
+        },
+        "txDetailB": {
+          "textureName": "gravel_diffuse.dds"
+        },
+        "txDetailA": {
+          "textureName": "white.dds"
+        },
+        "txNormalR": {
+          "textureName": "asphalt_normal.dds"
+        },
+        "txNormalG": {
+          "textureName": "repair_normal.dds"
+        },
+        "txNormalB": {
+          "textureName": "gravel_normal.dds"
+        },
+        "txNormalA": {
+          "textureName": "flat_normal.dds"
+        }
+      },
+      "preview": {
+        "kind": "road",
+        "period_m": 400,
+        "roughness": 0.84
+      }
+    },
+    "asphalt_junction_1": {
+      "shaderName": "ksMultilayer_fresnel_nm4",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.6
+        },
+        "ksSpecularEXP": {
+          "valueA": 28.0
+        },
+        "fresnelC": {
+          "valueA": 0.012
+        },
+        "fresnelEXP": {
+          "valueA": 5.0
+        },
+        "fresnelMaxLevel": {
+          "valueA": 0.16
+        },
+        "tarmacSpecularMultiplier": {
+          "valueA": 0.16
+        },
+        "magicMult": {
+          "valueA": 1.0
+        },
+        "multTilingFix": {
+          "valueA": 0.0
+        },
+        "tilingFixR": {
+          "valueA": 0.0
+        },
+        "tilingFixG": {
+          "valueA": 0.0
+        },
+        "tilingFixB": {
+          "valueA": 0.0
+        },
+        "tilingFixA": {
+          "valueA": 0.0
+        },
+        "extColoredReflection": {
+          "valueA": 0.0
+        },
+        "extColoredReflectionNorm": {
+          "valueA": 0.0
+        },
+        "extLocalAO": {
+          "valueA": 0.0
+        },
+        "detailNMMult": {
+          "valueA": 1.0
+        },
+        "multR": {
+          "valueA": 0.5714285714285714
+        },
+        "multG": {
+          "valueA": 0.5714285714285714
+        },
+        "multB": {
+          "valueA": 0.5714285714285714
+        },
+        "multA": {
+          "valueA": 0.5714285714285714
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "asphalt_junction_1_macro.dds"
+        },
+        "txMask": {
+          "textureName": "asphalt_junction_1_mask.dds"
+        },
+        "txDetailR": {
+          "textureName": "asphalt_diffuse.dds"
+        },
+        "txDetailG": {
+          "textureName": "repair_diffuse.dds"
+        },
+        "txDetailB": {
+          "textureName": "gravel_diffuse.dds"
+        },
+        "txDetailA": {
+          "textureName": "white.dds"
+        },
+        "txNormalR": {
+          "textureName": "asphalt_normal.dds"
+        },
+        "txNormalG": {
+          "textureName": "repair_normal.dds"
+        },
+        "txNormalB": {
+          "textureName": "gravel_normal.dds"
+        },
+        "txNormalA": {
+          "textureName": "flat_normal.dds"
+        }
+      },
+      "preview": {
+        "kind": "road",
+        "period_m": 400,
+        "roughness": 0.84
+      }
+    },
+    "asphalt_junction_2": {
+      "shaderName": "ksMultilayer_fresnel_nm4",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.6
+        },
+        "ksSpecularEXP": {
+          "valueA": 28.0
+        },
+        "fresnelC": {
+          "valueA": 0.012
+        },
+        "fresnelEXP": {
+          "valueA": 5.0
+        },
+        "fresnelMaxLevel": {
+          "valueA": 0.16
+        },
+        "tarmacSpecularMultiplier": {
+          "valueA": 0.16
+        },
+        "magicMult": {
+          "valueA": 1.0
+        },
+        "multTilingFix": {
+          "valueA": 0.0
+        },
+        "tilingFixR": {
+          "valueA": 0.0
+        },
+        "tilingFixG": {
+          "valueA": 0.0
+        },
+        "tilingFixB": {
+          "valueA": 0.0
+        },
+        "tilingFixA": {
+          "valueA": 0.0
+        },
+        "extColoredReflection": {
+          "valueA": 0.0
+        },
+        "extColoredReflectionNorm": {
+          "valueA": 0.0
+        },
+        "extLocalAO": {
+          "valueA": 0.0
+        },
+        "detailNMMult": {
+          "valueA": 1.0
+        },
+        "multR": {
+          "valueA": 0.5714285714285714
+        },
+        "multG": {
+          "valueA": 0.5714285714285714
+        },
+        "multB": {
+          "valueA": 0.5714285714285714
+        },
+        "multA": {
+          "valueA": 0.5714285714285714
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "asphalt_junction_2_macro.dds"
+        },
+        "txMask": {
+          "textureName": "asphalt_junction_2_mask.dds"
+        },
+        "txDetailR": {
+          "textureName": "asphalt_diffuse.dds"
+        },
+        "txDetailG": {
+          "textureName": "repair_diffuse.dds"
+        },
+        "txDetailB": {
+          "textureName": "gravel_diffuse.dds"
+        },
+        "txDetailA": {
+          "textureName": "white.dds"
+        },
+        "txNormalR": {
+          "textureName": "asphalt_normal.dds"
+        },
+        "txNormalG": {
+          "textureName": "repair_normal.dds"
+        },
+        "txNormalB": {
+          "textureName": "gravel_normal.dds"
+        },
+        "txNormalA": {
+          "textureName": "flat_normal.dds"
+        }
+      },
+      "preview": {
+        "kind": "road",
+        "period_m": 400,
+        "roughness": 0.84
+      }
+    },
     "grass": {
       "shaderName": "ksMultilayer_fresnel_nm4",
       "alphaBlendMode": "Opaque",
@@ -941,6 +1265,35 @@
         "period_m": 256,
         "roughness": 0.95
       }
+    },
+    "roadside_signs": {
+      "shaderName": "ksPerPixel",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.6
+        },
+        "ksSpecular": {
+          "valueA": 0.12
+        },
+        "ksSpecularEXP": {
+          "valueA": 24.0
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "roadside_signs.dds"
+        }
+      },
+      "preview": {
+        "kind": "sign",
+        "roughness": 0.75
+      }
     }
   },
   "textures": {
@@ -991,7 +1344,7 @@
       "mips": 11,
       "bytes": 1398256,
       "gpu_bytes": 1398128,
-      "sha256": "2c365209bdd40f7ea4070eba0c2ead9a1ccf7b1b4e04cadccb4ad5fc00340e65",
+      "sha256": "295fe1e13ee045de3065aba4dcd8c401e5f2920cf4ccd62c928b1873ef33f3ba",
       "file": "textures/v2/gravel_diffuse.dds"
     },
     "gravel_normal.dds": {
@@ -1021,7 +1374,7 @@
       "mips": 11,
       "bytes": 1398256,
       "gpu_bytes": 1398128,
-      "sha256": "cd54de90a580628aabe72c0f24c4c89fb7a0275ab334607030de6880a390c85a",
+      "sha256": "be2e7a14a2d84dca031349729eb4f6748bae13160853330ae29857b522629fa2",
       "file": "textures/v2/dirt_diffuse.dds"
     },
     "dirt_normal.dds": {
@@ -1041,7 +1394,7 @@
       "mips": 11,
       "bytes": 1398256,
       "gpu_bytes": 1398128,
-      "sha256": "b8819933a86401114832ea00c9fb816a1e354729e710f520fa8ec9ef5d6132b1",
+      "sha256": "fe54d8758f6d7adfa107af1e29a8db638762e4db6d5e3798cde0e8619c406248",
       "file": "textures/v2/grass_diffuse.dds"
     },
     "grass_normal.dds": {
@@ -1061,7 +1414,7 @@
       "mips": 11,
       "bytes": 699192,
       "gpu_bytes": 699064,
-      "sha256": "a0ff085b644f020ce94a54f3025dd1e767cbb8cc045695b75aa61c85ecbd3787",
+      "sha256": "f23ad6821d13aa8dd8c126dee18b9ecf13a6f8a51d2d0ccfd309880d41f2306d",
       "file": "textures/v2/rock_diffuse.dds"
     },
     "rock_normal.dds": {
@@ -1241,7 +1594,7 @@
       "mips": 12,
       "bytes": 2796344,
       "gpu_bytes": 2796216,
-      "sha256": "83a2264e5f09d74b5d9f75743785886f94517a5057e3fa773811111974c8308c",
+      "sha256": "dd2d76d4053f937e4409301a739b4322b739693bc0186c308285a4850fccaa06",
       "file": "textures/v2/road_0_macro.dds"
     },
     "road_0_mask.dds": {
@@ -1261,7 +1614,7 @@
       "mips": 12,
       "bytes": 2796344,
       "gpu_bytes": 2796216,
-      "sha256": "c6d4bf3a83ff029e5b29898a1b688cb1f5414c91f8063ea21bc6b039ae7e6318",
+      "sha256": "bbae8c2ca340e359b9722db558e3c9b80c49c0aefa8587a17a88e5105fdbbf07",
       "file": "textures/v2/road_1_macro.dds"
     },
     "road_1_mask.dds": {
@@ -1281,7 +1634,7 @@
       "mips": 12,
       "bytes": 2796344,
       "gpu_bytes": 2796216,
-      "sha256": "2cf59fdd8242a20663995cdea7cef633b4dfb3f17b70ff03933830d21020e773",
+      "sha256": "12d6a86775a065308bf5be01210c74d55ea886cf9b457e4086b915599ccd453e",
       "file": "textures/v2/road_2_macro.dds"
     },
     "road_2_mask.dds": {
@@ -1294,6 +1647,66 @@
       "sha256": "96b35d0248519844fab17f77241aa3feadd18f9404e9e97b6da6ea70fc9901da",
       "file": "textures/v2/road_2_mask.dds"
     },
+    "asphalt_junction_0_macro.dds": {
+      "width": 2048,
+      "height": 2048,
+      "format": "DXT1",
+      "mips": 12,
+      "bytes": 2796344,
+      "gpu_bytes": 2796216,
+      "sha256": "2eb8c8da550e8a40e93873ab461895e291282b0f063b25aa64166e810a56f22e",
+      "file": "textures/v2/asphalt_junction_0_macro.dds"
+    },
+    "asphalt_junction_0_mask.dds": {
+      "width": 2048,
+      "height": 2048,
+      "format": "DXT5",
+      "mips": 12,
+      "bytes": 5592560,
+      "gpu_bytes": 5592432,
+      "sha256": "bac32a5a9c7d8ce3938cbd20c02af1654c992fa494df4ef2e9764c88550fa9f0",
+      "file": "textures/v2/asphalt_junction_0_mask.dds"
+    },
+    "asphalt_junction_1_macro.dds": {
+      "width": 2048,
+      "height": 2048,
+      "format": "DXT1",
+      "mips": 12,
+      "bytes": 2796344,
+      "gpu_bytes": 2796216,
+      "sha256": "213446cc2164ba53c351cc96b7b924db0267d9f11e5c5a8cc4aa87aa662540ea",
+      "file": "textures/v2/asphalt_junction_1_macro.dds"
+    },
+    "asphalt_junction_1_mask.dds": {
+      "width": 2048,
+      "height": 2048,
+      "format": "DXT5",
+      "mips": 12,
+      "bytes": 5592560,
+      "gpu_bytes": 5592432,
+      "sha256": "78e36e53d45a70e2409d8a00a4f78df246581ba7238798cb62ef11d19ddfa010",
+      "file": "textures/v2/asphalt_junction_1_mask.dds"
+    },
+    "asphalt_junction_2_macro.dds": {
+      "width": 2048,
+      "height": 2048,
+      "format": "DXT1",
+      "mips": 12,
+      "bytes": 2796344,
+      "gpu_bytes": 2796216,
+      "sha256": "5948852f38595b524aa89c77c45da665d52e8d2115ec7d58c2747fe541ca8e06",
+      "file": "textures/v2/asphalt_junction_2_macro.dds"
+    },
+    "asphalt_junction_2_mask.dds": {
+      "width": 2048,
+      "height": 2048,
+      "format": "DXT5",
+      "mips": 12,
+      "bytes": 5592560,
+      "gpu_bytes": 5592432,
+      "sha256": "dfa46608df53d1355a976dcf585aadf9b3865bcc7dd74134bb0cd38010f5a9cd",
+      "file": "textures/v2/asphalt_junction_2_mask.dds"
+    },
     "terrain_macro.dds": {
       "width": 2048,
       "height": 2048,
@@ -1301,7 +1714,7 @@
       "mips": 12,
       "bytes": 2796344,
       "gpu_bytes": 2796216,
-      "sha256": "de4ed2f95d3621ee79049b8aa5966f01f495765f90270873392b20ca8103f69b",
+      "sha256": "ae5933365165c7c9653f430d98c4e176b1522baac6f78a708ad279df1cb5fb0b",
       "file": "textures/v2/terrain_macro.dds"
     },
     "terrain_mask.dds": {
@@ -1311,7 +1724,7 @@
       "mips": 12,
       "bytes": 5592560,
       "gpu_bytes": 5592432,
-      "sha256": "87c1f43f78f000d07bf985be11270463ee2520d65ac0bb91fb88f834df6c2110",
+      "sha256": "77d8a217f23c743e80cf7f4f5c7449ccd18978d604562e37f3a88d46f8bf2c6d",
       "file": "textures/v2/terrain_mask.dds"
     },
     "terrain_mountain_mask.dds": {
@@ -1321,23 +1734,50 @@
       "mips": 12,
       "bytes": 5592560,
       "gpu_bytes": 5592432,
-      "sha256": "a7a3166a07a07840ad82ca5c317d45f57bbc69e1d89834089c55d4749273b625",
+      "sha256": "e13ccb7ea7c92d3446b039e57f0cc0c0975244ce772a1eef5db9f7f0dc6e9013",
       "file": "textures/v2/terrain_mountain_mask.dds"
+    },
+    "roadside_signs.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT1",
+      "mips": 11,
+      "bytes": 699192,
+      "gpu_bytes": 699064,
+      "sha256": "35cfd569c9b5005f0d5640c6c50650aa4877d65e2f2d843403ff85fbadae260b",
+      "file": "textures/v2/roadside_signs.dds"
     }
   },
-  "dds_gpu_bytes": 68508264,
-  "geometry_sha256_before_and_after": "06ad68236235a095f7b983f84ba2af41d209949721e7ed1bb9ac14a9100ebff9",
-  "kn5_bytes": 141232395,
-  "kn5_sha256": "1fc772c8d45a46d7482929d29635ab4f1bdb10d4805c2e4764b65b2cdf639904",
-  "export_seconds": 22.694682917001046,
+  "junction_arrows": [
+    {
+      "chunk": 3,
+      "chainage_m": 1202.9065601654304,
+      "material": "asphalt_junction_0"
+    },
+    {
+      "chunk": 7,
+      "chainage_m": 3174.8523748180733,
+      "material": "asphalt_junction_1"
+    },
+    {
+      "chunk": 23,
+      "chainage_m": 9570.580461602827,
+      "material": "asphalt_junction_2"
+    }
+  ],
+  "dds_gpu_bytes": 94373272,
+  "geometry_sha256_before_and_after": "66386ba6e5a15e894a7f229a95d5be9a459176f441434be5140027efc6e4ee15",
+  "kn5_bytes": 182419447,
+  "kn5_sha256": "a380f06e7dd6cb1856b7d020af628f10c47c3aae072d671de84134426a00d0da",
+  "export_seconds": 25.99959342099828,
   "warnings": [
     "Unknown logical object 'AC_AB_FINISH_L' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it.",
     "Unknown logical object 'AC_AB_FINISH_R' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it.",
     "Unknown logical object 'AC_AB_START_L' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it.",
     "Unknown logical object 'AC_AB_START_R' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it."
   ],
-  "embedded_texture_count": 40,
-  "texture_gpu_bytes": 70605416,
+  "embedded_texture_count": 47,
+  "texture_gpu_bytes": 96470424,
   "embedded_textures": {
     "terrain_mountain_mask.dds": {
       "width": 2048,
@@ -1346,7 +1786,7 @@
       "mips": 12,
       "bytes": 5592560,
       "gpu_bytes": 5592432,
-      "sha256": "a7a3166a07a07840ad82ca5c317d45f57bbc69e1d89834089c55d4749273b625"
+      "sha256": "e13ccb7ea7c92d3446b039e57f0cc0c0975244ce772a1eef5db9f7f0dc6e9013"
     },
     "gravel_maps.dds": {
       "width": 1024,
@@ -1366,6 +1806,60 @@
       "gpu_bytes": 699064,
       "sha256": "9bce2574eafa89bef2c29897b15f458d849fca75302f610d3e0c2fb130b20113"
     },
+    "asphalt_junction_0_macro.dds": {
+      "width": 2048,
+      "height": 2048,
+      "format": "DXT1",
+      "mips": 12,
+      "bytes": 2796344,
+      "gpu_bytes": 2796216,
+      "sha256": "2eb8c8da550e8a40e93873ab461895e291282b0f063b25aa64166e810a56f22e"
+    },
+    "asphalt_junction_0_mask.dds": {
+      "width": 2048,
+      "height": 2048,
+      "format": "DXT5",
+      "mips": 12,
+      "bytes": 5592560,
+      "gpu_bytes": 5592432,
+      "sha256": "bac32a5a9c7d8ce3938cbd20c02af1654c992fa494df4ef2e9764c88550fa9f0"
+    },
+    "asphalt_junction_1_macro.dds": {
+      "width": 2048,
+      "height": 2048,
+      "format": "DXT1",
+      "mips": 12,
+      "bytes": 2796344,
+      "gpu_bytes": 2796216,
+      "sha256": "213446cc2164ba53c351cc96b7b924db0267d9f11e5c5a8cc4aa87aa662540ea"
+    },
+    "asphalt_junction_1_mask.dds": {
+      "width": 2048,
+      "height": 2048,
+      "format": "DXT5",
+      "mips": 12,
+      "bytes": 5592560,
+      "gpu_bytes": 5592432,
+      "sha256": "78e36e53d45a70e2409d8a00a4f78df246581ba7238798cb62ef11d19ddfa010"
+    },
+    "asphalt_junction_2_macro.dds": {
+      "width": 2048,
+      "height": 2048,
+      "format": "DXT1",
+      "mips": 12,
+      "bytes": 2796344,
+      "gpu_bytes": 2796216,
+      "sha256": "5948852f38595b524aa89c77c45da665d52e8d2115ec7d58c2747fe541ca8e06"
+    },
+    "asphalt_junction_2_mask.dds": {
+      "width": 2048,
+      "height": 2048,
+      "format": "DXT5",
+      "mips": 12,
+      "bytes": 5592560,
+      "gpu_bytes": 5592432,
+      "sha256": "dfa46608df53d1355a976dcf585aadf9b3865bcc7dd74134bb0cd38010f5a9cd"
+    },
     "road_1_macro.dds": {
       "width": 2048,
       "height": 2048,
@@ -1373,7 +1867,7 @@
       "mips": 12,
       "bytes": 2796344,
       "gpu_bytes": 2796216,
-      "sha256": "c6d4bf3a83ff029e5b29898a1b688cb1f5414c91f8063ea21bc6b039ae7e6318"
+      "sha256": "bbae8c2ca340e359b9722db558e3c9b80c49c0aefa8587a17a88e5105fdbbf07"
     },
     "road_1_mask.dds": {
       "width": 2048,
@@ -1391,7 +1885,7 @@
       "mips": 12,
       "bytes": 2796344,
       "gpu_bytes": 2796216,
-      "sha256": "2cf59fdd8242a20663995cdea7cef633b4dfb3f17b70ff03933830d21020e773"
+      "sha256": "12d6a86775a065308bf5be01210c74d55ea886cf9b457e4086b915599ccd453e"
     },
     "road_2_mask.dds": {
       "width": 2048,
@@ -1409,7 +1903,7 @@
       "mips": 12,
       "bytes": 2796344,
       "gpu_bytes": 2796216,
-      "sha256": "83a2264e5f09d74b5d9f75743785886f94517a5057e3fa773811111974c8308c"
+      "sha256": "dd2d76d4053f937e4409301a739b4322b739693bc0186c308285a4850fccaa06"
     },
     "road_0_mask.dds": {
       "width": 2048,
@@ -1445,7 +1939,7 @@
       "mips": 11,
       "bytes": 1398256,
       "gpu_bytes": 1398128,
-      "sha256": "2c365209bdd40f7ea4070eba0c2ead9a1ccf7b1b4e04cadccb4ad5fc00340e65"
+      "sha256": "295fe1e13ee045de3065aba4dcd8c401e5f2920cf4ccd62c928b1873ef33f3ba"
     },
     "asphalt_normal.dds": {
       "width": 1024,
@@ -1483,96 +1977,6 @@
       "gpu_bytes": 368,
       "sha256": "e32fda5b134ae20c19564684896d4b997e571e956aa22c892c647aee70ef3d8d"
     },
-    "metal_diffuse.dds": {
-      "width": 1024,
-      "height": 1024,
-      "format": "DXT1",
-      "mips": 11,
-      "bytes": 699192,
-      "gpu_bytes": 699064,
-      "sha256": "210e861f348472b7a87c831bca54d34db59ce4b8a20e50c6570d690d4b926342"
-    },
-    "metal_normal.dds": {
-      "width": 1024,
-      "height": 1024,
-      "format": "DXT5",
-      "mips": 11,
-      "bytes": 1398256,
-      "gpu_bytes": 1398128,
-      "sha256": "0b276a1d94087aa2c827a15dbe054a446da00a754ddd8101be6b65012f5441ac"
-    },
-    "metal_maps.dds": {
-      "width": 1024,
-      "height": 1024,
-      "format": "DXT1",
-      "mips": 11,
-      "bytes": 699192,
-      "gpu_bytes": 699064,
-      "sha256": "04b4336f72c4ae8b0255e1e456c34c080a904de2d99c1dbac69a7906df6027b9"
-    },
-    "marker_red.png": {
-      "width": 512,
-      "height": 512,
-      "format": "PNG",
-      "bytes": 246929,
-      "gpu_bytes": 1048576,
-      "mips": 1,
-      "sha256": "19658b82bd089a943c4c89129743019c9abdfa122c7a34a73cb1fe73b5fe04eb"
-    },
-    "bark_diffuse.dds": {
-      "width": 1024,
-      "height": 1024,
-      "format": "DXT1",
-      "mips": 11,
-      "bytes": 699192,
-      "gpu_bytes": 699064,
-      "sha256": "6997259633160941669a0ef9cdde36acd4458ad07e0a51f47f01ede499219724"
-    },
-    "bark_normal.dds": {
-      "width": 1024,
-      "height": 1024,
-      "format": "DXT5",
-      "mips": 11,
-      "bytes": 1398256,
-      "gpu_bytes": 1398128,
-      "sha256": "f21a89a68c697ece87590717cc1f26ab666c179bb52833ec795cfe498ac524b7"
-    },
-    "bark_maps.dds": {
-      "width": 1024,
-      "height": 1024,
-      "format": "DXT1",
-      "mips": 11,
-      "bytes": 699192,
-      "gpu_bytes": 699064,
-      "sha256": "64e637a163e167252b7a0450d941ca5f84a889215ae8279004e2f0436023865d"
-    },
-    "plaster_diffuse.dds": {
-      "width": 1024,
-      "height": 1024,
-      "format": "DXT1",
-      "mips": 11,
-      "bytes": 699192,
-      "gpu_bytes": 699064,
-      "sha256": "4537cc02a85c843d4ae32fff31328c9e33d0b8e5d438a24304526f081b7cd5c5"
-    },
-    "plaster_normal.dds": {
-      "width": 1024,
-      "height": 1024,
-      "format": "DXT5",
-      "mips": 11,
-      "bytes": 1398256,
-      "gpu_bytes": 1398128,
-      "sha256": "33fb35a85c819bc3117eaaac3ecbb41eb0aecfa11e3f695a458e32dcbf58c21c"
-    },
-    "plaster_maps.dds": {
-      "width": 1024,
-      "height": 1024,
-      "format": "DXT1",
-      "mips": 11,
-      "bytes": 699192,
-      "gpu_bytes": 699064,
-      "sha256": "bf8d2ab2a4d8974228a6eb0c2104031be4b9cc50338c0dc77c2e2bdbf72b65f7"
-    },
     "sand_diffuse.dds": {
       "width": 1024,
       "height": 1024,
@@ -1609,6 +2013,105 @@
       "mips": 1,
       "sha256": "4139d1694ec016e64e4d32e7222f3bd9929d86afb9b361ff02e584b878a345b3"
     },
+    "metal_diffuse.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT1",
+      "mips": 11,
+      "bytes": 699192,
+      "gpu_bytes": 699064,
+      "sha256": "210e861f348472b7a87c831bca54d34db59ce4b8a20e50c6570d690d4b926342"
+    },
+    "metal_normal.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT5",
+      "mips": 11,
+      "bytes": 1398256,
+      "gpu_bytes": 1398128,
+      "sha256": "0b276a1d94087aa2c827a15dbe054a446da00a754ddd8101be6b65012f5441ac"
+    },
+    "metal_maps.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT1",
+      "mips": 11,
+      "bytes": 699192,
+      "gpu_bytes": 699064,
+      "sha256": "04b4336f72c4ae8b0255e1e456c34c080a904de2d99c1dbac69a7906df6027b9"
+    },
+    "roadside_signs.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT1",
+      "mips": 11,
+      "bytes": 699192,
+      "gpu_bytes": 699064,
+      "sha256": "35cfd569c9b5005f0d5640c6c50650aa4877d65e2f2d843403ff85fbadae260b"
+    },
+    "bark_diffuse.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT1",
+      "mips": 11,
+      "bytes": 699192,
+      "gpu_bytes": 699064,
+      "sha256": "6997259633160941669a0ef9cdde36acd4458ad07e0a51f47f01ede499219724"
+    },
+    "bark_normal.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT5",
+      "mips": 11,
+      "bytes": 1398256,
+      "gpu_bytes": 1398128,
+      "sha256": "f21a89a68c697ece87590717cc1f26ab666c179bb52833ec795cfe498ac524b7"
+    },
+    "bark_maps.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT1",
+      "mips": 11,
+      "bytes": 699192,
+      "gpu_bytes": 699064,
+      "sha256": "64e637a163e167252b7a0450d941ca5f84a889215ae8279004e2f0436023865d"
+    },
+    "marker_red.png": {
+      "width": 512,
+      "height": 512,
+      "format": "PNG",
+      "bytes": 246929,
+      "gpu_bytes": 1048576,
+      "mips": 1,
+      "sha256": "19658b82bd089a943c4c89129743019c9abdfa122c7a34a73cb1fe73b5fe04eb"
+    },
+    "plaster_diffuse.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT1",
+      "mips": 11,
+      "bytes": 699192,
+      "gpu_bytes": 699064,
+      "sha256": "4537cc02a85c843d4ae32fff31328c9e33d0b8e5d438a24304526f081b7cd5c5"
+    },
+    "plaster_normal.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT5",
+      "mips": 11,
+      "bytes": 1398256,
+      "gpu_bytes": 1398128,
+      "sha256": "33fb35a85c819bc3117eaaac3ecbb41eb0aecfa11e3f695a458e32dcbf58c21c"
+    },
+    "plaster_maps.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT1",
+      "mips": 11,
+      "bytes": 699192,
+      "gpu_bytes": 699064,
+      "sha256": "bf8d2ab2a4d8974228a6eb0c2104031be4b9cc50338c0dc77c2e2bdbf72b65f7"
+    },
     "terrain_macro.dds": {
       "width": 2048,
       "height": 2048,
@@ -1616,7 +2119,7 @@
       "mips": 12,
       "bytes": 2796344,
       "gpu_bytes": 2796216,
-      "sha256": "de4ed2f95d3621ee79049b8aa5966f01f495765f90270873392b20ca8103f69b"
+      "sha256": "ae5933365165c7c9653f430d98c4e176b1522baac6f78a708ad279df1cb5fb0b"
     },
     "terrain_mask.dds": {
       "width": 2048,
@@ -1625,7 +2128,7 @@
       "mips": 12,
       "bytes": 5592560,
       "gpu_bytes": 5592432,
-      "sha256": "87c1f43f78f000d07bf985be11270463ee2520d65ac0bb91fb88f834df6c2110"
+      "sha256": "77d8a217f23c743e80cf7f4f5c7449ccd18978d604562e37f3a88d46f8bf2c6d"
     },
     "grass_diffuse.dds": {
       "width": 1024,
@@ -1634,7 +2137,7 @@
       "mips": 11,
       "bytes": 1398256,
       "gpu_bytes": 1398128,
-      "sha256": "b8819933a86401114832ea00c9fb816a1e354729e710f520fa8ec9ef5d6132b1"
+      "sha256": "fe54d8758f6d7adfa107af1e29a8db638762e4db6d5e3798cde0e8619c406248"
     },
     "dirt_diffuse.dds": {
       "width": 1024,
@@ -1643,7 +2146,7 @@
       "mips": 11,
       "bytes": 1398256,
       "gpu_bytes": 1398128,
-      "sha256": "cd54de90a580628aabe72c0f24c4c89fb7a0275ab334607030de6880a390c85a"
+      "sha256": "be2e7a14a2d84dca031349729eb4f6748bae13160853330ae29857b522629fa2"
     },
     "grass_normal.dds": {
       "width": 1024,
@@ -1670,7 +2173,7 @@
       "mips": 11,
       "bytes": 699192,
       "gpu_bytes": 699064,
-      "sha256": "a0ff085b644f020ce94a54f3025dd1e767cbb8cc045695b75aa61c85ecbd3787"
+      "sha256": "f23ad6821d13aa8dd8c126dee18b9ecf13a6f8a51d2d0ccfd309880d41f2306d"
     },
     "rock_normal.dds": {
       "width": 1024,
@@ -1702,6 +2205,9 @@
   },
   "kn5_materials": [
     "asphalt",
+    "asphalt_junction_0",
+    "asphalt_junction_1",
+    "asphalt_junction_2",
     "asphalt_v1",
     "asphalt_v2",
     "bark",
@@ -1712,6 +2218,7 @@
     "marker_red",
     "metal",
     "plaster",
+    "roadside_signs",
     "rock",
     "sand",
     "water"

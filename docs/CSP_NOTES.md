@@ -1,5 +1,14 @@
 # Visual upgrade research and v2 material implementation
 
+Phase 4c instance-scale check: CSP wiki `Tracks-–-Trees.md:1` explicitly describes
+hundreds of thousands of trees with instancing/LOD/billboards. A case-insensitive
+search of that page for limit/maximum/instance/thousand finds no hard track-wide
+instance cap. The density increase was subsequently cancelled for a quality-first
+80m corridor. This is documentation evidence, not a runtime performance measurement.
+Generic roadside sign boards use the already verified `ksPerPixel`/`txDiffuse`
+contract below; their exact material name is added to the existing verified
+RainFX `SMOOTH_MATERIALS` list. No new CSP section, key or shader name is introduced.
+
 ## Scope, baseline and source notation
 
 Sections 1–8 preserve the original audit/proposal. Section 9 records the applied

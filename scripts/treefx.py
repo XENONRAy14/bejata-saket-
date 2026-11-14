@@ -125,10 +125,10 @@ def generate(root=ROOT):
     plants=np.load(root/'data/vegetation.npz')['plants'];lines=[];models={};texture_folder=root/'textures/v2'
     for plant in plants:
         kind,variant=int(plant[0]),int(plant[1]);tint=int(plant[7])
-        if kind in (4,6):continue
+        if kind==6:continue
         name=f'{SPECIES[kind]}_{variant}{TINTS[tint]}.bin'
         if name not in models:
-            lods=[prototype(kind,variant,lod) for lod in (0,1)]
+            lods=[prototype(kind,variant,lod,quality=True) for lod in (0,1)]
             points=vector_ac(np.concatenate([m.vertices for parts in lods for m in parts.values() if m.vertices]))
             radius=float(np.max(abs(points[:,[0,2]])));height=float(points[:,1].max())
             config=f'[BASIC]\nHEIGHT={height:.9g}\nWIDTH={radius*2:.9g}\n[SHADING]\nSPECULAR=1\nSUBSCATTERING=1\nREFLECTIVITY=1\nBRIGHTNESS=1\nUSE_AO_CHANNEL=0\n[NORMALS]\nBOOST=0.9\nSPHERE=1\n[LEAVES]\nMULT=20\nOFFSET=0\n[FAKE_SHADOW]\nSIZE=1\nOPACITY=1\n'
@@ -150,7 +150,9 @@ def generate(root=ROOT):
     if not lines:raise ValueError('No external trees')
     (folder/'trees.txt').write_text('\n'.join(lines)+'\n')
     (folder/'grass.dds').write_bytes((texture_folder/'veg_canopy.dds').read_bytes())
-    summary=dict(mode='TreeFX',instances=len(lines),models=len(models),model_lod_metrics=models,grassfx_replaced_instances=int(np.sum(np.isin(plants[:,0],[4,6]))),human_conversion_required=False)
+    for path in folder.glob('*.bin'):
+        if path.name not in models:path.unlink()
+    summary=dict(mode='TreeFX',instances=len(lines),models=len(models),model_lod_metrics=models,grassfx_replaced_instances=int(np.sum(plants[:,0]==6)),human_conversion_required=False)
     (root/'data/treefx_info.json').write_text(json.dumps(summary,indent=2)+'\n')
     print(f'TREEFX_EXPORT_OK models={len(models)} instances={len(lines)} round_trip=True human_conversion_required=False')
     return summary

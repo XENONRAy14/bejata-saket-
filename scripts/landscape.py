@@ -91,7 +91,7 @@ def height_field(points,data,dem,land,coast,segments):
     z+=noise*np.clip((road_distance-100)/150,0,1)*np.clip(coast_distance/40,0,1)*onland
     d,edge_z=edge_height(points,segments)
     blend=np.clip(d/65,0,1);blend=blend*blend*(3-2*blend)
-    z=(edge_z-.1)*(1-blend)+z*blend
+    z=(edge_z-.015)*(1-blend)+z*blend
     plan=np.load(ROOT/'data/decor_plan.npz')
     triangles=plan['beach'][plan['beach_faces']]
     if len(triangles):
@@ -104,9 +104,9 @@ def height_field(points,data,dem,land,coast,segments):
         v=(ab[:,0,0]*q[:,1]-ab[:,0,1]*q[:,0])/safe
         beach_z=tri[:,0,2]+u*(tri[:,1,2]-tri[:,0,2])+v*(tri[:,2,2]-tri[:,0,2])
         target=np.full(len(points),np.inf)
-        np.minimum.at(target,rows,beach_z-.1)
+        np.minimum.at(target,rows,beach_z-.015)
         inside=np.isfinite(target);z[inside]=target[inside]
-        z[d<1.5]=np.minimum(z[d<1.5],edge_z[d<1.5]-.1)
+        z[d<1.5]=np.minimum(z[d<1.5],edge_z[d<1.5]-.015)
     return z
 
 
@@ -207,7 +207,7 @@ def generate(root=ROOT):
     overlap=shapely.area(shapely.intersection(polygons[hit],road)).sum()
     if overlap>.001:raise ValueError(f'Landscape overlaps road: {overlap} m2')
     d,edge_z=edge_height(xy,segments);join=d<1.5
-    if np.any(z[join]>edge_z[join]-.09):raise ValueError('Landscape join above original ribbon')
+    if np.any(z[join]>edge_z[join]-.014):raise ValueError('Landscape join above original ribbon')
     np.savez_compressed(root/'data/landscape.npz',vertices=vertices,faces=faces,keys=keys,
         sea_vertices=np.column_stack([sea_xy,np.zeros(len(sea_xy))]),sea_faces=sea_faces)
     info=dict(grid_points=counts,triangles_added=len(faces),vertices=len(vertices),physical_triangles=int(physical.sum()),

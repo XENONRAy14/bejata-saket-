@@ -360,7 +360,10 @@ First check folder nesting and Practice mode, collect the logs above, and run `s
 
 The sourced alternative workflow is **Blender/modeler → FBX → KsEditor → KN5** ([workflow discussion](https://assettocorsamods.net/threads/need-some-advices-to-start-workflow.2757/), [FBX import/shader/export explanation](https://assettocorsamods.net/threads/is-there-a-guide-to-adding-cones-to-a-mod-track.1682/)). On a Windows machine with the AC SDK, use the supplied `blend/bejaia_saket.blend` as the source, export an FBX, import that FBX in KsEditor, assign/check shaders/textures and logical objects, and export a replacement KN5 under the same filename; preserve the original and revalidate/retest. This is a high-level fallback, **not a verified click-by-click recipe**. Directly opening this KN5 in KsEditor, exact FBX export settings/axis conversion, material persistence, UI menu labels and a full KsEditor round trip are **UNVERIFIED** here. Do not blindly reuse the direct exporter's empty rotations for a different FBX conversion; recheck axes against repository `docs/AC_NOTES.md` and the basic guide before testing.
 
-### Phase 4b: procedural Mediterranean vegetation
+### Phase 4b baseline: procedural Mediterranean vegetation
+
+The following records the accepted 4b baseline; current 4c behavior supersedes its
+counts, tree prototypes and planting band as described in the next section.
 
 `build.py vegetation` replaces the old solid foliage from a 5,000-plant deterministic,
 clustered, terrain-snapped plants: Aleppo/stone pines, olives, Italian cypress,
@@ -425,6 +428,54 @@ no opaque card rectangles and no visible trees crossing the road; density remain
 sparse on some stretches. Terrain seam shadows and dry-patch masks are unchanged.
 AC alpha-to-coverage/MSAA appearance, mip shimmer, LOD transitions, wind, collisions
 and FPS remain runtime-unverified; Cycles previews show LOD0, not AC LOD switching.
+
+### Phase 4c: quality-first enclosed roadside corridor
+
+TreeFX remains the default. The proposed density increase was cancelled in favor
+of tapered, bent trunks, recursive branching and many smaller canopy cards.
+Pines use a checksum-pinned CC0 photographic Poly Haven twig crop; olive, cypress
+and maquis textures remain procedural, with soft alpha edges. Full trees and
+tall maquis are clustered within **80m of the road edge**, with town grove rows,
+mountain-side verge pockets and occasional 1.38× hero trees. Distant trees are
+omitted; the DEM backdrop is retained. Low scrub/tufts also use GrassFX. The KN5
+fallback retains the original lower-detail, 300m-band plan. Both paths preserve
+4m canopy clearance, actual terrain snapping and a 35° root-slope limit.
+The [TreeFX wiki](https://github.com/ac-custom-shaders-patch/acc-extension-config/wiki/Tracks-%E2%80%93-Trees)
+(`Tracks-–-Trees.md:1`) describes hundreds of thousands of instances with instancing;
+no smaller track-wide instance cap is documented there. This is not an FPS guarantee.
+
+`build.py roadside` (also in `all`) adds terraced rock retaining walls along
+existing road cuts, DEM-sided rock facings, visual cliff-side rail extensions,
+reflector delineators, precast concrete U-drains, small rocks, curve chevrons,
+generic 50 km/h boards, timber fences and two town bus shelters. Signs use one procedural
+1K DXT1/mipped atlas and the previously verified `ksPerPixel`; other meshes reuse
+rock, bark, metal and plaster. Signs are illustrative, not surveyed traffic controls.
+All new `DETAIL_*` meshes are visual-only and have a 1,400m draw distance. Existing
+physical road-edge `1WALL_CUT_*` and guardrail meshes are retained unchanged;
+setback walls and rail extensions do not add collision or surface keys. The drains
+are shallow above-ground precast channels, not excavations of the accepted corridor.
+
+The two terrain dry-mask octaves now have lower contrast; distant mask mips fade
+contrast toward their preserved mean. Landscape/beach support at the untouched
+ribbon edge is now 15mm below it instead of 100mm, reducing the shadow ledge
+without changing any road/kerb/shoulder/inner-ribbon triangles. The validator
+retains a positive below-ribbon clearance test. Cycles cannot establish the
+appearance of this join under CSP/Pure lighting.
+
+Multi-scale terrain/detail color noise, greener dry soil and moss/strata variation
+break up the plain ribbon. The narrow pale shoulder is the 1.5m `1GRAVEL_*` strip;
+the wider flat band is the unchanged `1GRASS_*` terrain ribbon. Both receive
+texture-only variation; physics keys and corridor geometry are unchanged. Road
+atlases gain subtle rubber grooves/cracks and unique 400m chunk atlases with worn
+painted arrows on a few OSM junction approaches, without moving road triangles.
+
+Run `build.py render --roadside` for the six standard Cycles CPU views, tree/hero,
+wall/guardrail closeups and a low-sun shadow view under `out/preview/v2_roadside/after/`, with
+`out/preview/v2_roadside/contact_sheet.jpg`. Rendering remains optional and is
+never invoked by `all` or `materials`.
+
+See [Phase 4c sources and in-game checklist](docs/PHASE4C.md) for licensed model
+candidates (not integrated), shadow-source evidence and explicit runtime caveats.
 
 ### Remaining runtime limitations
 

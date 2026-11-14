@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "assets": [{
+    "id": "pine_tree_01",
+    "provider": "Poly Haven",
+    "url": "https://polyhaven.com/a/pine_tree_01",
+    "license": "CC0-1.0",
+    "license_url": "https://polyhaven.com/license",
+    "files": {"twig_diffuse": {
+      "path": "data/asset_cache/foliage/pine_tree_01_twig_diff_1k.png",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/pine_tree_01/pine_tree_01_twig_diff_1k.png",
+      "sha256": "d02c031de64b8ad671f3dd0da19870fa4783d912ae6674aeab0702871deeaeaa"
+    }}
+  }]
+}

@@ -22,7 +22,7 @@ class BuildTests(unittest.TestCase):
             with self.subTest(arguments=arguments),tempfile.TemporaryDirectory() as folder:
                 with patch.object(build,'ROOT',Path(folder)),patch('sys.argv',arguments),patch('build.subprocess.run') as run,patch('build.package') as package,contextlib.redirect_stdout(io.StringIO()):
                     build.main()
-                self.assertEqual([c.args[0][2] for c in run.call_args_list[:-1]],['assets','route','dem','centerline','mesh','acdata','decor','materials','landscape','vegetation','csp'])
+                self.assertEqual([c.args[0][2] for c in run.call_args_list[:-1]],['assets','route','dem','centerline','mesh','acdata','decor','materials','landscape','vegetation','roadside','csp'])
                 self.assertTrue(run.call_args_list[-1].args[0][1].endswith('scripts/validate.py'))
                 self.assertTrue(all(c.kwargs['check'] for c in run.call_args_list))
                 self.assertTrue(all(('--kn5-vegetation' in c.args[0])==('--kn5-vegetation' in arguments) for c in run.call_args_list[:-1]))

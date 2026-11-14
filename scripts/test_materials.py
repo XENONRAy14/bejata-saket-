@@ -11,7 +11,9 @@ from PIL import Image
 
 from assets import acquire
 from check_kn5 import inspect_dds, mask_mip_error
-from materials import channel_mips, packed_maps, road_atlas, grade_diffuse, terrain_mask, ROAD_PERIOD
+from materials import channel_mips, data_mips, packed_maps, road_atlas, grade_diffuse, terrain_mask, ROAD_PERIOD
+from road_arrows import select_junctions
+from geometry import FORWARD
 
 
 class AssetTests(unittest.TestCase):
@@ -36,6 +38,27 @@ class AssetTests(unittest.TestCase):
 
 
 class TextureTests(unittest.TestCase):
+    def test_junction_selection_normal_empty_and_invalid(self):
+        point=[5.08,36.75];origin=np.asarray(FORWARD.transform(*point))
+        data=dict(xy=np.array([[-100,0],[0,0],[100,0]]),s=np.array([500,600,700]))
+        ways=[dict(tags={'highway':'primary'},nodes=[2,n],coords=[point,other]) for n,other in ((1,[5.079,36.75]),(3,[5.081,36.75]),(4,[5.08,36.751]))]
+        result=select_junctions(data,ways,origin)
+        self.assertEqual(result,[dict(chunk=1,chainage_m=575.)])
+        self.assertEqual(select_junctions(data,[],origin),[])
+        with self.assertRaises(ValueError):select_junctions(dict(xy=[]),[],origin)
+    def test_junction_arrow_texture_without_road_geometry(self):
+        source=Image.new('RGB',(64,64),(90,90,90))
+        plain,_=road_atlas(source,size=256,period_m=400)
+        arrow,_=road_atlas(source,size=256,period_m=400,arrows=[300])
+        self.assertGreater(float(abs(arrow-plain).sum()),0)
+        self.assertLess(float((abs(arrow-plain).sum(2)>.01).mean()),.01)
+        rows=np.where(abs(arrow-plain).sum(2)>.01)[0]
+        self.assertTrue((rows>60).all() and (rows<68).all())
+    def test_terrain_mips_fade_contrast_not_mean(self):
+        pixels=np.rint(terrain_mask(128,.35)*255).astype('uint8')
+        plain=list(data_mips(pixels));faded=list(data_mips(pixels,True))
+        self.assertLess(faded[4][:,:,1].std(),plain[4][:,:,1].std())
+        for a,b in zip(plain,faded):np.testing.assert_allclose(a.mean((0,1)),b.mean((0,1)),atol=.51)
     def test_neutral_grades_and_green_terrain(self):
         pixels=np.random.default_rng(5).uniform(.1,.8,(64,64,3)).astype('float32')
         for role,target in [('asphalt',(83.6,83.6,83.6)),('repair',(61.6,61.6,63.36)),('gravel',(139,137,123))]:

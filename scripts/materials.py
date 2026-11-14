@@ -33,10 +33,18 @@ def channel_mips(pixels):
         pixels=np.stack([np.asarray(Image.fromarray(pixels[:,:,c]).resize((max(1,width//2),max(1,height//2)),Image.Resampling.BOX)) for c in range(pixels.shape[2])],axis=2)
 
 
-def encode_data_dds(pixels,path):
+def data_mips(pixels,fade=False):
+    for i,level in enumerate(channel_mips(pixels)):
+        if fade and i>=3:
+            mean=level.mean((0,1),keepdims=True)
+            level=np.rint(mean+(level.astype(float)-mean)*max(.18,1-(i-2)*.11)).clip(0,255).astype('uint8')
+        yield level
+
+
+def encode_data_dds(pixels,path,fade=False):
     folder=path.parent/'.mips';folder.mkdir(exist_ok=True)
     payloads=[];header=None
-    for i,level in enumerate(channel_mips(pixels)):
+    for i,level in enumerate(data_mips(pixels,fade)):
         png=folder/f'{path.stem}_{i}.png';dds=png.with_suffix('.dds')
         Image.fromarray(level).save(png)
         subprocess.run(['convert',str(png),'-define','dds:compression=dxt5','-define','dds:mipmaps=0',str(dds)],check=True)
@@ -59,7 +67,7 @@ def grade_diffuse(role, pixels):
     pixels=np.asarray(pixels,dtype=np.float32)
     if pixels.ndim!=3 or pixels.shape[2]!=3 or not pixels.size:
         raise ValueError('Expected nonempty RGB pixels')
-    targets=dict(asphalt=(83.6,83.6,83.6),repair=(61.6,61.6,63.36),grass=(80,112,48),gravel=(139,137,123),sand=(207,189,139))
+    targets=dict(asphalt=(83.6,83.6,83.6),repair=(61.6,61.6,63.36),grass=(80,112,48),dirt=(111,116,79),gravel=(139,137,123),sand=(207,189,139))
     if role not in targets:return pixels
     luminance=pixels.mean(2,keepdims=True)
     variation=np.clip(luminance/max(float(luminance.mean()),.01),.45,1.65)
@@ -68,18 +76,18 @@ def grade_diffuse(role, pixels):
 
 def terrain_mask(size, coverage):
     if size<1 or not 0<coverage<1:raise ValueError('Need positive size and fractional coverage')
-    noise=periodic_noise(size,max(1,size*.073),SEED+55)
-    dirt=np.clip(.5+(noise-np.quantile(noise,1-coverage))*.8,0,1)
+    noise=.68*periodic_noise(size,max(1,size*.073),SEED+55)+.32*periodic_noise(size,max(1,size*.019),SEED+56)
+    dirt=np.clip(.5+(noise-np.quantile(noise,1-coverage))*.45,0,1)
     mask=np.zeros((size,size,4),dtype=np.float32)
     mask[:,:,0]=1-dirt;mask[:,:,1]=dirt
     return mask
 
 
-def road_atlas(source, variant=0, size=2048):
+def road_atlas(source, variant=0, size=2048,period_m=ROAD_PERIOD,arrows=()):
     if size < 32 or variant not in (0,1,2):
         raise ValueError('Need a usable atlas size and variant 0..2')
     u = (np.arange(size,dtype=np.float32)+.5)/size
-    distance = (np.arange(size,dtype=np.float32)+.5)/size*ROAD_PERIOD
+    distance = (np.arange(size,dtype=np.float32)+.5)/size*period_m
     noise = periodic_noise(size,max(2,size/150),SEED+variant)
     macro = np.asarray(source.resize((size,size)).filter(ImageFilter.GaussianBlur(size/100)),dtype=np.float32)/255
     luminance = macro.mean(2)
@@ -88,15 +96,21 @@ def road_atlas(source, variant=0, size=2048):
     tyre = sum(np.exp(-((u-c)/.026)**2) for c in (.14,.36,.64,.86))
     lane_middle = sum(np.exp(-((u-c)/.05)**2) for c in (.25,.75))
     tone *= (1-.035*tyre+.015*lane_middle)[None,:]
+    grooves=sum(np.exp(-((u-c-.006*np.sin(distance[:,None]/21))/.009)**2) for c in (.15,.35,.65,.85))
+    tone*=1-.022*grooves
     rgb = np.repeat(tone[:,:,None],3,axis=2)
+    for crack in range(5):
+        center=.12+crack*.18+.014*np.sin(distance/3+crack)+.008*np.sin(distance*1.7+crack)
+        shape=np.exp(-((u[None,:]-center[:,None])/.0009)**2)*np.exp(-((distance[:,None]-(crack+1)*ROAD_PERIOD/6)/1.2)**2)
+        rgb*=1-.16*shape[:,:,None]
     edge = np.clip((.085-np.minimum(u,1-u))/.085,0,1)[None,:]
     edge = np.clip(edge*(.6+.15*noise),0,.7)
     patch = np.zeros((size,size),dtype=np.float32)
     rng = np.random.default_rng(SEED+100+variant)
     for _ in range(1):
-        center = rng.uniform(.1,.9);chainage = rng.uniform(0,ROAD_PERIOD)
+        center = rng.uniform(.1,.9);chainage = rng.uniform(0,period_m)
         du = abs(u-center)[None,:]
-        dv = abs((distance[:,None]-chainage+ROAD_PERIOD/2)%ROAD_PERIOD-ROAD_PERIOD/2)
+        dv = abs((distance[:,None]-chainage+period_m/2)%period_m-period_m/2)
         radius=np.sqrt((du/rng.uniform(.035,.055))**2+(dv/rng.uniform(.45,.8))**2)
         shape=np.clip((1-radius+.08*noise)*3,0,1)
         patch = np.maximum(patch,shape)
@@ -105,6 +119,11 @@ def road_atlas(source, variant=0, size=2048):
     center_line = (u>=506/1024)&(u<518/1024)
     dash = (distance%7 < 7*440/1024)[:,None]
     paint = np.maximum(edge_lines[None,:],center_line[None,:]*dash).astype(np.float32)*wear
+    for chainage in arrows:
+        v=period_m-distance[:,None]-chainage
+        shaft=(abs(u[None,:]-.75)<.015)&(v> -2.5)&(v<.5)
+        head=(v>=.5)&(v<2)&(abs(u[None,:]-.75)<(2-v)*.055)
+        paint=np.maximum(paint,(shaft|head)*wear*.85)
     paint *= np.clip(.9+noise*.2,0,1)
     rgb = rgb*(1-paint[:,:,None])+np.array([.88,.86,.77],dtype=np.float32)*paint[:,:,None]
     weights = np.stack([(1-patch)*(1-edge),patch*(1-edge),np.broadcast_to(edge,patch.shape),np.zeros_like(patch)],axis=2)
@@ -151,7 +170,7 @@ def generate(manifest):
         png = output/(name+'.png')
         Image.fromarray(pixels).save(png)
         path = output/(name+'.dds')
-        if data_channels:encode_data_dds(pixels,path)
+        if data_channels:encode_data_dds(pixels,path,fade=name in ('terrain_mask','terrain_mountain_mask'))
         else:subprocess.run(['convert',str(png),'-define','dds:compression='+('dxt5' if alpha else 'dxt1'),str(path)],check=True)
         record = inspect_dds(path.read_bytes())
         record.update(sha256=sha256(path),file=str(path.relative_to(ROOT)))
@@ -164,6 +183,13 @@ def generate(manifest):
         normal = np.asarray(normal.resize((1024,1024)),dtype=np.float32)/255
         roughness = np.asarray(roughness.resize((1024,1024)),dtype=np.float32)/255
         diffuse=grade_diffuse(role,diffuse)
+        if role in ('grass','dirt','gravel','rock'):
+            broad=periodic_noise(1024,100,SEED+61);fine=periodic_noise(1024,13,SEED+62)
+            diffuse*=np.clip(1+.065*broad[:,:,None]+.025*fine[:,:,None],.77,1.22)
+        if role=='rock':
+            strata=np.sin(np.arange(1024)[:,None]/15+periodic_noise(1024,65,SEED+63)*.4)
+            moss=np.clip(periodic_noise(1024,24,SEED+64)-.6,0,1)*.22
+            diffuse=diffuse*(1-.04*strata[:,:,None])*(1-moss[:,:,None])+np.array([.26,.31,.16])*moss[:,:,None]
         if role=='plaster':
             diffuse = .86+.12*(diffuse-diffuse.mean(axis=(0,1)))
         if role=='metal':
@@ -205,10 +231,21 @@ def generate(manifest):
         textures['txNormalA']=flat
         props = dict(layer_props,**{f'mult{c}':1/1.75 for c in 'RGBA'})
         specs['asphalt' if variant==0 else f'asphalt_v{variant}'] = material_spec(MULTILAYER,props,textures,kind='road',period_m=ROAD_PERIOD,roughness=.84)
+    from road_arrows import select_junctions
+    centerline=np.load(ROOT/'data/centerline.npz');origin=json.loads((ROOT/'data/geo_origin.json').read_text())
+    junctions=select_junctions(centerline,json.loads((ROOT/'data/area_cache.json').read_text())['ways'],np.array([origin['easting_m'],origin['northing_m']]))
+    for i,junction in enumerate(junctions):
+        name=f'asphalt_junction_{i}'
+        color,mask=road_atlas(sources['asphalt'][0],junction['chunk']%3,period_m=400,arrows=[junction['chainage_m']%400])
+        textures=dict(specs['asphalt']['textures']);textures={k:v['textureName'] for k,v in textures.items()}
+        textures.update(txDiffuse=dds(name+'_macro',color),txMask=dds(name+'_mask',mask,True,True))
+        specs[name]=material_spec(MULTILAYER,dict(props),textures,kind='road',period_m=400,roughness=.84)
+        junction['material']=name
     size = 2048
     noise = periodic_noise(size,150,SEED+55)
     mask = terrain_mask(size,.35)
-    tint = np.repeat(np.clip(.9+.035*noise,.75,1)[:,:,None],3,axis=2)
+    medium=periodic_noise(size,28,SEED+57);fine=periodic_noise(size,6,SEED+58)
+    tint = np.repeat(np.clip(.9+.045*noise+.025*medium+.012*fine,.72,1)[:,:,None],3,axis=2)
     textures = dict(txDiffuse=dds('terrain_macro',tint),txMask=dds('terrain_mask',mask,True,True))
     textures.update({f'txDetail{c}':maps[r]['diffuse'] for c,r in zip('RGBA',('grass','dirt','grass','dirt'))})
     textures.update({f'txNormal{c}':maps[r]['normal'] for c,r in zip('RGBA',('grass','dirt','grass','dirt'))})
@@ -219,7 +256,7 @@ def generate(manifest):
     specs['grass_mountain']=material_spec(MULTILAYER,props,mountain_textures,kind='terrain',period_m=256,roughness=.95)
     used = {v['textureName'] for spec in specs.values() for v in spec['textures'].values()}
     records = {k:v for k,v in records.items() if k in used}
-    info = dict(version=2,seed=SEED,normal_format='DXT5, DirectX green; RGB XYZ, no BC5',materials=specs,textures=records,
+    info = dict(version=2,seed=SEED,normal_format='DXT5, DirectX green; RGB XYZ, no BC5',materials=specs,textures=records,junction_arrows=junctions,
                 dds_gpu_bytes=sum(v['gpu_bytes'] for v in records.values()))
     (ROOT/'data/materials_info.json').write_text(json.dumps(info,indent=2)+'\n')
     print(f'MATERIAL_TEXTURES_OK used_dds={len(records)} gpu_bytes={info["dds_gpu_bytes"]}')

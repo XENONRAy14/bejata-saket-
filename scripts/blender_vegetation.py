@@ -58,7 +58,7 @@ def main():
             z=p[9:12];x=rotation[:,0]-z*np.dot(rotation[:,0],z);x/=np.linalg.norm(x);rotation=np.column_stack([x,np.cross(z,x),z])
         for lod in (0,1):
             key=(kind,variant,lod)
-            if key not in prototypes:prototypes[key]=prototype(kind,variant,lod)
+            if key not in prototypes:prototypes[key]=prototype(kind,variant,lod,quality=os.environ.get('BS_KN5_VEGETATION')!='1')
             groups=prototypes[key]
             for material,mesh in groups.items():
                 if not mesh.faces:continue
@@ -80,7 +80,7 @@ def main():
     settings['nodes']['DECOR_VEG_L1_*']=dict(lodIn=150,lodOut=600)
     settings_path.write_text(json.dumps(settings,indent=2)+'\n')
     total=sum(sum(len(p.vertices)-2 for p in obj.data.polygons) for obj in bpy.data.objects if obj.type=='MESH')
-    assert total<1600000,f'Vegetation exceeds total triangle budget: {total}'
+    if os.environ.get('BS_KN5_VEGETATION')=='1':assert total<1600000,f'Vegetation exceeds total triangle budget: {total}'
     path=ROOT/'data/vegetation_info.json';info=json.loads(path.read_text());info.update(after_triangles=total,lod0_triangles=counts[0],lod1_triangles=counts[1],nonvegetation_sha256_before_and_after=before,vegetation_objects=len(batches),max_vegetation_vertices=max(len(v[0]) for v in batches.values()))
     path.write_text(json.dumps(info,indent=2)+'\n')
     from blender_materials import main as export,apply

@@ -51,7 +51,13 @@ class ValidationTests(unittest.TestCase):
     def test_valid_package(self):
         passed,output=self.run_check(scene())
         self.assertTrue(passed,output)
-        self.assertIn('VALIDATION_PASS checks=17 passed=17',output)
+        self.assertIn('VALIDATION_PASS checks=18 passed=18',output)
+
+    def test_roadside_rejects_road_overlap(self):
+        parsed=scene();detail=dict(parsed['nodes'][-1],name='DETAIL_fixture',lod_in=0,lod_out=1400)
+        parsed['nodes'].append(detail)
+        passed,output=self.run_check(parsed)
+        self.assertFalse(passed);self.assertIn('FAIL roadside: roadside inside 1m road-edge clearance',output)
 
     def test_geometry_and_binary_semantic_failures(self):
         mutations={
