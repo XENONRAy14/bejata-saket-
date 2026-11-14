@@ -51,7 +51,7 @@ class ValidationTests(unittest.TestCase):
     def test_valid_package(self):
         passed,output=self.run_check(scene())
         self.assertTrue(passed,output)
-        self.assertIn('VALIDATION_PASS checks=15 passed=15',output)
+        self.assertIn('VALIDATION_PASS checks=16 passed=16',output)
 
     def test_geometry_and_binary_semantic_failures(self):
         mutations={
@@ -87,6 +87,21 @@ class ValidationTests(unittest.TestCase):
         parsed=scene();parsed['nodes'][-2]['indices']=np.array([[0,2,1]])
         passed,output=self.run_check(parsed)
         self.assertFalse(passed);self.assertIn('FAIL sea_surface',output)
+
+    def test_landscape_overlap_height_and_physical_failures(self):
+        parsed=scene()
+        land=copy.deepcopy(parsed['nodes'][-1]);land.update(name='1GRASS_LAND_000_grass',material=2,lod_out=60000,
+            positions=np.array([[1.1,-.2,-3.5],[1.1,-.2,3.5],[2,-.2,-3.5]]))
+        parsed['nodes'].append(land)
+        (self.folder/'data/surfaces.ini').write_text('[SURFACE_0]\nKEY=ROAD\n[SURFACE_1]\nKEY=GRASS\n')
+        passed,output=self.run_check(parsed)
+        self.assertTrue(passed,output)
+        for mutate in (lambda n:n.update(positions=scene()['nodes'][-1]['positions']),
+                       lambda n:n['positions'].__setitem__((slice(None),1),.1),
+                       lambda n:n.update(name='LAND_000_grass')):
+            bad=copy.deepcopy(parsed);mutate(bad['nodes'][-1])
+            passed,output=self.run_check(bad)
+            self.assertFalse(passed);self.assertIn('FAIL landscape_geometry',output)
 
     def test_empty_folder_and_corrupt_kn5(self):
         for folder in (Path(self.temp.name)/'Invalid-Name',self.folder):

@@ -131,7 +131,7 @@ def main():
     settings=json.loads((ROOT/'blend/settings.json').read_text())
     for name,spec in info['materials'].items():settings['materials'][name]={k:v for k,v in spec.items() if k!='preview'}
     (ROOT/'blend/settings.json').write_text(json.dumps(settings,indent=2)+'\n')
-    bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'blend/bejaia_saket.blend'))
+    bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'blend/bejaia_saket.blend'),compress=True)
     exporter=importlib.import_module(target.name+'.exporter')
     original_writer=exporter.NodeWriter
     original_texture_writer=exporter.TextureWriter
@@ -197,7 +197,7 @@ def main():
     info.update(geometry_sha256_before_and_after=original,kn5_bytes=parsed['bytes'],kn5_sha256=hashlib.sha256(path.read_bytes()).hexdigest(),export_seconds=time.monotonic()-started,warnings=warnings,
                 embedded_texture_count=len(parsed['textures']),texture_gpu_bytes=sum(t['gpu_bytes'] for t in parsed['texture_info'].values()),embedded_textures=parsed['texture_info'],kn5_materials=sorted(actual))
     (ROOT/'data/materials_info.json').write_text(json.dumps(info,indent=2)+'\n')
-    ui_path=path.parent/'ui/ui_track.json';ui=json.loads(ui_path.read_text());ui['version']='0.2';ui_path.write_text(json.dumps(ui,ensure_ascii=False,indent=2)+'\n')
+    ui_path=path.parent/'ui/ui_track.json';ui=json.loads(ui_path.read_text());ui['version']='0.3' if any(o.name.startswith('LAND_') for o in bpy.data.objects) else '0.2';ui_path.write_text(json.dumps(ui,ensure_ascii=False,indent=2)+'\n')
     print(f'MATERIAL_EXPORT_OK materials={len(actual)} textures={len(parsed["textures"])} bytes={parsed["bytes"]} geometry_unchanged=True')
     print('MATERIAL_WARNINGS',json.dumps(warnings))
 

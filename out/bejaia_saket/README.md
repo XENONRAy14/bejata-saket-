@@ -179,7 +179,7 @@ Run from project root. The initial country scan takes several minutes; subsequen
 
 Building on Windows is **UNVERIFIED**; scripts currently use Linux runtime-directory handling. On Linux install Python 3.10+ with venv support, official [Blender 3.6.23](https://download.blender.org/release/Blender3.6/) at `~/tools/blender-3.6.23-linux-x64/blender` (or pass `--blender`), and clone the [exporter](https://github.com/moppius/blender-assetto-corsa-tools) to `~/tools/blender-assetto-corsa-tools` (or set `AC_ADDON_SOURCE`). The export stage imports/registers the addon headlessly; no interactive addon setup is needed. Optional comparison rendering uses Cycles CPU, not an OpenGL renderer. The pinned Python dependencies are in `scripts/requirements.txt`; Blender uses its own bundled Python/numpy.
 
-`all` runs **assets → route → dem → centerline → mesh → acdata → decor → materials → ZIP → validate**, failing immediately on a stage error. It creates missing output directories and downloads missing `data/algeria-latest.osm.pbf` plus `data/dem/N36E004.tif` and `N36E005.tif`. These raw downloads and `data/asset_cache/` may be copied to another checkout to avoid bandwidth; do not copy generated arrays, Blender scenes, extracted area caches or outputs for a clean-rebuild proof. Upstream `algeria-latest` is mutable: identical results require the same PBF/DEM bytes and pinned tools, not a later live download. Preserve `data/source_info.json` and `data/dem/sources.json` as provenance; v2 material downloads additionally enforce `data/assets.lock.json`.
+`all` runs **assets → route → dem → centerline → mesh → acdata → decor → materials → landscape → csp → ZIP → validate**, failing immediately on a stage error. It creates missing output directories and downloads missing `data/algeria-latest.osm.pbf` plus `data/dem/N36E004.tif` and `N36E005.tif`. These raw downloads and `data/asset_cache/` may be copied to another checkout to avoid bandwidth; do not copy generated arrays, Blender scenes, extracted area caches or outputs for a clean-rebuild proof. Upstream `algeria-latest` is mutable: identical results require the same PBF/DEM bytes and pinned tools, not a later live download. Preserve `data/source_info.json` and `data/dem/sources.json` as provenance; v2 material downloads additionally enforce `data/assets.lock.json`.
 
 Deliverables: `out/bejaia_saket/` and `out/bejaia_saket.zip`, whose root is `bejaia_saket/`, not loose install files. ZIP entries have normalized timestamps/permissions and sorted order. `scripts/package.py` recreates only the ZIP. `scripts/validate.py [folder]` needs no Blender or generated centerline arrays: it independently reads the exported KN5 and install files, checks naming/surfaces, UI/pits, logical transforms and raycasts road triangles for spawn/gate heights, physical-track bounds (excluding visual sea), sampled road-triangle cross-width edges, vertex limits, texture signatures/references and map dimensions. **PASS is static validation, not proof of engine compatibility.**
 
@@ -262,9 +262,63 @@ Run **`scripts/build.py decor`** after geometry (it also rebuilds AC metadata/em
 - Eight seeded 512² noise textures: bark, pine foliage, olive foliage, maquis, plaster, sand, water and marker red. All are embedded PNGs using `ksPerPixel`; water is an opaque blue low-cost placeholder. Total decor triangles are asserted **≤150,000**, each object below 65k vertices. Actual counts and export growth are recorded in the JSON evidence, not inferred from instance counts.
 - Updated previews: `out/preview/top.png`, `road_10.png`, `road_40.png`, `road_70.png`, `road_95.png`; new road-level views `decor_town.png`, `decor_saket.png`, plus the end barrier check. `ui/preview.png` is refreshed from the decorated road-level render. The sea polygon is limited to the coastal section; the blue world background elsewhere is still not modeled water.
 
+## Phase 4a — continuous DEM landscape and horizon
+
+Existing road, kerb, shoulder, terrain ribbons, beach, props and AC spawns are
+preserved. `scripts/build.py landscape` adds terrain to the existing v2 scene;
+`all` runs it after `materials`, then regenerates CSP configuration and validates.
+The stage replaces its own tiles and sea rather than stacking geometry.
+
+- Copernicus GLO-30 **interpolated at 11 m** within 400 m of the route, 30 m
+  to 2.5 km, and 90 m to 8 km. The 11 m near grid keeps the added landscape
+  below 600k triangles; it does **not** imply an 11 m elevation survey.
+- A 250 m DEM backdrop continues to approximately 14 km using the same two
+  cached TIFF tiles. This models local inland foothills, not more distant
+  Babors peaks outside the domain. No invented mountain silhouettes/assets.
+- One global triangulation includes every domain-boundary vertex before
+  clipping. All bands and tile groups share edge positions and smooth normals;
+  no LOD-band skirts or separate overlapping resolution surfaces are needed.
+- The union/valid polygon of both ribbons is inset 1 m to allow a hidden
+  underlap. An explicit road-polygon exclusion also protects route end caps.
+  Border vertices follow the original ribbon edges about 0.1 m below them.
+  Existing beach faces are supported by terrain just below the sand surface.
+  Tight hairpins are treated as a single polygon, not independent strips.
+- Deterministic noise has maximum amplitude 1.45 m, fading in only beyond
+  100 m from the road. Terrain intersecting the 150 m route buffer is physical
+  `1GRASS_LAND_*`; outside it `LAND_*` is visual-only. Boundary triangles are
+  conservatively physical. Near tiles are 400 m, medium 800 m, far 2000 m.
+- Coastlines come from all coastline ways in the cached Algeria PBF, not the
+  smaller route-area cache. Seaward ground is pulled below Z=0; coastal DEM
+  drops above 10 m steepen through a 10 m coastal transition. Slopes over 35° use
+  the existing `rock`; gentler ground reuses `grass`. GrassFX already references
+  that exact material, so no new shader, texture or CSP key was introduced.
+- The visual-only sea is replaced by a flat coastline-clipped plane extending
+  approximately 15 km offshore in the route area, with 4 m UV repeats. Landscape
+  and sea have 60 km export draw distances (exporter `NODE_SETTINGS` / `lodOut`
+  in `exporter/node_writer.py`); the old corridor retains its export settings.
+
+`data/landscape_info.json` records geometry budgets, physical/visual counts and
+the identical corridor hashes before/after scene assembly. `validate.py` checks
+road overlap, below-ribbon border heights, physical/visual separation, terrain
+budget and the existing per-mesh vertex limits. The global boundary audit and
+hairpin-hole test check that no unmatched internal edges cross resolution bands.
+
+Optional **Cycles CPU** previews (not part of `all`):
+```sh
+.venv/bin/python scripts/build.py render --terrain
+```
+Nine images and `contact_sheet.jpg` are under `out/preview/v2_terrain/` (individual
+PNGs in `after/`): top, the six standard views, elevated Boulimat and city start.
+These approximate materials only; AC/CSP/Pure water, collision performance,
+grass density, long-range culling and FPS require a new Windows drive test.
+
 ## Known issues
 
-- **Distant terrain ribbon edges can look like floating slabs on the horizon.** Only approximately 40 m of terrain per side is modeled; distant ribbon undersides/edges are visible across bends. This cosmetic limitation is intentionally not fixed in Phase 5.
+- The old 40 m floating-ribbon horizon is superseded by the Phase 4a landscape.
+  Source DSM trees/buildings, coarse far slopes and non-surveyed coastline/datum
+  remain limitations; runtime terrain acceptance still needs a Windows drive.
+- Thin dark contact-shadow seams remain along some preserved ribbon/beach edges
+  in Cycles (not open holes); the support terrain is deliberately below them.
 - No AI fast lane is bundled; use **Practice**, not an AI race. Timing, launcher acceptance without AI and pit servicing remain **UNVERIFIED on Windows**.
 - Decor is pass-through, sea/beach are simplified visual placeholders, and there is a crude physical end wall. Do not approach the finish at racing speed during initial tests.
 - DSM includes trees/buildings; widths, elevations, local intersection realignment and generic props are not surveyed. The KN5 split branch, map overlay alignment, runtime shaders, surface response and collisions remain **UNVERIFIED** despite static validation.

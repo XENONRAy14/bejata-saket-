@@ -1,5 +1,11 @@
 # Credits and licensing
 
+Phase 4a landscape and distant foothills reuse the existing Copernicus GLO-30
+DEM tiles; the expanded shoreline is derived from the cached OpenStreetMap
+Algeria extract (attributions below). Noise detail is procedural. Landscape
+grass/rock and expanded sea reuse existing credited materials and textures;
+no new third-party art assets were downloaded for this phase.
+
 ## v2 materials: shipped derivatives of CC0 PBR textures
 
 Individual asset pages were fetched and checked for CC0 before downloading.

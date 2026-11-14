@@ -48,9 +48,20 @@ def main():
         point=np.r_[data['xy'][j],data['z'][i]+1.6]
         if name=='saket':point[:2]+=np.array([0,18])
         views.append(('decor_'+name,[*data['xy'][i],data['z'][i]+1.6],point))
+    terrain=bool(os.environ.get('BS_TERRAIN_PREVIEW'))
+    if terrain:
+        midpoint=(data['xy'].min(0)+data['xy'].max(0))/2
+        views.insert(0,('top',[*midpoint,45000],[*midpoint,0]))
+        landscape=np.load(ROOT/'data/landscape.npz')['vertices']
+        for name,chainage,offset in [('boulimat',18500,(550,-550)),('city',1000,(850,-650))]:
+            i=int(np.searchsorted(data['s'],chainage));xy=data['xy'][i]+offset
+            nearby=landscape[np.linalg.norm(landscape[:,:2]-xy,axis=1)<1000,2]
+            elevation=float(nearby.max()+500) if len(nearby) else 1200
+            views.append(('elevated_'+name,[*xy,elevation],[*data['xy'][i],data['z'][i]]))
     for name,origin,target in views:
         if selected and name not in selected:continue
-        camera('__COMPARISON_'+name,origin,target)
+        view=camera('__COMPARISON_'+name,origin,target,32000 if name=='top' else None)
+        if terrain:view.data.clip_end=100000
         scene.render.filepath=str(output/(name+'.png'))
         bpy.ops.render.render(write_still=True)
     print(f'COMPARISON_RENDER_OK side={label} views={len(selected) if selected else len(views)} engine=CYCLES device=CPU samples=16 denoising=True')

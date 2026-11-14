@@ -135,7 +135,9 @@ def inspect_kn5(path, geometry=False, texture_data=False):
                 normal_length_error=float(np.max(abs(normal_lengths-1))),
                 tangent_length_error=float(np.max(abs(tangent_lengths-1))),
                 max_normal_dot_tangent=float(np.max(abs(np.sum(values[:,3:6]*values[:,8:11],axis=1)))))
-            take(4+8+16)
+            entry['layer']=number()
+            entry['lod_in'],entry['lod_out']=number('f'),number('f')
+            take(16)
             entry.update(vertices=vertices,triangles=indices//3,material=material,renderable=number('?'))
             if geometry:
                 positions = np.frombuffer(vertex_data, dtype='<f4').reshape(-1,11)[:,:3]

@@ -1326,10 +1326,10 @@
     }
   },
   "dds_gpu_bytes": 68508264,
-  "geometry_sha256_before_and_after": "c32e92f3fb5f23cc72a2e4623056975c82311bfef3acfd36a400ea41d88c642d",
-  "kn5_bytes": 136842509,
-  "kn5_sha256": "f62fae10ca69213549cd5df732f388fee5aeeb89ee9bf049cc6240caae88dfca",
-  "export_seconds": 12.236457705999783,
+  "geometry_sha256_before_and_after": "97ac3f8b160ccd559838e74431c0dab4045c976fdad3f7dfbbc58f4d3ebe2fc9",
+  "kn5_bytes": 155241351,
+  "kn5_sha256": "677dbf29c101b17a91376862acdbf4703efe8d47436f7cb362d243ea0b60da8e",
+  "export_seconds": 23.091219246998662,
   "warnings": [
     "Unknown logical object 'AC_AB_FINISH_L' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it.",
     "Unknown logical object 'AC_AB_FINISH_R' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it.",
@@ -1347,60 +1347,6 @@
       "bytes": 5592560,
       "gpu_bytes": 5592432,
       "sha256": "a7a3166a07a07840ad82ca5c317d45f57bbc69e1d89834089c55d4749273b625"
-    },
-    "terrain_macro.dds": {
-      "width": 2048,
-      "height": 2048,
-      "format": "DXT1",
-      "mips": 12,
-      "bytes": 2796344,
-      "gpu_bytes": 2796216,
-      "sha256": "de4ed2f95d3621ee79049b8aa5966f01f495765f90270873392b20ca8103f69b"
-    },
-    "terrain_mask.dds": {
-      "width": 2048,
-      "height": 2048,
-      "format": "DXT5",
-      "mips": 12,
-      "bytes": 5592560,
-      "gpu_bytes": 5592432,
-      "sha256": "87c1f43f78f000d07bf985be11270463ee2520d65ac0bb91fb88f834df6c2110"
-    },
-    "grass_diffuse.dds": {
-      "width": 1024,
-      "height": 1024,
-      "format": "DXT5",
-      "mips": 11,
-      "bytes": 1398256,
-      "gpu_bytes": 1398128,
-      "sha256": "b8819933a86401114832ea00c9fb816a1e354729e710f520fa8ec9ef5d6132b1"
-    },
-    "dirt_diffuse.dds": {
-      "width": 1024,
-      "height": 1024,
-      "format": "DXT5",
-      "mips": 11,
-      "bytes": 1398256,
-      "gpu_bytes": 1398128,
-      "sha256": "cd54de90a580628aabe72c0f24c4c89fb7a0275ab334607030de6880a390c85a"
-    },
-    "grass_normal.dds": {
-      "width": 1024,
-      "height": 1024,
-      "format": "DXT5",
-      "mips": 11,
-      "bytes": 1398256,
-      "gpu_bytes": 1398128,
-      "sha256": "cbb61bc223d3143f94efd5563714c2587275d1133ed208824df45b0e39a3da6f"
-    },
-    "dirt_normal.dds": {
-      "width": 1024,
-      "height": 1024,
-      "format": "DXT5",
-      "mips": 11,
-      "bytes": 1398256,
-      "gpu_bytes": 1398128,
-      "sha256": "b2004984c54b6ba4fd0de23e3d2939e1461dff9af204c9e12a6dea954e481018"
     },
     "gravel_maps.dds": {
       "width": 1024,
@@ -1536,33 +1482,6 @@
       "bytes": 496,
       "gpu_bytes": 368,
       "sha256": "e32fda5b134ae20c19564684896d4b997e571e956aa22c892c647aee70ef3d8d"
-    },
-    "rock_diffuse.dds": {
-      "width": 1024,
-      "height": 1024,
-      "format": "DXT1",
-      "mips": 11,
-      "bytes": 699192,
-      "gpu_bytes": 699064,
-      "sha256": "a0ff085b644f020ce94a54f3025dd1e767cbb8cc045695b75aa61c85ecbd3787"
-    },
-    "rock_normal.dds": {
-      "width": 1024,
-      "height": 1024,
-      "format": "DXT5",
-      "mips": 11,
-      "bytes": 1398256,
-      "gpu_bytes": 1398128,
-      "sha256": "dab851f81ad2e8ff14bfb5153265071036c43417ae4f208c8b007134ac82c8d7"
-    },
-    "rock_maps.dds": {
-      "width": 1024,
-      "height": 1024,
-      "format": "DXT1",
-      "mips": 11,
-      "bytes": 699192,
-      "gpu_bytes": 699064,
-      "sha256": "cebce5f76f4d826dcf9f35a9ed2d3b0da472e818b9ff3f0588e24914a0fae9c7"
     },
     "metal_diffuse.dds": {
       "width": 1024,
@@ -1708,15 +1627,6 @@
       "gpu_bytes": 699064,
       "sha256": "34d6259f1b74bceafc7a09980aac8cabedd3251dd1a7983f767651d00c3a7f75"
     },
-    "white.dds": {
-      "width": 16,
-      "height": 16,
-      "format": "DXT1",
-      "mips": 5,
-      "bytes": 312,
-      "gpu_bytes": 184,
-      "sha256": "497ffff45814f4c24699ec7611edbdbbfee3050ec89f039c44fbf7af9234b747"
-    },
     "water.png": {
       "width": 512,
       "height": 512,
@@ -1725,6 +1635,96 @@
       "gpu_bytes": 1048576,
       "mips": 1,
       "sha256": "4139d1694ec016e64e4d32e7222f3bd9929d86afb9b361ff02e584b878a345b3"
+    },
+    "terrain_macro.dds": {
+      "width": 2048,
+      "height": 2048,
+      "format": "DXT1",
+      "mips": 12,
+      "bytes": 2796344,
+      "gpu_bytes": 2796216,
+      "sha256": "de4ed2f95d3621ee79049b8aa5966f01f495765f90270873392b20ca8103f69b"
+    },
+    "terrain_mask.dds": {
+      "width": 2048,
+      "height": 2048,
+      "format": "DXT5",
+      "mips": 12,
+      "bytes": 5592560,
+      "gpu_bytes": 5592432,
+      "sha256": "87c1f43f78f000d07bf985be11270463ee2520d65ac0bb91fb88f834df6c2110"
+    },
+    "grass_diffuse.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT5",
+      "mips": 11,
+      "bytes": 1398256,
+      "gpu_bytes": 1398128,
+      "sha256": "b8819933a86401114832ea00c9fb816a1e354729e710f520fa8ec9ef5d6132b1"
+    },
+    "dirt_diffuse.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT5",
+      "mips": 11,
+      "bytes": 1398256,
+      "gpu_bytes": 1398128,
+      "sha256": "cd54de90a580628aabe72c0f24c4c89fb7a0275ab334607030de6880a390c85a"
+    },
+    "grass_normal.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT5",
+      "mips": 11,
+      "bytes": 1398256,
+      "gpu_bytes": 1398128,
+      "sha256": "cbb61bc223d3143f94efd5563714c2587275d1133ed208824df45b0e39a3da6f"
+    },
+    "dirt_normal.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT5",
+      "mips": 11,
+      "bytes": 1398256,
+      "gpu_bytes": 1398128,
+      "sha256": "b2004984c54b6ba4fd0de23e3d2939e1461dff9af204c9e12a6dea954e481018"
+    },
+    "rock_diffuse.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT1",
+      "mips": 11,
+      "bytes": 699192,
+      "gpu_bytes": 699064,
+      "sha256": "a0ff085b644f020ce94a54f3025dd1e767cbb8cc045695b75aa61c85ecbd3787"
+    },
+    "rock_normal.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT5",
+      "mips": 11,
+      "bytes": 1398256,
+      "gpu_bytes": 1398128,
+      "sha256": "dab851f81ad2e8ff14bfb5153265071036c43417ae4f208c8b007134ac82c8d7"
+    },
+    "rock_maps.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT1",
+      "mips": 11,
+      "bytes": 699192,
+      "gpu_bytes": 699064,
+      "sha256": "cebce5f76f4d826dcf9f35a9ed2d3b0da472e818b9ff3f0588e24914a0fae9c7"
+    },
+    "white.dds": {
+      "width": 16,
+      "height": 16,
+      "format": "DXT1",
+      "mips": 5,
+      "bytes": 312,
+      "gpu_bytes": 184,
+      "sha256": "497ffff45814f4c24699ec7611edbdbbfee3050ec89f039c44fbf7af9234b747"
     }
   },
   "kn5_materials": [

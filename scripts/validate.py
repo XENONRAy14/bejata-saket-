@@ -75,7 +75,7 @@ def validate(folder):
                 require(match[1] in keys, f"undefined surface {match[1]} for {mesh['name']}")
                 physical.append(mesh)
             else:
-                require(mesh['name'].startswith('DECOR_'), f"invalid physical/visual mesh name {mesh['name']}")
+                require(mesh['name'].startswith(('DECOR_','LAND_')), f"invalid physical/visual mesh name {mesh['name']}")
         require(physical, 'no physical meshes')
         return 'physical keys '+','.join(sorted(keys))
     check('mesh_names_and_surfaces', surfaces)
@@ -114,7 +114,7 @@ def validate(folder):
     check('empty_road_clearance', heights)
     def units():
         require(physical and len(triangles)>0, 'missing physical geometry')
-        bounds = np.array([n['bounds'] for n in physical])
+        bounds = np.array([n['bounds'] for n in physical if not n['name'].startswith('1GRASS_LAND_')])
         extents = bounds[:,1].max(axis=0)-bounds[:,0].min(axis=0)
         require(np.isfinite(extents).all() and 11000<extents[0]<15000 and 7000<extents[2]<10000 and 280<extents[1]<450, f'implausible physical bbox {extents}')
         sample = triangles[::max(1,len(triangles)//1000)]
@@ -152,7 +152,7 @@ def validate(folder):
             stats=mesh['tangent_stats']
             require(stats['finite'] and max(stats['normal_length_error'],stats['tangent_length_error'],stats['max_normal_dot_tangent'])<.001,f'invalid normal/tangent basis: {mesh["name"]}')
         ui_data=json.loads((folder/'ui/ui_track.json').read_text())
-        if ui_data.get('version')=='0.2':
+        if ui_data.get('version') in ('0.2','0.3'):
             recipe=json.loads((ROOT/'data/materials_info.json').read_text())
             actual={m['name']:m for m in entries}
             for name,spec in recipe['materials'].items():
@@ -195,9 +195,43 @@ def validate(folder):
             require(np.all(np.cross(tri[:,1]-tri[:,0],tri[:,2]-tri[:,0])[:,1]>0),'sea winding not upward')
             require(mesh['uv_stats']['finite'] and min(mesh['uv_stats']['extent'])>0,'invalid sea UVs')
             extent=np.ptp(p,axis=0)
-            require(1000<min(extent[[0,2]]) and max(extent)<10000,'unexpected sea dimensions')
+            require(1000<min(extent[[0,2]]) and max(extent)<60000,'unexpected sea dimensions')
         return f'{len(water)} flat upward sea mesh, finite nondegenerate UVs, coastal dimensions'
     check('sea_surface',sea_surface)
+    def landscape():
+        import shapely
+        from landscape import edge_height
+        land=[n for n in meshes if n['name'].startswith(('1GRASS_LAND_','LAND_'))]
+        version=json.loads((folder/'ui/ui_track.json').read_text()).get('version')
+        if not land:
+            require(version!='0.3','missing v0.3 landscape')
+            return 'no landscape in historical package'
+        require(all(n['lod_out']>=30000 for n in land),'landscape draw distance too short for horizon')
+        road=shapely.union_all(shapely.polygons(triangles[:,:,[0,2]]))
+        all_tri=np.concatenate([n['positions'][n['indices']] for n in land])
+        require(len(all_tri)<600000,'terrain triangle budget exceeded')
+        shapely.prepare(road);polygons=shapely.polygons(all_tri[:,:,[0,2]])
+        hit=shapely.intersects(road,polygons)
+        overlap=shapely.area(shapely.intersection(polygons[hit],road)).sum()
+        require(overlap<.01,f'landscape overlaps road: {overlap:.6f} m2')
+        visual=[n for n in land if n['name'].startswith('LAND_')]
+        visual_tri=np.concatenate([n['positions'][n['indices']] for n in visual]) if visual else np.empty((0,3,3))
+        band=road.buffer(145);shapely.prepare(band)
+        require(not len(visual_tri) or not shapely.intersects(band,shapely.polygons(visual_tri[:,:,[0,2]])).any(),'visual-only terrain within physical corridor')
+        ribbon=[n for n in meshes if n['name'].startswith(('1ROAD_','1KERB_','1GRAVEL_','1GRASS_')) and not n['name'].startswith('1GRASS_LAND_')]
+        strip=np.concatenate([n['positions'][n['indices']] for n in ribbon])
+        xyz,indices=np.unique(strip.reshape(-1,3),axis=0,return_inverse=True);indices=indices.reshape(-1,3)
+        edges=np.sort(np.concatenate([indices[:,[0,1]],indices[:,[1,2]],indices[:,[2,0]]]),axis=1)
+        edge_ids,count=np.unique(edges,axis=0,return_counts=True)
+        border=xyz[edge_ids[count==1]]
+        vertices=np.unique(all_tri.reshape(-1,3),axis=0)
+        segments=border[:,:,[0,2,1]].copy();segments[:,:,1]*=-1
+        xy=vertices[:,[0,2]].copy();xy[:,1]*=-1
+        distance,edge_z=edge_height(xy,segments);near=distance<1.5
+        clearance=edge_z-vertices[:,1]
+        require(near.any() and clearance[near].min()>.04,f'landscape above ribbon join: {clearance[near].min() if near.any() else "none"}')
+        return f'{len(all_tri)} triangles; physical/visual meshes={len(land)-len(visual)}/{len(visual)}; road overlap={overlap:.6f} m2; join clearance min={clearance[near].min():.3f} m'
+    check('landscape_geometry',landscape)
     def map_image():
         ini = configparser.ConfigParser();ini.read(folder/'data/map.ini');params=ini['PARAMETERS']
         with Image.open(folder/'map.png') as im:
