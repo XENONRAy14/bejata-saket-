@@ -5,15 +5,12 @@ data/*cache*
 data/dem/*.tif
 out/exporter_smoke/
 out/road.png
-out/bejaia_saket/*.kn5
 out/bejaia_saket/*.partial
 blend/*.blend*
 blend/*.kn5*
 !blend/bejaia_saket.blend
 *.log
-out/*.zip*
 data/*.partial
-out_backup_v1/
 data/research_cache/
 data/asset_cache/
 textures/v2/
@@ -22,4 +19,3 @@ out/preview/csp_material_fixes/*.blend
 data/landscape.npz
 data/vegetation.npz
 data/roadside.npz
-out/bejaia_saket/extension/trees/
