@@ -10,6 +10,7 @@ import numpy as np
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'scripts'))
 from blender_mesh import camera
+from shortening import active_chainage
 
 
 def main():
@@ -47,7 +48,12 @@ def main():
         i=int(np.searchsorted(data['s'],data['s'][-1]*fraction));j=int(np.searchsorted(data['s'],min(data['s'][-1],data['s'][i]+35)))
         views.append((f'road_{int(fraction*100):02d}',[*data['xy'][i],data['z'][i]+1.2],[*data['xy'][j],data['z'][j]+1.2]))
     houses=plan['placements'][(plan['placements'][:,0]==5)&(plan['placements'][:,8]<2000)]
-    for name,chainage in [('town',float(houses[len(houses)//2,8]-45)),('saket',float(data['s'][-1]-340))]:
+    locations=[('saket',float(data['s'][-1]-340))]
+    if len(houses):locations.insert(0,('town',float(houses[len(houses)//2,8]-45)))
+    if 'spawn_s' in data:
+        layout=json.loads((ROOT/'data/shortening_info.json').read_text())
+        locations.extend([('start',float(data['spawn_s'])),('summit',layout['summit_active_s_m'])])
+    for name,chainage in locations:
         i=int(np.searchsorted(data['s'],chainage));j=int(np.searchsorted(data['s'],chainage+50))
         point=np.r_[data['xy'][j],data['z'][i]+1.6]
         if name=='saket':point[:2]+=np.array([0,18])
@@ -87,7 +93,8 @@ def main():
         midpoint=(data['xy'].min(0)+data['xy'].max(0))/2
         views.insert(0,('top',[*midpoint,45000],[*midpoint,0]))
         landscape=np.load(ROOT/'data/landscape.npz')['vertices']
-        for name,chainage,offset in [('boulimat',18500,(550,-550)),('city',1000,(850,-650))]:
+        for name,chainage,offset in [('boulimat',active_chainage(data,18500),(550,-550)),('city',active_chainage(data,1000),(850,-650))]:
+            if not 0<=chainage<=data['s'][-1]:continue
             i=int(np.searchsorted(data['s'],chainage));xy=data['xy'][i]+offset
             nearby=landscape[np.linalg.norm(landscape[:,:2]-xy,axis=1)<1000,2]
             elevation=float(nearby.max()+500) if len(nearby) else 1200

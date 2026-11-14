@@ -1,36 +1,36 @@
 {
   "grid_points": {
-    "11": 121013,
-    "30": 66892,
-    "90": 19368,
-    "250": 4351
+    "11": 74722,
+    "30": 46307,
+    "90": 19111,
+    "250": 3793
   },
-  "triangles_added": 563317,
-  "vertices": 297377,
-  "physical_triangles": 156792,
-  "visual_triangles": 406525,
-  "rock_triangles": 21142,
-  "tiles": 692,
+  "triangles_added": 399583,
+  "vertices": 211770,
+  "physical_triangles": 101182,
+  "visual_triangles": 298401,
+  "rock_triangles": 15885,
+  "tiles": 532,
   "road_overlap_m2": 0.0,
-  "join_vertices": 46160,
+  "join_vertices": 29846,
   "join_clearance_m": [
     0.014999999999986358,
-    0.14288436322783937
+    0.2589709830201379
   ],
-  "sea_triangles": 3119,
+  "sea_triangles": 2971,
   "sea_extent_m": [
-    43250.0,
-    35072.8232421875
+    37750.0,
+    33257.44921875
   ],
   "backdrop_spacing_m": 250,
   "dem_source": "Copernicus GLO-30, cached N36E004/N36E005; 11m near grid is interpolation, not 11m survey",
   "noise_max_amplitude_m": 1.45,
   "noise_starts_road_distance_m": 100,
   "overlap_under_ribbon_m": 1,
-  "corridor_sha256_before_and_after": "97e1f7417c167c4b4fb19091a182b94de2367cf63250efa464579c1adadbc9f9",
-  "physical_meshes": 160,
-  "visual_meshes": 532,
-  "max_object_vertices": 3233,
-  "before_triangles": 491154,
-  "after_triangles": 1057188
+  "corridor_sha256_before_and_after": "163a51ecbd5bc1a5884d08af2fd670c19678b9427ebe2262efefe758ae27635f",
+  "physical_meshes": 109,
+  "visual_meshes": 423,
+  "max_object_vertices": 3280,
+  "before_triangles": 357588,
+  "after_triangles": 759740
 }

@@ -1,21 +1,21 @@
 {
   "seed": 24024,
   "placements": {
-    "pine": 418,
-    "olive": 357,
-    "shrub": 625,
-    "pole": 101,
-    "marker": 24,
-    "building": 40
+    "pine": 417,
+    "olive": 337,
+    "shrub": 646,
+    "pole": 69,
+    "marker": 15,
+    "building": 12
   },
-  "minimum_terrain_above_sea_m": 1.8480463951378543,
+  "minimum_terrain_above_sea_m": 7.218156892164057,
   "sea_elevation_m": 0,
   "offshore_extension_m": 1500,
   "beach_physical": false,
-  "triangles_added": 109026,
-  "mesh_objects_added": 297,
-  "vertices_added": 63768,
-  "max_object_vertices": 588,
+  "triangles_added": 103996,
+  "mesh_objects_added": 195,
+  "vertices_added": 60618,
+  "max_object_vertices": 756,
   "sea_triangles": 402,
   "beach_triangles": 180
 }

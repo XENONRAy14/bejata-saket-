@@ -9,6 +9,8 @@ import subprocess
 import numpy as np
 from PIL import Image, ImageDraw, ImageOps
 
+from shortening import road_distance
+
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT/'out/bejaia_saket'
 SURFACE_SOURCE = 'https://site.hagn.io/assettocorsa/modding/tracks/data/surfaces-ini'
@@ -48,7 +50,8 @@ def plan_empties(data):
     def heading_range(start):
         values = np.interp(np.linspace(start,start+120,121),s,heading)
         return float(np.ptp(values)*180/np.pi)
-    start = next((float(a) for a in np.arange(s[0],min(s[0]+1000,s[-1]-220),5) if heading_range(a) <= 3),None)
+    shortened='spawn_s' in data
+    start = float(data['spawn_s']) if shortened else next((float(a) for a in np.arange(s[0],min(s[0]+1000,s[-1]-220),5) if heading_range(a) <= 3),None)
     if start is None:
         raise ValueError('No reasonably straight 120 m staging section near start')
     seams = np.unique(np.r_[s[0],s[np.searchsorted(s,np.arange(400,s[-1],400))],s[-1]])
@@ -61,13 +64,22 @@ def plan_empties(data):
         xy += np.array([-tangent[1],tangent[0]])*offset
         yaw = math.atan2(tangent[0],-tangent[1])
         empties.append(dict(name=name,chainage_m=chainage,position_m=[*xy,z+1.5],yaw_deg=math.degrees(yaw),lateral_m=offset,road_height_m=z,chunk_seam_distance_m=float(np.min(abs(seams-chainage)))))
-    for i in range(4):
-        place(f'AC_PIT_{i}',clear_seam(start+15+8*i),-.25+(.02 if i%2 else -.02))
-    place('AC_START_0',clear_seam(start+63),-.25)
-    place('AC_START_1',clear_seam(start+55),-.25)
-    place('AC_HOTLAP_START_0',clear_seam(start+70),-.25)
-    gate_start = clear_seam(start+80)
-    finish = clear_seam(float(s[-1]-50))
+    if shortened:
+        d=road_distance(data);pole_d=float(np.interp(start,s,d))
+        for i in range(4):
+            station=float(np.interp(pole_d-i*8,d,s));lateral=0 if i==0 else (.2 if i%2 else -.2)
+            place(f'AC_PIT_{i}',station,lateral)
+            place(f'AC_START_{i}',station,lateral)
+        place('AC_HOTLAP_START_0',start,0)
+        gate_start=float(data['start_gate_s']);finish=float(np.interp(d[-1]-50,d,s))
+    else:
+        for i in range(4):
+            place(f'AC_PIT_{i}',clear_seam(start+15+8*i),-.25+(.02 if i%2 else -.02))
+        place('AC_START_0',clear_seam(start+63),-.25)
+        place('AC_START_1',clear_seam(start+55),-.25)
+        place('AC_HOTLAP_START_0',clear_seam(start+70),-.25)
+        gate_start = clear_seam(start+80)
+        finish = clear_seam(float(s[-1]-50))
     def gate(prefix,chainage):
         for letter,lateral in [('L',.5),('R',-.5)]:
             place(f'{prefix}_{letter}',chainage,lateral)
@@ -75,7 +87,7 @@ def plan_empties(data):
     gate('AC_AB_FINISH',finish)
     for i,fraction in enumerate((1/3,2/3)):
         gate(f'AC_TIME_{i}',clear_seam(gate_start+(finish-gate_start)*fraction))
-    return dict(empties=empties,initial_120m_heading_range_deg=heading_range(float(s[0])),staging_start_m=start,staging_end_m=start+120,staging_heading_range_deg=heading_range(start),start_gate_m=gate_start,finish_gate_m=finish,finish_runoff_m=float(s[-1]-finish),timed_length_m=finish-gate_start,spawn_height_offset_m=1.5,timing_convention='AB start/finish; TIME_0 and TIME_1 internal thirds per docs/AC_NOTES.md section 6; UNVERIFIED in AC')
+    return dict(empties=empties,initial_120m_heading_range_deg=heading_range(float(s[0])),staging_start_m=0 if shortened else start,staging_end_m=start+3 if shortened else start+120,staging_heading_range_deg=heading_range(start),start_gate_m=gate_start,finish_gate_m=finish,finish_runoff_m=float(s[-1]-finish),timed_length_m=finish-gate_start,spawn_height_offset_m=1.5,fixed_shortened_grid=shortened,timing_convention='AB start/finish; TIME_0 and TIME_1 internal thirds per docs/AC_NOTES.md section 6; UNVERIFIED in AC')
 
 
 def map_transform(xy, max_size=1600, padding=20):
@@ -130,7 +142,14 @@ def write_files(data, output=OUTPUT):
     (output/'data/surfaces.ini').write_text(surfaces_text(),encoding='utf-8')
     route = json.loads((ROOT/'data/route_info.json').read_text())
     lon,lat = route['start']['coords']
+    if 'spawn_s' in data:
+        from geometry import INVERSE
+        origin=json.loads((ROOT/'data/geo_origin.json').read_text())
+        pole=road_point(data,float(data['spawn_s']))[0]
+        lon,lat=INVERSE.transform(pole[0]+origin['easting_m'],pole[1]+origin['northing_m'])
     ui = dict(name='Béjaïa – Saket (RN24)',description='Coastal RN24 from Béjaïa to Saket. Point-to-point mountain road; provisional DSM-derived geometry. © OpenStreetMap contributors; produced using Copernicus WorldDEM-30; see CREDITS.md.',tags=['point-to-point','mountain','coastal'],geotags=[str(lat),str(lon)],country='Algeria',city='Béjaïa',length=f"{data['s'][-1]:.0f}m",width=f"{data['width'].min():.1f}m-{data['width'].max():.1f}m",pitboxes='4',run='Béjaïa → Saket · point-to-point',author='frite',version='0.1',year=2026,url='')
+    if 'spawn_s' in data:
+        ui.update(name='RN24 summit approach – Saket',description='Shortened RN24: spawn exactly 1000m of 3D road before the graded summit, then the main descent toward Saket. Includes a 30m rear grid pad. Copernicus DSM-derived, not surveyed. © OpenStreetMap contributors; see CREDITS.md.',length=f"{road_distance(data)[-1]:.0f}m",run='Summit approach → Saket · point-to-point')
     (output/'ui/ui_track.json').write_text(json.dumps(ui,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     ImageOps.fit(Image.open(ROOT/'out/preview/road_70.png').convert('RGB'),(355,200),method=Image.Resampling.LANCZOS).save(output/'ui/preview.png')
     draw_route(data['xy']*[1,-1],(355,200)).save(output/'ui/outline.png')

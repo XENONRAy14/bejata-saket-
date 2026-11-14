@@ -25,7 +25,7 @@ def main():
     plan = json.loads((ROOT/'data/acdata_info.json').read_text())
     data = np.load(ROOT/'data/centerline.npz')
     for obj in list(bpy.data.objects):
-        if obj.name.startswith('AC_') or obj.name in ('1WALL_END','__AC_END_CHECK'):
+        if obj.name.startswith('AC_') or obj.name in ('1WALL_END','1WALL_START_END','__AC_END_CHECK'):
             bpy.data.objects.remove(obj,do_unlink=True)
         elif obj.type in ('CAMERA','LIGHT') and not obj.name.startswith('__'):
             obj.name = '__'+obj.name
@@ -42,6 +42,12 @@ def main():
     for a,b in zip(cross_section,cross_section[1:]):
         add_box(verts,faces,a,b,.5,-.2,1.2)
     object_mesh('1WALL_END',verts,faces,bpy.data.materials['rock'])
+    if 'spawn_s' in data:
+        cross_section=np.concatenate([data['sides'][1,0,::-1],data['sides'][0,0]])
+        cross_section[:,:2]+=data['tangent'][0]*.5
+        verts,faces=[],[]
+        for a,b in zip(cross_section,cross_section[1:]):add_box(verts,faces,a,b,.8,-.5,1.5)
+        object_mesh('1WALL_START_END',verts,faces,bpy.data.materials['rock'])
     source = Path(os.environ.get('AC_ADDON_SOURCE',str(Path.home()/'tools/blender-assetto-corsa-tools')))
     addons = Path(bpy.utils.user_resource('SCRIPTS',path='addons',create=True))
     target = addons/'blender_assetto_corsa_tools'

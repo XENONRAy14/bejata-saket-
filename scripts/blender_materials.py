@@ -143,6 +143,7 @@ def main():
     settings=json.loads((ROOT/'blend/settings.json').read_text())
     for name,spec in info['materials'].items():settings['materials'][name]={k:v for k,v in spec.items() if k!='preview'}
     (ROOT/'blend/settings.json').write_text(json.dumps(settings,indent=2)+'\n')
+    bpy.ops.file.make_paths_relative()
     bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'blend/bejaia_saket.blend'),compress=True)
     exporter=importlib.import_module(target.name+'.exporter')
     original_writer=exporter.NodeWriter

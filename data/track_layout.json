@@ -1,0 +1,8 @@
+{
+  "summit_prominence_m": 100,
+  "minimum_main_descent_drop_m": 200,
+  "minimum_main_descent_length_m": 4000,
+  "spawn_before_summit_3d_m": 1000,
+  "pad_before_spawn_3d_m": 30,
+  "start_gate_ahead_3d_m": 3
+}

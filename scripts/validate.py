@@ -119,7 +119,7 @@ def validate(folder):
         require(physical and len(triangles)>0, 'missing physical geometry')
         bounds = np.array([n['bounds'] for n in physical if not n['name'].startswith('1GRASS_LAND_')])
         extents = bounds[:,1].max(axis=0)-bounds[:,0].min(axis=0)
-        require(np.isfinite(extents).all() and 11000<extents[0]<15000 and 7000<extents[2]<10000 and 280<extents[1]<450, f'implausible physical bbox {extents}')
+        require(np.isfinite(extents).all() and 6000<extents[0]<15000 and 2000<extents[2]<10000 and 280<extents[1]<450, f'implausible RN24 full/short physical bbox {extents}')
         sample = triangles[::max(1,len(triangles)//1000)]
         lengths = np.stack([np.linalg.norm((sample[:,a]-sample[:,b])[:,[0,2]],axis=1) for a,b in ((0,1),(1,2),(2,0))],axis=1)
         widths = np.sort(lengths,axis=1)[:,1]

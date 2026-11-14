@@ -17,15 +17,21 @@ class BuildTests(unittest.TestCase):
             build.main()
             render.assert_called_once()
 
+    def test_shortened_preview_views(self):
+        with tempfile.TemporaryDirectory() as folder,patch.object(build,'ROOT',Path(folder)),patch('sys.argv',['build.py','render','--views','decor_start','decor_summit']),patch('materials.render') as render:
+            build.main()
+            self.assertEqual(render.call_args.kwargs['views'],['decor_start','decor_summit'])
+
     def test_default_and_explicit_all_order(self):
         for arguments in (['build.py'],['build.py','all'],['build.py','all','--kn5-vegetation']):
             with self.subTest(arguments=arguments),tempfile.TemporaryDirectory() as folder:
                 with patch.object(build,'ROOT',Path(folder)),patch('sys.argv',arguments),patch('build.subprocess.run') as run,patch('build.package') as package,contextlib.redirect_stdout(io.StringIO()):
                     build.main()
-                self.assertEqual([c.args[0][2] for c in run.call_args_list[:-1]],['assets','route','dem','centerline','mesh','acdata','decor','materials','landscape','vegetation','roadside','csp'])
-                self.assertTrue(run.call_args_list[-1].args[0][1].endswith('scripts/validate.py'))
+                self.assertEqual([c.args[0][2] for c in run.call_args_list[:-2]],['assets','route','dem','centerline','mesh','acdata','decor','materials','landscape','vegetation','roadside','csp'])
+                self.assertTrue(run.call_args_list[-2].args[0][1].endswith('scripts/validate.py'))
+                self.assertTrue(run.call_args_list[-1].args[0][1].endswith('scripts/validate_shortened.py'))
                 self.assertTrue(all(c.kwargs['check'] for c in run.call_args_list))
-                self.assertTrue(all(('--kn5-vegetation' in c.args[0])==('--kn5-vegetation' in arguments) for c in run.call_args_list[:-1]))
+                self.assertTrue(all(('--kn5-vegetation' in c.args[0])==('--kn5-vegetation' in arguments) for c in run.call_args_list[:-2]))
                 package.assert_called_once()
 
     def test_all_stops_on_failure(self):

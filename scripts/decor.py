@@ -10,6 +10,7 @@ from pyproj import Transformer
 from scipy.spatial import cKDTree
 
 from acdata import ROOT, write_files
+from shortening import active_chainage, canonical_chainage
 
 SEED = 24024
 COLORS = dict(bark=(91,74,48),pine_foliage=(49,81,39),olive_foliage=(109,124,84),maquis=(74,96,47),plaster=(229,223,201),sand=(208,190,139),water=(32,107,146),marker_red=(173,39,32))
@@ -94,7 +95,7 @@ def scatter(data,seed=SEED,vegetation_count=1400):
         if len(entries) >= vegetation_count:
             break
         chainage = float(rng.uniform(0,data['s'][-1]))
-        if (chainage < 2000 or chainage > 23300) and rng.random() > .2:
+        if (canonical_chainage(data,chainage) < 2000 or canonical_chainage(data,chainage) > 23300) and rng.random() > .2:
             continue
         kind = int(rng.choice(3,p=[.3,.25,.45]))
         scale = float(rng.uniform(.75,1.25))
@@ -105,7 +106,8 @@ def scatter(data,seed=SEED,vegetation_count=1400):
         if upper > lower:
             place(kind,chainage,side,float(rng.uniform(lower,upper)),scale,int(rng.integers(3)))
     for chainage in np.arange(25,data['s'][-1]-10,50):
-        if chainage < 2000 or 18000 < chainage < 20500 or chainage > 23100:
+        source=canonical_chainage(data,chainage)
+        if source < 2000 or 18000 < source < 20500 or source > 23100:
             for offset in (10,14,20):
                 if place(3,float(chainage),1,offset,1,int(rng.integers(2))):
                     break
@@ -123,7 +125,8 @@ def scatter(data,seed=SEED,vegetation_count=1400):
                 break
         if not placed:
             raise ValueError(f'No terrain site for kilometre marker {chainage}')
-    for lower,upper,target in ((60,2000,28),(23200,float(data['s'][-1]-20),12)):
+    for lower,upper,target in ((active_chainage(data,60),active_chainage(data,2000),28),(active_chainage(data,23200),float(data['s'][-1]-20),12)):
+        lower=max(0,lower)
         upper = min(upper,float(data['s'][-1]-20))
         if upper <= lower:
             continue
@@ -167,7 +170,7 @@ def coast_chain(cache,origin,data):
     chain = min(chains,key=lambda p: np.linalg.norm(p-data['xy'][-1],axis=1).min())
     along = np.r_[0,np.cumsum(np.linalg.norm(np.diff(chain,axis=0),axis=1))]
     near_finish = int(np.argmin(np.linalg.norm(chain-data['xy'][-1],axis=1)))
-    near_boulimat = int(np.argmin(np.linalg.norm(chain-data['xy'][np.searchsorted(data['s'],18500)],axis=1)))
+    near_boulimat = int(np.argmin(np.linalg.norm(chain-data['xy'][np.searchsorted(data['s'],np.clip(active_chainage(data,18500),0,data['s'][-1]))],axis=1)))
     low,high = sorted((along[near_finish],along[near_boulimat]))
     selected = chain[(along>=low-1200)&(along<=high+1200)]
     a,b = sorted((int(np.argmin(selected[:,0])),int(np.argmax(selected[:,0]))))

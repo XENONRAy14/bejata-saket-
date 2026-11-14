@@ -18,6 +18,8 @@ from scipy.spatial import cKDTree
 from scipy.interpolate import BSpline, CubicSpline
 from scipy import sparse
 
+from shortening import derive_layout
+
 ROOT = Path(__file__).resolve().parents[1]
 FORWARD = Transformer.from_crs(4326, 32631, always_xy=True)
 INVERSE = Transformer.from_crs(32631, 4326, always_xy=True)
@@ -370,16 +372,21 @@ def centerline():
     median_dem = median_filter(raw,size=11,mode='nearest')
     interval = (s >= 11000)&(s <= 19000)
     metrics.update(mean_abs_median_dem_error_m=float(np.mean(abs(z-median_dem))),max_abs_median_dem_error_m=float(np.max(abs(z-median_dem))),mean_signed_elevation_error_11_19km_m=float(np.mean((z-filtered)[interval])),max_curvature_change_per_m2=float(np.max(abs(np.gradient(curvature,s)))))
-    np.savez_compressed(ROOT/'data/centerline.npz', xy=xy, z=z, s=s, raw=raw, filtered=filtered, width=widths, normal=normal, tangent=tangent, sides=points, offsets=np.array(offsets), guard=np.array(guard), cut=np.array(cut))
+    full=dict(xy=xy,z=z,s=s,raw=raw,filtered=filtered,width=widths,normal=normal,tangent=tangent,sides=np.array(points),offsets=np.array(offsets),guard=np.array(guard),cut=np.array(cut))
+    active,metrics=derive_layout(full,metrics)
+    xy,z,s,raw,filtered=(active[key] for key in ('xy','z','s','raw','filtered'))
     (ROOT/'data/geometry_info.json').write_text(json.dumps(metrics, indent=2)+'\n')
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     fig, ax = plt.subplots(figsize=(14,4))
-    ax.plot(s/1000, raw, color='#a4a4a4', lw=.7, label='Raw bilinear DSM')
-    ax.plot(s/1000,filtered,color='#4378a8',lw=.8,label='Median / Gaussian target')
-    ax.plot(s/1000, z, color='#d44a2d', lw=1.4, label='Filtered / grade-limited road')
-    ax.set(xlabel='Chainage (km)', ylabel='Elevation (m, DSM datum)', title='Béjaïa → Saket | elevation profile (DSM, not surveyed road)')
+    distance=active['s3'];spawn=float(np.interp(float(active['spawn_s']),s,distance))
+    ax.plot((distance-spawn)/1000, raw, color='#a4a4a4', lw=.7, label='Raw bilinear DSM')
+    ax.plot((distance-spawn)/1000,filtered,color='#4378a8',lw=.8,label='Median / Gaussian target')
+    ax.plot((distance-spawn)/1000, z, color='#d44a2d', lw=1.4, label='Retained road (no new smoothing)')
+    ax.axvline(0,color='#333333',lw=1,label='Vehicle spawn')
+    ax.axvline(1,color='#4378a8',lw=1,ls='--',label='Main summit: 1.000 km from spawn')
+    ax.set(xlabel='3D road distance from pole spawn (km)', ylabel='Elevation (m, DSM datum)', title='RN24 summit approach → Saket | shortened elevation profile (not surveyed)')
     ax.legend()
     ax.grid(alpha=.2)
     fig.tight_layout()

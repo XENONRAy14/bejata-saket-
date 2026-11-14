@@ -1,0 +1,37 @@
+{
+  "length_m": 24086.99719490741,
+  "length_3d_m": 24114.40798497126,
+  "samples": 12045,
+  "min_elevation_m": 6.002015925267251,
+  "max_elevation_m": 323.2385278402941,
+  "max_grade_percent": 14.000000000002785,
+  "total_climb_m": 464.44478425679586,
+  "min_radius_m": 18.802253679626002,
+  "max_xy_deviation_m": 14.72139987099048,
+  "max_sample_displacement_m": 14.742138050715672,
+  "max_grade_change_per_m": 0.0010000000000894228,
+  "width_range_m": [
+    6.5,
+    7.000000000000002
+  ],
+  "actual_min_width_m": 6.5,
+  "narrowed_length_m": 0.0,
+  "min_terrain_extent_m": 8.177848818586952,
+  "ribbon_boundary_crossings": 0,
+  "guardrail_m": [
+    1869.9447365733974,
+    4781.821469466495
+  ],
+  "cut_m": [
+    6975.7497204717,
+    2955.884300366767
+  ],
+  "mean_abs_elevation_error_m": 0.2832646826145631,
+  "max_abs_elevation_error_m": 5.107343041825715,
+  "mean_signed_elevation_error_m": -3.282323973248469e-10,
+  "max_heading_change_rad_per_m": 0.05328856607038742,
+  "mean_abs_median_dem_error_m": 0.39944474412496966,
+  "max_abs_median_dem_error_m": 6.354654321021002,
+  "mean_signed_elevation_error_11_19km_m": 0.00029210052375506026,
+  "max_curvature_change_per_m2": 0.00489045949514569
+}

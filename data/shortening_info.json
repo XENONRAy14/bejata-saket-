@@ -1,0 +1,28 @@
+{
+  "canonical_length_2d_m": 24086.99719490741,
+  "canonical_length_3d_m": 24114.407984971294,
+  "canonical_summit_index": 4796,
+  "canonical_summit_2d_m": 9591.580550868364,
+  "canonical_summit_3d_m": 9602.888437123813,
+  "summit_elevation_m": 323.2385278402941,
+  "canonical_cut_2d_m": 8562.969746767489,
+  "canonical_cut_3d_m": 8572.888437123813,
+  "canonical_spawn_2d_m": 8592.950603809251,
+  "canonical_spawn_3d_m": 8602.888437123813,
+  "spawn_s_m": 29.980857041762647,
+  "start_gate_s_m": 32.98022589420907,
+  "spawn_before_summit_3d_m": 1000.0,
+  "pad_3d_m": 30.0,
+  "start_gate_ahead_3d_m": 3.0,
+  "length_2d_m": 15524.027448139921,
+  "length_3d_m": 15541.519547847447,
+  "main_descent_drop_m": 269.7201217899156,
+  "main_descent_length_3d_m": 5633.719737850639,
+  "retained_original_samples": 7763,
+  "spawn_lon_lat": [
+    5.026555990213126,
+    36.77504324966629
+  ],
+  "spawn_elevation_m": 283.9510271106833,
+  "summit_active_s_m": 1028.6108041008756
+}

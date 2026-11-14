@@ -1,6 +1,10 @@
 # Béjaïa → Saket: Assetto Corsa track preparation
 
-Phases 0–5 plus v2 materials: a 24.24 km OSM-derived Béjaïa city-center → Saket coastal RN24 track, with Copernicus DSM elevation, procedural Blender geometry/decor, validated KN5 install folder and ZIP. **The user reports v1 loads and drives in AC; v2 materials still require AC/CSP/Pure acceptance testing.** This is a provisional, unsurveyed low-poly reconstruction, not a claim of racing accuracy.
+The active layout is now **RN24 summit approach → Saket**: **15.512 km from the pole spawn to the road endpoint**, plus a **30 m rear grid pad** (15.542 km of physical road total). The Béjaïa city climb is removed from the exported scene, not hidden. The pole practice/grid/hotlap spawn is exactly **1,000 m of 3D centerline distance before the main graded summit**. That summit is at old 2D km 9.591581 / 3D km 9.602888, elevation 323.239 m, and precedes a 5.634 km main descent with a 269.720 m net drop.
+
+Rebuild with `.venv/bin/python scripts/build.py all`. `data/track_layout.json` controls summit qualification, the 1 km approach and the rear pad. `data/route.geojson` / `route.gpx` and `full_centerline.npz` retain the **canonical source route** for reproducibility; **`data/active_route.geojson` / `active_route.gpx` and `centerline.npz` are the shortened playable route**. Do not install source archives as the track; install `out/bejaia_saket.zip`, including its real KN5 and external TreeFX files. Cloning the repository requires Git LFS; GitHub source ZIP LFS inclusion depends on repository archive settings, so use a clone with `git lfs pull` to ensure complete binaries.
+
+See `docs/SHORTENED_LAYOUT.md` for exact distances, grid/timing choices and the in-game checklist. Earlier sections below describe historical passes and may quote their old lengths/counts. The user confirmed the earlier track loads and TreeFX/GrassFX work, but **this shortened layout still requires real AC/CSP/Pure testing**, including collisions and timing. This is a provisional Copernicus DSM reconstruction, not surveyed racing geometry.
 
 ## CSP / Content Manager settings
 

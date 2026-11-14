@@ -128,6 +128,13 @@ def main():
     faces = [tuple(reversed(f)) if np.cross(np.asarray(sea[f[1]])-sea[f[0]],np.asarray(sea[f[2]])-sea[f[0]])[2]<0 else f for f in faces]
     object_mesh('DECOR_SEA',plan['sea'],faces,bpy.data.materials['water'])
     object_mesh('DECOR_BEACH',plan['beach'],plan['beach_faces'].tolist(),bpy.data.materials['sand'])
+    if 'start_gate_s' in data:
+        station=float(data['start_gate_s']);s=data['s']
+        right=np.array([np.interp(station,s,data['sides'][1,:,0,j]) for j in range(3)])
+        left=np.array([np.interp(station,s,data['sides'][0,:,0,j]) for j in range(3)])
+        tangent=np.array([np.interp(station,s,data['tangent'][:,j]) for j in range(2)])
+        half=np.r_[tangent*.12,0];lift=np.array([0,0,.012])
+        object_mesh('DECOR_START_LINE',[right-half+lift,right+half+lift,left+half+lift,left-half+lift],[(0,1,2,3)],bpy.data.materials['plaster'])
     meshes = [obj for obj in bpy.data.objects if obj.type=='MESH' and obj.name.startswith('DECOR_')]
     triangles = sum(sum(len(p.vertices)-2 for p in obj.data.polygons) for obj in meshes)
     assert triangles <= 150000, f'Decor budget exceeded: {triangles}'
@@ -150,10 +157,14 @@ def main():
         scene.render.filepath = str(ROOT/f'out/preview/road_{int(fraction*100):02d}.png')
         if not os.environ.get('BS_SKIP_RENDER'):bpy.ops.render.render(write_still=True)
     houses = plan['placements'][(plan['placements'][:,0]==5)&(plan['placements'][:,8]<2000)]
-    town_chainage = float(houses[len(houses)//2,8]-45)
-    for label,chainage in [('town',town_chainage),('saket',float(data['s'][-1]-340))]:
+    locations=[('saket',float(data['s'][-1]-340))]
+    if len(houses):locations.insert(0,('town',float(houses[len(houses)//2,8]-45)))
+    if 'spawn_s' in data:
+        layout=json.loads((ROOT/'data/shortening_info.json').read_text())
+        locations.extend([('start',float(data['spawn_s'])),('summit',layout['summit_active_s_m'])])
+    for label,chainage in locations:
         i = int(np.searchsorted(data['s'],chainage))
-        j = int(np.searchsorted(data['s'],chainage+50))
+        j = min(len(data['s'])-1,int(np.searchsorted(data['s'],chainage+50)))
         target = np.r_[data['xy'][j],data['z'][i]+1.6]
         if label=='saket':
             target[:2] += np.array([0,18])

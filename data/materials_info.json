@@ -1712,7 +1712,7 @@
       "mips": 12,
       "bytes": 2796344,
       "gpu_bytes": 2796216,
-      "sha256": "2eb8c8da550e8a40e93873ab461895e291282b0f063b25aa64166e810a56f22e",
+      "sha256": "e349b787d732314e938e6c2cbd7ce35002a39787a23b4f150752d122dc593cad",
       "file": "textures/v2/asphalt_junction_0_macro.dds"
     },
     "asphalt_junction_0_mask.dds": {
@@ -1722,7 +1722,7 @@
       "mips": 12,
       "bytes": 5592560,
       "gpu_bytes": 5592432,
-      "sha256": "bac32a5a9c7d8ce3938cbd20c02af1654c992fa494df4ef2e9764c88550fa9f0",
+      "sha256": "5a320de7fa754e62c4edfc7e616d71050c2ddd67e12db2d148216ebe4b700307",
       "file": "textures/v2/asphalt_junction_0_mask.dds"
     },
     "asphalt_junction_1_macro.dds": {
@@ -1732,7 +1732,7 @@
       "mips": 12,
       "bytes": 2796344,
       "gpu_bytes": 2796216,
-      "sha256": "213446cc2164ba53c351cc96b7b924db0267d9f11e5c5a8cc4aa87aa662540ea",
+      "sha256": "345459b634d33e2518744f774f7c35ab1c89c1ef615db01031c12d5a6c6e4018",
       "file": "textures/v2/asphalt_junction_1_macro.dds"
     },
     "asphalt_junction_1_mask.dds": {
@@ -1742,7 +1742,7 @@
       "mips": 12,
       "bytes": 5592560,
       "gpu_bytes": 5592432,
-      "sha256": "78e36e53d45a70e2409d8a00a4f78df246581ba7238798cb62ef11d19ddfa010",
+      "sha256": "19f1179c6d7ee739ab25f0ffc59d869812a485169730945decabb3b8e7756800",
       "file": "textures/v2/asphalt_junction_1_mask.dds"
     },
     "asphalt_junction_2_macro.dds": {
@@ -1752,7 +1752,7 @@
       "mips": 12,
       "bytes": 2796344,
       "gpu_bytes": 2796216,
-      "sha256": "5948852f38595b524aa89c77c45da665d52e8d2115ec7d58c2747fe541ca8e06",
+      "sha256": "09e7312678e9917be60a521c7bac88906a2af0aa47e6edc33801cbe060b9b1ef",
       "file": "textures/v2/asphalt_junction_2_macro.dds"
     },
     "asphalt_junction_2_mask.dds": {
@@ -1762,7 +1762,7 @@
       "mips": 12,
       "bytes": 5592560,
       "gpu_bytes": 5592432,
-      "sha256": "dfa46608df53d1355a976dcf585aadf9b3865bcc7dd74134bb0cd38010f5a9cd",
+      "sha256": "44424556c6295b697ba0eb94a298eda7cc54dd7ce1bd79474f45eb815411603c",
       "file": "textures/v2/asphalt_junction_2_mask.dds"
     },
     "terrain_macro.dds": {
@@ -1828,26 +1828,26 @@
   },
   "junction_arrows": [
     {
-      "chunk": 3,
-      "chainage_m": 1202.9065601654304,
+      "chunk": 2,
+      "chainage_m": 1007.6107148353385,
       "material": "asphalt_junction_0"
     },
     {
-      "chunk": 7,
-      "chainage_m": 3174.8523748180733,
+      "chunk": 33,
+      "chainage_m": 13547.076423533981,
       "material": "asphalt_junction_1"
     },
     {
-      "chunk": 23,
-      "chainage_m": 9570.580461602827,
+      "chunk": 26,
+      "chainage_m": 10689.18762537693,
       "material": "asphalt_junction_2"
     }
   ],
   "dds_gpu_bytes": 96470464,
-  "geometry_sha256_before_and_after": "2cccc85ba9459638354400429eb33d40a63647d62f4b60db3c8c1baff6d45559",
-  "kn5_bytes": 189724615,
-  "kn5_sha256": "fb1e21f779b09ab154d56ab598c5db39408d2f112675a064b462a474e042330c",
-  "export_seconds": 28.78485132700007,
+  "geometry_sha256_before_and_after": "b0ba6ca73558e7f9d6e2686300673263b31c6fe71e5d650b531b69ca6162cddc",
+  "kn5_bytes": 160628830,
+  "kn5_sha256": "7256881bd34fa636df3ffb886846b982cb1aa6b6d98e800b865b628c9cbcb8f0",
+  "export_seconds": 18.002169528001104,
   "warnings": [
     "Unknown logical object 'AC_AB_FINISH_L' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it.",
     "Unknown logical object 'AC_AB_FINISH_R' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it.",
@@ -1891,7 +1891,7 @@
       "mips": 12,
       "bytes": 2796344,
       "gpu_bytes": 2796216,
-      "sha256": "2eb8c8da550e8a40e93873ab461895e291282b0f063b25aa64166e810a56f22e"
+      "sha256": "e349b787d732314e938e6c2cbd7ce35002a39787a23b4f150752d122dc593cad"
     },
     "asphalt_junction_0_mask.dds": {
       "width": 2048,
@@ -1900,25 +1900,7 @@
       "mips": 12,
       "bytes": 5592560,
       "gpu_bytes": 5592432,
-      "sha256": "bac32a5a9c7d8ce3938cbd20c02af1654c992fa494df4ef2e9764c88550fa9f0"
-    },
-    "asphalt_junction_1_macro.dds": {
-      "width": 2048,
-      "height": 2048,
-      "format": "DXT1",
-      "mips": 12,
-      "bytes": 2796344,
-      "gpu_bytes": 2796216,
-      "sha256": "213446cc2164ba53c351cc96b7b924db0267d9f11e5c5a8cc4aa87aa662540ea"
-    },
-    "asphalt_junction_1_mask.dds": {
-      "width": 2048,
-      "height": 2048,
-      "format": "DXT5",
-      "mips": 12,
-      "bytes": 5592560,
-      "gpu_bytes": 5592432,
-      "sha256": "78e36e53d45a70e2409d8a00a4f78df246581ba7238798cb62ef11d19ddfa010"
+      "sha256": "5a320de7fa754e62c4edfc7e616d71050c2ddd67e12db2d148216ebe4b700307"
     },
     "asphalt_junction_2_macro.dds": {
       "width": 2048,
@@ -1927,7 +1909,7 @@
       "mips": 12,
       "bytes": 2796344,
       "gpu_bytes": 2796216,
-      "sha256": "5948852f38595b524aa89c77c45da665d52e8d2115ec7d58c2747fe541ca8e06"
+      "sha256": "09e7312678e9917be60a521c7bac88906a2af0aa47e6edc33801cbe060b9b1ef"
     },
     "asphalt_junction_2_mask.dds": {
       "width": 2048,
@@ -1936,7 +1918,43 @@
       "mips": 12,
       "bytes": 5592560,
       "gpu_bytes": 5592432,
-      "sha256": "dfa46608df53d1355a976dcf585aadf9b3865bcc7dd74134bb0cd38010f5a9cd"
+      "sha256": "44424556c6295b697ba0eb94a298eda7cc54dd7ce1bd79474f45eb815411603c"
+    },
+    "asphalt_junction_1_macro.dds": {
+      "width": 2048,
+      "height": 2048,
+      "format": "DXT1",
+      "mips": 12,
+      "bytes": 2796344,
+      "gpu_bytes": 2796216,
+      "sha256": "345459b634d33e2518744f774f7c35ab1c89c1ef615db01031c12d5a6c6e4018"
+    },
+    "asphalt_junction_1_mask.dds": {
+      "width": 2048,
+      "height": 2048,
+      "format": "DXT5",
+      "mips": 12,
+      "bytes": 5592560,
+      "gpu_bytes": 5592432,
+      "sha256": "19f1179c6d7ee739ab25f0ffc59d869812a485169730945decabb3b8e7756800"
+    },
+    "road_0_macro.dds": {
+      "width": 2048,
+      "height": 2048,
+      "format": "DXT1",
+      "mips": 12,
+      "bytes": 2796344,
+      "gpu_bytes": 2796216,
+      "sha256": "dd2d76d4053f937e4409301a739b4322b739693bc0186c308285a4850fccaa06"
+    },
+    "road_0_mask.dds": {
+      "width": 2048,
+      "height": 2048,
+      "format": "DXT5",
+      "mips": 12,
+      "bytes": 5592560,
+      "gpu_bytes": 5592432,
+      "sha256": "41db50d07f0162c712ea525e4f3b503d5a2dfbe2f6e989a8bdaaa73ea72a81eb"
     },
     "road_1_macro.dds": {
       "width": 2048,
@@ -1973,24 +1991,6 @@
       "bytes": 5592560,
       "gpu_bytes": 5592432,
       "sha256": "96b35d0248519844fab17f77241aa3feadd18f9404e9e97b6da6ea70fc9901da"
-    },
-    "road_0_macro.dds": {
-      "width": 2048,
-      "height": 2048,
-      "format": "DXT1",
-      "mips": 12,
-      "bytes": 2796344,
-      "gpu_bytes": 2796216,
-      "sha256": "dd2d76d4053f937e4409301a739b4322b739693bc0186c308285a4850fccaa06"
-    },
-    "road_0_mask.dds": {
-      "width": 2048,
-      "height": 2048,
-      "format": "DXT5",
-      "mips": 12,
-      "bytes": 5592560,
-      "gpu_bytes": 5592432,
-      "sha256": "41db50d07f0162c712ea525e4f3b503d5a2dfbe2f6e989a8bdaaa73ea72a81eb"
     },
     "asphalt_diffuse.dds": {
       "width": 1024,
@@ -2091,33 +2091,6 @@
       "mips": 1,
       "sha256": "4139d1694ec016e64e4d32e7222f3bd9929d86afb9b361ff02e584b878a345b3"
     },
-    "metal_diffuse.dds": {
-      "width": 1024,
-      "height": 1024,
-      "format": "DXT1",
-      "mips": 11,
-      "bytes": 699192,
-      "gpu_bytes": 699064,
-      "sha256": "210e861f348472b7a87c831bca54d34db59ce4b8a20e50c6570d690d4b926342"
-    },
-    "metal_normal.dds": {
-      "width": 1024,
-      "height": 1024,
-      "format": "DXT5",
-      "mips": 11,
-      "bytes": 1398256,
-      "gpu_bytes": 1398128,
-      "sha256": "0b276a1d94087aa2c827a15dbe054a446da00a754ddd8101be6b65012f5441ac"
-    },
-    "metal_maps.dds": {
-      "width": 1024,
-      "height": 1024,
-      "format": "DXT1",
-      "mips": 11,
-      "bytes": 699192,
-      "gpu_bytes": 699064,
-      "sha256": "04b4336f72c4ae8b0255e1e456c34c080a904de2d99c1dbac69a7906df6027b9"
-    },
     "roadside_concrete.dds": {
       "width": 1024,
       "height": 1024,
@@ -2126,15 +2099,6 @@
       "bytes": 699192,
       "gpu_bytes": 699064,
       "sha256": "bfc1277a537dafa4f8c63fe03634672b48b3bc8eaaa6ac4b1b1b297de651dc3f"
-    },
-    "roadside_signs.dds": {
-      "width": 1024,
-      "height": 1024,
-      "format": "DXT1",
-      "mips": 11,
-      "bytes": 699192,
-      "gpu_bytes": 699064,
-      "sha256": "35cfd569c9b5005f0d5640c6c50650aa4877d65e2f2d843403ff85fbadae260b"
     },
     "bark_diffuse.dds": {
       "width": 1024,
@@ -2172,6 +2136,33 @@
       "mips": 1,
       "sha256": "19658b82bd089a943c4c89129743019c9abdfa122c7a34a73cb1fe73b5fe04eb"
     },
+    "metal_diffuse.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT1",
+      "mips": 11,
+      "bytes": 699192,
+      "gpu_bytes": 699064,
+      "sha256": "210e861f348472b7a87c831bca54d34db59ce4b8a20e50c6570d690d4b926342"
+    },
+    "metal_normal.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT5",
+      "mips": 11,
+      "bytes": 1398256,
+      "gpu_bytes": 1398128,
+      "sha256": "0b276a1d94087aa2c827a15dbe054a446da00a754ddd8101be6b65012f5441ac"
+    },
+    "metal_maps.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT1",
+      "mips": 11,
+      "bytes": 699192,
+      "gpu_bytes": 699064,
+      "sha256": "04b4336f72c4ae8b0255e1e456c34c080a904de2d99c1dbac69a7906df6027b9"
+    },
     "plaster_diffuse.dds": {
       "width": 1024,
       "height": 1024,
@@ -2207,6 +2198,15 @@
       "bytes": 1398256,
       "gpu_bytes": 1398128,
       "sha256": "f96e32a58d0df6e5df20f3f4140a4ee42cad9017b2fa2f2b62a666e63dfad22b"
+    },
+    "roadside_signs.dds": {
+      "width": 1024,
+      "height": 1024,
+      "format": "DXT1",
+      "mips": 11,
+      "bytes": 699192,
+      "gpu_bytes": 699064,
+      "sha256": "35cfd569c9b5005f0d5640c6c50650aa4877d65e2f2d843403ff85fbadae260b"
     },
     "terrain_macro.dds": {
       "width": 2048,

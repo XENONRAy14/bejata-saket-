@@ -12,6 +12,7 @@ from check_kn5 import inspect_kn5
 from materials import material_spec
 from vegetation import Terrain, blender_triangles
 from foliage import encode_coverage_dds
+from shortening import active_chainage
 
 
 class Mesh:
@@ -153,7 +154,8 @@ def plan(data,houses,terrain):
         if board(int(i),side,1 if side else 0,width=.9,height=.6):
             selected.append(int(i));counts['chevrons']+=1
         if counts['chevrons']>=36:break
-    for chainage in (250,1050,2400,float(data['s'][-1]-600)):
+    for chainage in (*[active_chainage(data,s) for s in (250,1050,2400)],float(data['s'][-1]-600)):
+        if not 0 <= chainage <= data['s'][-1]:continue
         i=min(len(data['s'])-1,int(np.searchsorted(data['s'],chainage)))
         if board(i,0,2):counts['speed_signs']+=1
     for house in houses[::max(1,len(houses)//36)]:
@@ -169,7 +171,8 @@ def plan(data,houses,terrain):
                 for height in (.4,.85):batch(i,'bark').box(point+np.r_[tangent*.75,height],[1.5,.07,.10],tangent)
             placed=True
         counts['fences']+=int(placed)
-    for chainage in (550,1450):
+    for chainage in (active_chainage(data,550),active_chainage(data,1450)):
+        if not 0 <= chainage <= data['s'][-1]:continue
         i=min(len(data['s'])-1,int(np.searchsorted(data['s'],chainage)));point=at(i,0,1.3)
         if point is None:continue
         tangent=data['tangent'][i];normal=np.array([-tangent[1],tangent[0]])
@@ -269,8 +272,8 @@ def render(blender):
     folder=ROOT/'out/preview/v2_roadside';preview=ROOT/'data/research_cache/vegetation_preview.blend'
     subprocess.run([blender,'--background',str(preview),'--python-exit-code','1','--python',str(ROOT/'scripts/blender_material_preview.py'),'--','after'],check=True,
                    env=dict(os.environ,BS_COMPARISON_DIR=str(folder),BS_VEGETATION_PREVIEW='1',BS_ROADSIDE_PREVIEW='1'))
-    names=('road_10','road_40','road_70','road_95','decor_town','decor_saket','trees_closeup','hero_tree','wall_closeup','guardrail_closeup','low_sun')
-    canvas=Image.new('RGB',(1920,4*382),(25,25,25));draw=ImageDraw.Draw(canvas)
+    names=('road_10','road_40','road_70','road_95',*(['decor_town'] if 'spawn_s' not in np.load(ROOT/'data/centerline.npz') else ['decor_start','decor_summit']),'decor_saket','trees_closeup','hero_tree','wall_closeup','guardrail_closeup','low_sun')
+    canvas=Image.new('RGB',(1920,((len(names)+2)//3)*382),(25,25,25));draw=ImageDraw.Draw(canvas)
     for i,name in enumerate(names):
         x=(i%3)*640;y=(i//3)*382
         with Image.open(folder/'after'/f'{name}.png') as im:canvas.paste(ImageOps.fit(im.convert('RGB'),(640,360)),(x,y))

@@ -11,6 +11,7 @@ from scipy.spatial import cKDTree
 from geometry import ROOT
 from check_kn5 import inspect_kn5
 from foliage import SEED,SPECIES,prototype,generate_textures
+from shortening import canonical_chainage
 
 
 class Terrain:
@@ -65,12 +66,12 @@ def corridor_candidates(data):
         if layer in (5,6):higher=1-higher
         outward=data['sides'][higher,ids,2,:2]-data['xy'][ids];outward/=np.linalg.norm(outward,axis=1)[:,None]
         for j,i in enumerate(ids):
-            s=data['s'][i];wave=np.sin(s/63)+.45*np.sin(s/19)
+            s=canonical_chainage(data,data['s'][i]);wave=np.sin(s/63)+.45*np.sin(s/19)
             if layer in (5,6) and np.sin(s/117)>.8:continue
             distance=offset+(wave*.3 if layer in (4,5) else wave*2)
             kind=4 if layer in (4,5) else (2 if s<2600 or s>22500 else (0 if rng.random()<.75 else 1))
             if layer==1 and (s<2600 or s>22500) and rng.random()<.17:kind=3
-            points.append(data['xy'][i]+outward[j]*(data['width'][i]/2+distance)+data['tangent'][i]*(chainage[j]-s+rng.uniform(-.3,.3)))
+            points.append(data['xy'][i]+outward[j]*(data['width'][i]/2+distance)+data['tangent'][i]*(chainage[j]-data['s'][i]+rng.uniform(-.3,.3)))
             kinds.append(kind);angles.append(float(np.arctan2(data['tangent'][i,1],data['tangent'][i,0])+rng.uniform(-.12,.12)) if kind==4 else float(rng.uniform(0,2*np.pi)))
             scales.append(float(rng.uniform(1,1.1)) if layer==4 else float(rng.uniform(.83,1.08)) if layer!=5 else float(rng.uniform(.88,1.02)))
     order=rng.permutation(len(points))
@@ -120,7 +121,7 @@ def generate(root=ROOT,quality=True):
             vertices=np.concatenate([mesh.vertices for lod in (0,1) for mesh in prototype(4,variant,lod,quality=True).values() if mesh.vertices])
             outlines[variant]=shapely.get_coordinates(shapely.convex_hull(shapely.multipoints(vertices[:,:2])))
     for i,point in enumerate(xy):
-        s=data['s'][nearest[i]];near_building=building_distance[i]<50
+        s=canonical_chainage(data,data['s'][nearest[i]]);near_building=building_distance[i]<50
         mountain=np.dot(point-data['xy'][nearest[i]],data['normal'][nearest[i]])>0
         r=rng.random()
         if quality and mountain and edge_distance[i]<18 and r<.8:kind=4
@@ -148,7 +149,7 @@ def generate(root=ROOT,quality=True):
                     if np.linalg.norm(point-np.asarray(plants[previous][2:4]))<separation:valid=False
         if not valid or total_cost+cost[kind,variant]>budget:continue
         tint=int(rng.choice(3,p=(.25,.18,.57) if kind==2 else (.56,.32,.12)))
-        entry=[kind,variant,*point,float(heights[i]),float(preferred_angle[i]) if quality else float(rng.uniform(0,2*np.pi)),scale,tint,int(s//400),*normals[i],float(edge_distance[i]),float(slope[i])]
+        entry=[kind,variant,*point,float(heights[i]),float(preferred_angle[i]) if quality else float(rng.uniform(0,2*np.pi)),scale,tint,int(data['s'][nearest[i]]//400),*normals[i],float(edge_distance[i]),float(slope[i])]
         plants.append(entry);clearances.append(clearance);grid.setdefault(cell,[]).append(len(plants)-1);total_cost+=cost[kind,variant]
         if len(plants)>=(8000 if quality else 5000):break
     if not plants:raise ValueError('No valid vegetation placements')
@@ -182,8 +183,8 @@ def render(blender):
     subprocess.run([blender,'-b',str(preview if preview.exists() else ROOT/'blend/bejaia_saket.blend'),'--python-exit-code','1','-P',str(ROOT/'scripts/blender_material_preview.py'),'--','after'],
         check=True,cwd=ROOT,env=dict(os.environ,BS_COMPARISON_DIR=str(folder),BS_VEGETATION_PREVIEW='1'))
     from PIL import Image,ImageDraw,ImageOps
-    names=('road_10','road_40','road_70','road_95','decor_town','decor_saket','trees_closeup')
-    canvas=Image.new('RGB',(1920,3*382),(25,25,25));draw=ImageDraw.Draw(canvas)
+    names=('road_10','road_40','road_70','road_95',*(['decor_town'] if 'spawn_s' not in np.load(ROOT/'data/centerline.npz') else ['decor_start','decor_summit']),'decor_saket','trees_closeup')
+    canvas=Image.new('RGB',(1920,((len(names)+2)//3)*382),(25,25,25));draw=ImageDraw.Draw(canvas)
     for i,name in enumerate(names):
         x,y=(i%3)*640,(i//3)*382
         canvas.paste(ImageOps.fit(Image.open(folder/'after'/(name+'.png')).convert('RGB'),(640,360)),(x,y+22));draw.text((x+8,y+5),name+' (Cycles CPU)',fill='white')

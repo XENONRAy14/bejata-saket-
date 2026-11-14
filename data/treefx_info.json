@@ -1,12 +1,22 @@
 {
   "mode": "TreeFX",
-  "instances": 8000,
-  "models": 40,
+  "instances": 6805,
+  "models": 41,
   "model_lod_metrics": {
-    "aleppo_pine_1_dark.bin": [
+    "aleppo_pine_2_dark.bin": [
       {
         "triangles": 1212,
         "vertices": 2424
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "olive_2_silver.bin": [
+      {
+        "triangles": 1236,
+        "vertices": 2472
       },
       {
         "triangles": 8,
@@ -23,10 +33,70 @@
         "vertices": 16
       }
     ],
+    "maquis_0.bin": [
+      {
+        "triangles": 200,
+        "vertices": 400
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "olive_1_silver.bin": [
+      {
+        "triangles": 1236,
+        "vertices": 2472
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "aleppo_pine_1.bin": [
+      {
+        "triangles": 1212,
+        "vertices": 2424
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
     "maquis_1_dark.bin": [
       {
         "triangles": 200,
         "vertices": 400
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "maquis_1.bin": [
+      {
+        "triangles": 200,
+        "vertices": 400
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "maquis_2_silver.bin": [
+      {
+        "triangles": 200,
+        "vertices": 400
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "aleppo_pine_2_silver.bin": [
+      {
+        "triangles": 1212,
+        "vertices": 2424
       },
       {
         "triangles": 8,
@@ -43,20 +113,40 @@
         "vertices": 16
       }
     ],
-    "olive_0_silver.bin": [
+    "aleppo_pine_2.bin": [
       {
-        "triangles": 1236,
-        "vertices": 2472
+        "triangles": 1212,
+        "vertices": 2424
       },
       {
         "triangles": 8,
         "vertices": 16
       }
     ],
-    "olive_1_silver.bin": [
+    "stone_pine_1.bin": [
       {
-        "triangles": 1236,
-        "vertices": 2472
+        "triangles": 1212,
+        "vertices": 2424
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "maquis_2_dark.bin": [
+      {
+        "triangles": 200,
+        "vertices": 400
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "maquis_1_silver.bin": [
+      {
+        "triangles": 200,
+        "vertices": 400
       },
       {
         "triangles": 8,
@@ -83,277 +173,7 @@
         "vertices": 16
       }
     ],
-    "maquis_0.bin": [
-      {
-        "triangles": 200,
-        "vertices": 400
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "stone_pine_2.bin": [
-      {
-        "triangles": 1212,
-        "vertices": 2424
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "maquis_2_dark.bin": [
-      {
-        "triangles": 200,
-        "vertices": 400
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "aleppo_pine_2_dark.bin": [
-      {
-        "triangles": 1212,
-        "vertices": 2424
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "maquis_1.bin": [
-      {
-        "triangles": 200,
-        "vertices": 400
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "aleppo_pine_1.bin": [
-      {
-        "triangles": 1212,
-        "vertices": 2424
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
     "aleppo_pine_0_dark.bin": [
-      {
-        "triangles": 1212,
-        "vertices": 2424
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "aleppo_pine_0_silver.bin": [
-      {
-        "triangles": 1212,
-        "vertices": 2424
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "maquis_2_silver.bin": [
-      {
-        "triangles": 200,
-        "vertices": 400
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "maquis_0_silver.bin": [
-      {
-        "triangles": 200,
-        "vertices": 400
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "aleppo_pine_2.bin": [
-      {
-        "triangles": 1212,
-        "vertices": 2424
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "stone_pine_0_dark.bin": [
-      {
-        "triangles": 1212,
-        "vertices": 2424
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "aleppo_pine_2_silver.bin": [
-      {
-        "triangles": 1212,
-        "vertices": 2424
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "olive_0_dark.bin": [
-      {
-        "triangles": 1236,
-        "vertices": 2472
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "maquis_1_silver.bin": [
-      {
-        "triangles": 200,
-        "vertices": 400
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "stone_pine_1.bin": [
-      {
-        "triangles": 1212,
-        "vertices": 2424
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "stone_pine_2_dark.bin": [
-      {
-        "triangles": 1212,
-        "vertices": 2424
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "olive_2_silver.bin": [
-      {
-        "triangles": 1236,
-        "vertices": 2472
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "olive_2_dark.bin": [
-      {
-        "triangles": 1236,
-        "vertices": 2472
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "olive_1.bin": [
-      {
-        "triangles": 1236,
-        "vertices": 2472
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "stone_pine_1_dark.bin": [
-      {
-        "triangles": 1212,
-        "vertices": 2424
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "aleppo_pine_1_silver.bin": [
-      {
-        "triangles": 1212,
-        "vertices": 2424
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "olive_1_dark.bin": [
-      {
-        "triangles": 1236,
-        "vertices": 2472
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "olive_2.bin": [
-      {
-        "triangles": 1236,
-        "vertices": 2472
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "stone_pine_1_silver.bin": [
-      {
-        "triangles": 1212,
-        "vertices": 2424
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "stone_pine_0.bin": [
-      {
-        "triangles": 1212,
-        "vertices": 2424
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "cypress_1.bin": [
-      {
-        "triangles": 202,
-        "vertices": 404
-      },
-      {
-        "triangles": 8,
-        "vertices": 16
-      }
-    ],
-    "stone_pine_2_silver.bin": [
       {
         "triangles": 1212,
         "vertices": 2424
@@ -373,7 +193,177 @@
         "vertices": 16
       }
     ],
-    "cypress_0.bin": [
+    "olive_0_silver.bin": [
+      {
+        "triangles": 1236,
+        "vertices": 2472
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "olive_1_dark.bin": [
+      {
+        "triangles": 1236,
+        "vertices": 2472
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "stone_pine_0.bin": [
+      {
+        "triangles": 1212,
+        "vertices": 2424
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "aleppo_pine_1_dark.bin": [
+      {
+        "triangles": 1212,
+        "vertices": 2424
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "maquis_0_silver.bin": [
+      {
+        "triangles": 200,
+        "vertices": 400
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "aleppo_pine_1_silver.bin": [
+      {
+        "triangles": 1212,
+        "vertices": 2424
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "olive_1.bin": [
+      {
+        "triangles": 1236,
+        "vertices": 2472
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "stone_pine_2.bin": [
+      {
+        "triangles": 1212,
+        "vertices": 2424
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "stone_pine_0_dark.bin": [
+      {
+        "triangles": 1212,
+        "vertices": 2424
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "aleppo_pine_0_silver.bin": [
+      {
+        "triangles": 1212,
+        "vertices": 2424
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "olive_2.bin": [
+      {
+        "triangles": 1236,
+        "vertices": 2472
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "stone_pine_2_dark.bin": [
+      {
+        "triangles": 1212,
+        "vertices": 2424
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "stone_pine_1_dark.bin": [
+      {
+        "triangles": 1212,
+        "vertices": 2424
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "olive_2_dark.bin": [
+      {
+        "triangles": 1236,
+        "vertices": 2472
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "olive_0_dark.bin": [
+      {
+        "triangles": 1236,
+        "vertices": 2472
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "stone_pine_1_silver.bin": [
+      {
+        "triangles": 1212,
+        "vertices": 2424
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "stone_pine_2_silver.bin": [
+      {
+        "triangles": 1212,
+        "vertices": 2424
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "cypress_2_silver.bin": [
       {
         "triangles": 202,
         "vertices": 404
@@ -394,6 +384,26 @@
       }
     ],
     "cypress_2.bin": [
+      {
+        "triangles": 202,
+        "vertices": 404
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "cypress_1.bin": [
+      {
+        "triangles": 202,
+        "vertices": 404
+      },
+      {
+        "triangles": 8,
+        "vertices": 16
+      }
+    ],
+    "cypress_0.bin": [
       {
         "triangles": 202,
         "vertices": 404

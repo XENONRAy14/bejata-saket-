@@ -107,7 +107,7 @@ def main():
     parser.add_argument('--roadside',action='store_true')
     parser.add_argument('--kn5-vegetation',action='store_true',help='Use regular KN5 foliage instead of TreeFX/GrassFX')
     parser.add_argument('--terrain',action='store_true')
-    parser.add_argument('--views',nargs='+',choices=['road_10','road_40','road_70','road_95','decor_town','decor_saket'])
+    parser.add_argument('--views',nargs='+',choices=['road_10','road_40','road_70','road_95','decor_town','decor_saket','decor_start','decor_summit'])
     parser.add_argument('--blender', default=str(Path.home() / 'tools/blender-3.6.23-linux-x64/blender'))
     parser.add_argument('--list-places', action='store_true')
     args = parser.parse_args()
@@ -120,6 +120,7 @@ def main():
             subprocess.run([sys.executable, str(ROOT/'scripts/build.py'), stage, '--blender', args.blender]+(['--kn5-vegetation'] if args.kn5_vegetation else []), check=True)
         package()
         subprocess.run([sys.executable, str(ROOT/'scripts/validate.py')], check=True)
+        subprocess.run([sys.executable, str(ROOT/'scripts/validate_shortened.py')], check=True)
         print(f'ALL_OK seconds={time.monotonic()-started:.3f}', flush=True)
         return
     if args.stage == 'assets':
