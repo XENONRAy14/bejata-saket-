@@ -6,6 +6,7 @@ from pathlib import Path
 import re
 
 import numpy as np
+import shapely
 from PIL import Image
 from scipy.spatial import cKDTree
 
@@ -45,6 +46,7 @@ def validate(folder):
         require(not missing, f'missing {missing}')
         allowed = set(REQUIRED) | {folder.name+'.kn5'}
         extra = {str(p.relative_to(folder)) for p in folder.rglob('*') if p.is_file()}-allowed
+        extra={p for p in extra if not (p.startswith('extension/trees/') and len(Path(p).parts)==3 and Path(p).suffix in ('.bin','.txt','.dds'))}
         require(not extra, f'unexpected install files {sorted(extra)}')
         return f'{len(allowed)} install files'
     check('required_files', files)
@@ -138,6 +140,7 @@ def validate(folder):
         entries=parsed.get('materials',[])
         require(entries,'no materials')
         slots={'ksPerPixel':['txDiffuse'],
+               'ksPerPixelAT':['txDiffuse'],
                'ksPerPixelMultiMap':['txDiffuse','txNormal','txMaps','txDetail'],
                'ksMultilayer_fresnel_nm4':['txDiffuse','txMask']+[f'txDetail{c}' for c in 'RGBA']+[f'txNormal{c}' for c in 'RGBA']}
         for mat in entries:
@@ -145,14 +148,15 @@ def validate(folder):
             expected=slots[mat['shader']]
             require(list(mat['textures'])==expected,f'incorrect named texture slots for {mat["name"]}')
             require(mat['texture_slots']=={k:i for i,k in enumerate(expected)},f'incorrect numeric slots for {mat["name"]}')
-            require((mat['blend'],mat['alpha_tested'],mat['depth'])==(0,False,0),f'unexpected transparency/depth for {mat["name"]}')
+            flags=(2,True,0) if mat['shader']=='ksPerPixelAT' else (0,False,0)
+            require((mat['blend'],mat['alpha_tested'],mat['depth'])==flags,f'unexpected transparency/depth for {mat["name"]}')
             require(mat['properties'] and all(np.isfinite(list(mat['properties'].values()))),f'invalid shader properties for {mat["name"]}')
         for mesh in meshes:
             if entries[mesh['material']]['shader']=='ksPerPixel':continue
             stats=mesh['tangent_stats']
             require(stats['finite'] and max(stats['normal_length_error'],stats['tangent_length_error'],stats['max_normal_dot_tangent'])<.001,f'invalid normal/tangent basis: {mesh["name"]}')
         ui_data=json.loads((folder/'ui/ui_track.json').read_text())
-        if ui_data.get('version') in ('0.2','0.3'):
+        if ui_data.get('version') in ('0.2','0.3','0.4'):
             recipe=json.loads((ROOT/'data/materials_info.json').read_text())
             actual={m['name']:m for m in entries}
             for name,spec in recipe['materials'].items():
@@ -163,7 +167,7 @@ def validate(folder):
                 require(all(np.isclose(mat['properties'][k],v['valueA']) for k,v in spec['properties'].items()),f'property values differ from recipe: {name}')
             for name,expected in recipe['textures'].items():
                 require(parsed['texture_info'].get(name,{}).get('sha256')==expected['sha256'],f'embedded DDS differs from generated recipe: {name}')
-        return f'{len(entries)} materials; shader, ordered slots, properties and opaque/depth flags valid'
+        return f'{len(entries)} materials; shader, ordered slots, properties and reviewed blend/depth flags valid'
     check('materials_and_shaders',materials)
     def dds_headers():
         info=parsed.get('texture_info',{})
@@ -199,12 +203,11 @@ def validate(folder):
         return f'{len(water)} flat upward sea mesh, finite nondegenerate UVs, coastal dimensions'
     check('sea_surface',sea_surface)
     def landscape():
-        import shapely
         from landscape import edge_height
         land=[n for n in meshes if n['name'].startswith(('1GRASS_LAND_','LAND_'))]
         version=json.loads((folder/'ui/ui_track.json').read_text()).get('version')
         if not land:
-            require(version!='0.3','missing v0.3 landscape')
+            require(version not in ('0.3','0.4'),'missing v0.3+ landscape')
             return 'no landscape in historical package'
         require(all(n['lod_out']>=30000 for n in land),'landscape draw distance too short for horizon')
         road=shapely.union_all(shapely.polygons(triangles[:,:,[0,2]]))
@@ -232,6 +235,61 @@ def validate(folder):
         require(near.any() and clearance[near].min()>.04,f'landscape above ribbon join: {clearance[near].min() if near.any() else "none"}')
         return f'{len(all_tri)} triangles; physical/visual meshes={len(land)-len(visual)}/{len(visual)}; road overlap={overlap:.6f} m2; join clearance min={clearance[near].min():.3f} m'
     check('landscape_geometry',landscape)
+    def vegetation():
+        veg=[n for n in meshes if n['name'].startswith('DECOR_VEG_')]
+        version=json.loads((folder/'ui/ui_track.json').read_text()).get('version')
+        if not veg:
+            config=configparser.ConfigParser();config.read(folder/'extension/ext_config.ini')
+            if config.has_section('TREES'):
+                from treefx import validate_model,validate_foliage_texture
+                listing=folder/'extension'/config['TREES']['LIST_0']
+                require(listing.is_file(),'missing external TreeFX list')
+                lines=listing.read_text().splitlines();require(bool(lines),'empty TreeFX list')
+                names=set();instances=[]
+                for line in lines:
+                    parts=line.split(';');name=parts[0].removeprefix('tree: ').strip()
+                    require(Path(name).name==name and name.endswith('.bin'),'unsafe external tree model name')
+                    values=dict(p.strip().split('=',1) for p in parts[1:]);xyz=[float(v) for v in values['pos'].split(',')]
+                    require(len(xyz)==3 and np.isfinite(xyz).all() and float(values['size'])>0,'invalid external tree transform')
+                    require(np.isfinite([float(values['angle']),float(values['width']),*[float(v) for v in values['color'].split(',')]]).all(),'invalid external tree colour/rotation')
+                    names.add(name);instances.append((name,xyz,float(values['size'])))
+                metrics={name:validate_model(listing.parent/name,geometry=True) for name in names}
+                require(all(len(lods)==2 for lods in metrics.values()),'external TreeFX LOD missing')
+                radii={name:max(np.linalg.norm(lod['positions'][:,[0,2]],axis=1).max() for lod in lods) for name,lods in metrics.items()}
+                road=shapely.union_all(shapely.polygons(triangles[:,:,[0,2]]))
+                centers=np.asarray([xyz for _,xyz,_ in instances])[:,[0,2]]
+                distances=shapely.distance(road,shapely.points(centers))
+                clearance=distances-np.array([radii[name]*scale for name,_,scale in instances])
+                require(clearance.min()>3.999,'external canopy violates 4m road-edge clearance')
+                require(not any(n['name'].endswith(('_pine_foliage','_olive_foliage','_maquis')) for n in meshes),'old foliage remains')
+                total=sum(n['triangles'] for n in meshes)+sum(sum(lod['triangles'] for lod in metrics[name]) for name,_,_ in instances)
+                require(total<1600000,'base plus instantiated tree LOD triangle budget exceeded')
+                require(config['GRASS_FX'].get('TEXTURE_GROUP_0_CHANCE')=='0.14','missing GrassFX replacement group')
+                validate_foliage_texture((folder/'extension'/config['GRASS_FX']['TEXTURE']).read_bytes())
+                return f'external TreeFX: {len(lines)} instances / {len(names)} models; {total} base+instantiated LOD triangles; clearance min={clearance.min():.3f} m; binary/alpha coverage valid; GrassFX tufts/scrub'
+            require(version!='0.4','missing v0.4 vegetation')
+            return 'no replacement foliage in historical package'
+        require(sum(n['triangles'] for n in meshes)<1600000,'total vegetation/track triangle budget exceeded')
+        require(not any(n['name'].endswith(('_pine_foliage','_olive_foliage','_maquis')) for n in meshes),'old block foliage remains')
+        lod0=[n for n in veg if n['name'].startswith('DECOR_VEG_L0_')];lod1=[n for n in veg if n['name'].startswith('DECOR_VEG_L1_')]
+        require(lod0 and lod1,'missing foliage LOD')
+        require(all((n['lod_in'],n['lod_out'])==(0,150) for n in lod0),'wrong LOD0 range')
+        require(all((n['lod_in'],n['lod_out'])==(150,600) for n in lod1),'wrong LOD1 range')
+        require({n['name'].split('_')[3] for n in lod0}=={n['name'].split('_')[3] for n in lod1},'unpaired vegetation chunks')
+        road=shapely.union_all(shapely.polygons(triangles[:,:,[0,2]])).buffer(4)
+        shapely.prepare(road)
+        faces=np.concatenate([n['positions'][n['indices']] for n in veg])
+        require(not shapely.intersects(road,shapely.polygons(faces[:,:,[0,2]])).any(),'vegetation inside 4m road-edge clearance')
+        cards=[m for m in parsed['materials'] if m['name'].startswith(('veg_canopy','veg_impostor'))]
+        require(len(cards)==6 and all(m['shader']=='ksPerPixelAT' for m in cards),'missing cutout materials')
+        from foliage import coverage_report
+        for m in cards:
+            name=m['textures']['txDiffuse'];t=parsed['texture_info'][name]
+            require((t['width'],t['height'],t['mips'],t['format'])==(1024,1024,11,'DXT5'),'invalid foliage DDS')
+            coverage=np.asarray(coverage_report(parsed['texture_blobs'][name]))
+            require(np.max(abs(coverage[:7]-coverage[0]))<.13,'foliage alpha coverage lost in mips')
+        return f'{len(lod0)} LOD0 / {len(lod1)} LOD1 meshes; six 1K BC3 atlases; alpha coverage verified'
+    check('vegetation',vegetation)
     def map_image():
         ini = configparser.ConfigParser();ini.read(folder/'data/map.ini');params=ini['PARAMETERS']
         with Image.open(folder/'map.png') as im:

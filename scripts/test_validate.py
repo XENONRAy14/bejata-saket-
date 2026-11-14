@@ -51,7 +51,7 @@ class ValidationTests(unittest.TestCase):
     def test_valid_package(self):
         passed,output=self.run_check(scene())
         self.assertTrue(passed,output)
-        self.assertIn('VALIDATION_PASS checks=16 passed=16',output)
+        self.assertIn('VALIDATION_PASS checks=17 passed=17',output)
 
     def test_geometry_and_binary_semantic_failures(self):
         mutations={
@@ -88,6 +88,15 @@ class ValidationTests(unittest.TestCase):
         passed,output=self.run_check(parsed)
         self.assertFalse(passed);self.assertIn('FAIL sea_surface',output)
 
+    def test_external_tree_list_missing_empty_and_invalid(self):
+        config=self.folder/'extension/ext_config.ini'
+        config.write_text(config.read_text()+'\n[TREES]\nLIST_0=trees/trees.txt\n')
+        passed,output=self.run_check(scene());self.assertFalse(passed);self.assertIn('FAIL vegetation',output)
+        trees=self.folder/'extension/trees';trees.mkdir()
+        for text in ('','tree: ../unsafe.bin; pos=0,0,0; size=1'):
+            (trees/'trees.txt').write_text(text)
+            passed,output=self.run_check(scene());self.assertFalse(passed);self.assertIn('FAIL vegetation',output)
+
     def test_landscape_overlap_height_and_physical_failures(self):
         parsed=scene()
         land=copy.deepcopy(parsed['nodes'][-1]);land.update(name='1GRASS_LAND_000_grass',material=2,lod_out=60000,
@@ -108,6 +117,13 @@ class ValidationTests(unittest.TestCase):
             with contextlib.redirect_stdout(io.StringIO()) as output:
                 self.assertFalse(validate(folder))
             self.assertIn('FAIL kn5_readback',output.getvalue())
+
+    def test_verified_alpha_to_coverage_flags(self):
+        parsed=scene();parsed['materials'][0].update(shader='ksPerPixelAT',blend=2,alpha_tested=True)
+        parsed['nodes'][-1]['tangent_stats']=dict(finite=True,normal_length_error=0,tangent_length_error=0,max_normal_dot_tangent=0)
+        passed,output=self.run_check(parsed);self.assertTrue(passed,output)
+        parsed['materials'][0]['alpha_tested']=False
+        passed,output=self.run_check(parsed);self.assertFalse(passed);self.assertIn('FAIL materials_and_shaders',output)
 
     def test_zip_root_contents_and_reproducibility(self):
         with contextlib.redirect_stdout(io.StringIO()):

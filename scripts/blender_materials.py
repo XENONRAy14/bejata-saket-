@@ -47,6 +47,13 @@ def material_nodes(mat, spec):
         node.assettoCorsa.shaderInputName = slot
         node.show_texture = True
         textures[slot] = node
+    if spec['preview']['kind']=='foliage':
+        links.new(textures['txDiffuse'].outputs['Color'],shader.inputs['Base Color'])
+        clip=nodes.new('ShaderNodeMath');clip.operation='GREATER_THAN';clip.inputs[1].default_value=.3
+        links.new(textures['txDiffuse'].outputs['Alpha'],clip.inputs[0]);links.new(clip.outputs[0],shader.inputs['Alpha'])
+        mat.blend_method='CLIP';mat.alpha_threshold=.3
+        mat.assettoCorsa.alphaBlendMode='2';mat.assettoCorsa.alphaTested=True;mat.assettoCorsa.depthMode='0'
+        return
     def math_node(operation,a,b):
         n=nodes.new('ShaderNodeMath');n.operation=operation
         for socket,value in zip(n.inputs,(a,b)):
@@ -111,6 +118,7 @@ def apply(info):
                 mat=obj.data.materials[poly.material_index]
                 if mat.name not in specs:continue
                 spec=specs[mat.name]
+                if spec['preview']['kind']=='foliage':continue
                 scale=spec['preview'].get('tile_m',spec['preview'].get('period_m',1))
                 normal=np.abs(poly.normal)
                 for index in poly.loop_indices:
@@ -189,7 +197,7 @@ def main():
         assert mat['shader']==spec['shaderName']
         assert mat['textures']=={k:v['textureName'] for k,v in spec['textures'].items()}
         assert mat['texture_slots']=={k:i for i,k in enumerate(spec['textures'])}
-        assert (mat['blend'],mat['alpha_tested'],mat['depth'])==(0,False,0)
+        assert (mat['blend'],mat['alpha_tested'],mat['depth'])==((2,True,0) if spec['preview']['kind']=='foliage' else (0,False,0))
         assert mat['properties'].keys()==spec['properties'].keys()
         for k,v in spec['properties'].items():assert np.isclose(mat['properties'][k],v['valueA'])
     for name,expected in info['textures'].items():assert parsed['texture_info'][name]['sha256']==expected['sha256'],name
@@ -197,7 +205,7 @@ def main():
     info.update(geometry_sha256_before_and_after=original,kn5_bytes=parsed['bytes'],kn5_sha256=hashlib.sha256(path.read_bytes()).hexdigest(),export_seconds=time.monotonic()-started,warnings=warnings,
                 embedded_texture_count=len(parsed['textures']),texture_gpu_bytes=sum(t['gpu_bytes'] for t in parsed['texture_info'].values()),embedded_textures=parsed['texture_info'],kn5_materials=sorted(actual))
     (ROOT/'data/materials_info.json').write_text(json.dumps(info,indent=2)+'\n')
-    ui_path=path.parent/'ui/ui_track.json';ui=json.loads(ui_path.read_text());ui['version']='0.3' if any(o.name.startswith('LAND_') for o in bpy.data.objects) else '0.2';ui_path.write_text(json.dumps(ui,ensure_ascii=False,indent=2)+'\n')
+    ui_path=path.parent/'ui/ui_track.json';ui=json.loads(ui_path.read_text());ui['version']='0.4' if any(o.name.startswith('DECOR_VEG_') for o in bpy.data.objects) or (ROOT/'out/bejaia_saket/extension/trees/trees.txt').exists() else ('0.3' if any(o.name.startswith('LAND_') for o in bpy.data.objects) else '0.2');ui_path.write_text(json.dumps(ui,ensure_ascii=False,indent=2)+'\n')
     print(f'MATERIAL_EXPORT_OK materials={len(actual)} textures={len(parsed["textures"])} bytes={parsed["bytes"]} geometry_unchanged=True')
     print('MATERIAL_WARNINGS',json.dumps(warnings))
 

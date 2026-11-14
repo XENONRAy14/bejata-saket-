@@ -37,9 +37,14 @@ def generate(root=ROOT):
     groups=dict(grass=selected(roles['terrain']),road=selected(roles['road']),
         occluders=selected(roles['road']+['kerb','gravel','rock','sand','plaster','metal']),
         soaking=selected(roles['road']+['kerb','gravel','plaster']),smooth=selected(['metal']),
-        rough=selected(roles['terrain']+['gravel','rock','sand','bark','maquis','olive_foliage','pine_foliage']),
+        rough=selected(roles['terrain']+['gravel','rock','sand','bark']+[n for n in names if n in ('maquis','olive_foliage','pine_foliage') or n.startswith(('veg_canopy','veg_impostor'))]),
         water=selected(['water']))
     text=Template((root/'scripts/ext_config.ini.template').read_text()).substitute(groups)
+    tree_info=root/'data/treefx_info.json'
+    if tree_info.exists() and json.loads(tree_info.read_text()).get('mode')=='TreeFX':
+        text+='\n; CSP wiki Tracks–Trees:29–69: external model instances.\n[TREES]\nLIST_0 = trees/trees.txt\n'
+        text=text.replace('[GRASS_FX]\n','[GRASS_FX]\n; CSP wiki Tracks–Grass-FX:211–255: procedural dry tufts and low maquis.\nTEXTURE = trees/grass.dds\nTEXTURE_GRID = 4, 2\nTEXTURE_GROUP_0_CHANCE = 0.14\n')
+        text+='\n; Same GrassFX source; columns start at 1, rows at 0.\n[GRASS_FX_TEXTURE_GROUP_0]\nPIECE_0 = 3, 1\nPIECE_0_SIZE_MULT = 0.8, 1.0\nPIECE_1 = 1, 1\nPIECE_1_CHANCE = 0.3\nPIECE_1_SIZE_MULT = 1.4, 1.7\n'
     _,references=config_materials(text)
     if not references<=names:raise ValueError('Config refers to missing material')
     output=root/'out/bejaia_saket/extension';output.mkdir(parents=True,exist_ok=True)

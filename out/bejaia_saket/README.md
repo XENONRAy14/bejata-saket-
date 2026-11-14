@@ -360,6 +360,72 @@ First check folder nesting and Practice mode, collect the logs above, and run `s
 
 The sourced alternative workflow is **Blender/modeler → FBX → KsEditor → KN5** ([workflow discussion](https://assettocorsamods.net/threads/need-some-advices-to-start-workflow.2757/), [FBX import/shader/export explanation](https://assettocorsamods.net/threads/is-there-a-guide-to-adding-cones-to-a-mod-track.1682/)). On a Windows machine with the AC SDK, use the supplied `blend/bejaia_saket.blend` as the source, export an FBX, import that FBX in KsEditor, assign/check shaders/textures and logical objects, and export a replacement KN5 under the same filename; preserve the original and revalidate/retest. This is a high-level fallback, **not a verified click-by-click recipe**. Directly opening this KN5 in KsEditor, exact FBX export settings/axis conversion, material persistence, UI menu labels and a full KsEditor round trip are **UNVERIFIED** here. Do not blindly reuse the direct exporter's empty rotations for a different FBX conversion; recheck axes against repository `docs/AC_NOTES.md` and the basic guide before testing.
 
+### Phase 4b: procedural Mediterranean vegetation
+
+`build.py vegetation` replaces the old solid foliage from a 5,000-plant deterministic,
+clustered, terrain-snapped plants: Aleppo/stone pines, olives, Italian cypress,
+maquis, reeds and dry grass, each with three shape variants and three atlas tints.
+Placement favours the mountain side, rejects slopes above 35 degrees, sea/beach
+and buildings, and leaves at least 4 m between the complete canopy and road edge.
+Roots sample actual exported terrain triangles; foliage is visual-only. Road,
+kerb, shoulder and terrain geometry and physical surface definitions are retained.
+Far planting beyond 300 m from the route is deliberately skipped. **TreeFX is the
+default**: 3,272 terrain-snapped tree/reed instances in 41 external model archives.
+Low maquis and dry tufts move to terrain-only GrassFX custom atlas groups, replacing
+1,728 explicit placements with native surface scattering (not the same positions).
+Enable Grass FX and TreeFX support in a current CSP build. No CM model conversion
+step is required: the Linux writer and reader follow the pinned open-source CM
+converter field by field; see [docs/TREEFX_FORMAT.md](docs/TREEFX_FORMAT.md).
+The Linux build uses system `libxxhash.so.0` (Ubuntu package `libxxhash0`) for
+the exact texture checksum required by that format; it is installed on this VM.
+
+Six procedural 1024-square BC3/DXT5 atlases (canopy/impostor in three tints) have
+11 mip levels with per-species alpha-coverage scaling. Cards have explicit
+reversed back faces and canopy-outward custom normals. For the fallback, `ksPerPixelAT`,
+`alphaTested=true`, AlphaToCoverage (2), normal depth writes and `txDiffuse`
+are verified against the shader/exporter sources cited in `docs/CSP_NOTES.md`.
+Bark reuses the accepted PBR material. Default tree shaders are native TreeFX;
+they are not KN5 material replacements. TreeFX's source has native height-driven
+wind, but actual runtime dispatch/appearance remains unverified; no custom wind
+keys/weights are added. Fallback wind is deferred. GrassFX uses the verified
+`TEXTURE`, `TEXTURE_GRID`, `GRASS_FX_TEXTURE_GROUP_0` and chance/size keys; syntax
+sources are cited beside the generated sections and in the format document.
+
+External models provide full LOD0 and two-card LOD1 with distances 150/600 m;
+TreeFX owns per-instance culling, instancing and native distant billboards.
+`build.py vegetation --kn5-vegetation` (also supported by `all`) instead exports
+all species in merged 400 m route chunks, full LOD0 at 0–150 m and two crossed,
+double-sided impostor cards at 150–600 m, then cull. These are object-distance ranges, not
+individual-tree distances: chunk-level popping and final transitions need AC
+testing. Exporter support: `exporter/node_writer.py:39–40,182–183` in
+[blender-assetto-corsa-tools](https://github.com/moppius/blender-assetto-corsa-tools).
+The fallback has 427 vegetation objects; 1,057,188 → 1,517,726 total triangles
+(LOD0 519,138, LOD1 40,000), under the approximately 1.6M target.
+Fallback KN5 has 1,711 meshes, 20 materials, 46 textures and 201,061,253 bytes.
+Default TreeFX KN5 reduces the accepted 4a file from 155,241,351 to 141,232,395
+bytes, 1,506 → 1,284 meshes, 1,795,971 → 1,508,297 vertices and
+1,057,188 → 958,588 triangles. Counting every external tree instance's two LODs
+as if expanded adds 898,332 vertices / 449,166 triangles, giving 2,406,629 vertices
+and 1,407,754 triangles including the base KN5. Actual TreeFX uses instancing and
+selects LODs; GrassFX geometry is generated dynamically and is not in those counts.
+The default package has 14 KN5 materials / 40 embedded textures, plus external
+TreeFX assets. Unique texture payload including decoded PNGs is 78,994,184 bytes
+(about 75.3 MiB), versus 73,751,144 bytes in accepted 4a; this is a content estimate,
+not measured CSP GPU allocation (cross-model/GrassFX cache behavior is unverified).
+Fallback DDS GPU payload increases from 68,508,264 to 76,897,032 bytes; two
+retained PNG textures are additional decoded GPU memory. Primary-path metrics
+are in `data/kn5_export_info.json`, `data/materials_info.json` and `data/treefx_info.json`.
+
+Optional `build.py render --vegetation` writes the six standard views and
+`trees_closeup.png` to `out/preview/v2_veg/after/`, plus `contact_sheet.jpg`.
+These use Cycles CPU, 16 samples and denoising, with alpha-clipped mesh stand-ins
+for the same TreeFX prototypes and representative GrassFX tufts/scrub, not AC
+shaders or exact GrassFX scattering. The inspected set has irregular cutout silhouettes,
+no opaque card rectangles and no visible trees crossing the road; density remains
+sparse on some stretches. Terrain seam shadows and dry-patch masks are unchanged.
+AC alpha-to-coverage/MSAA appearance, mip shimmer, LOD transitions, wind, collisions
+and FPS remain runtime-unverified; Cycles previews show LOD0, not AC LOD switching.
+
 ### Remaining runtime limitations
 
 No Assetto Corsa or Windows runtime validation, ksEditor import/round trip, surveyed physical road widths/elevations, driving/collision validation, AI lines or pit-lane/repair-zone geometry. A full KN5/data package now exists; successful binary writing/readback does not demonstrate in-game correctness. OSM turn-restriction relations and conditional access/oneway tags are not modelled; this is not navigation certification. Route preview uses vector OSM roads and coastline, not raster tiles. Start/end are snapped to main-road nodes, not the exact square/beach centroid.

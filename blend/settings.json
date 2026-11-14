@@ -1003,6 +1003,156 @@
           "textureName": "dirt_normal.dds"
         }
       }
+    },
+    "veg_canopy": {
+      "shaderName": "ksPerPixelAT",
+      "alphaBlendMode": "AlphaToCoverage",
+      "alphaTested": true,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.5
+        },
+        "ksDiffuse": {
+          "valueA": 0.6
+        },
+        "ksSpecular": {
+          "valueA": 0.02
+        },
+        "ksSpecularEXP": {
+          "valueA": 10.0
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "veg_canopy.dds"
+        }
+      }
+    },
+    "veg_canopy_dark": {
+      "shaderName": "ksPerPixelAT",
+      "alphaBlendMode": "AlphaToCoverage",
+      "alphaTested": true,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.5
+        },
+        "ksDiffuse": {
+          "valueA": 0.6
+        },
+        "ksSpecular": {
+          "valueA": 0.02
+        },
+        "ksSpecularEXP": {
+          "valueA": 10.0
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "veg_canopy_dark.dds"
+        }
+      }
+    },
+    "veg_canopy_silver": {
+      "shaderName": "ksPerPixelAT",
+      "alphaBlendMode": "AlphaToCoverage",
+      "alphaTested": true,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.5
+        },
+        "ksDiffuse": {
+          "valueA": 0.6
+        },
+        "ksSpecular": {
+          "valueA": 0.02
+        },
+        "ksSpecularEXP": {
+          "valueA": 10.0
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "veg_canopy_silver.dds"
+        }
+      }
+    },
+    "veg_impostor": {
+      "shaderName": "ksPerPixelAT",
+      "alphaBlendMode": "AlphaToCoverage",
+      "alphaTested": true,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.5
+        },
+        "ksDiffuse": {
+          "valueA": 0.6
+        },
+        "ksSpecular": {
+          "valueA": 0.02
+        },
+        "ksSpecularEXP": {
+          "valueA": 10.0
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "veg_impostor.dds"
+        }
+      }
+    },
+    "veg_impostor_dark": {
+      "shaderName": "ksPerPixelAT",
+      "alphaBlendMode": "AlphaToCoverage",
+      "alphaTested": true,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.5
+        },
+        "ksDiffuse": {
+          "valueA": 0.6
+        },
+        "ksSpecular": {
+          "valueA": 0.02
+        },
+        "ksSpecularEXP": {
+          "valueA": 10.0
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "veg_impostor_dark.dds"
+        }
+      }
+    },
+    "veg_impostor_silver": {
+      "shaderName": "ksPerPixelAT",
+      "alphaBlendMode": "AlphaToCoverage",
+      "alphaTested": true,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.5
+        },
+        "ksDiffuse": {
+          "valueA": 0.6
+        },
+        "ksSpecular": {
+          "valueA": 0.02
+        },
+        "ksSpecularEXP": {
+          "valueA": 10.0
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "veg_impostor_silver.dds"
+        }
+      }
     }
   },
   "nodes": {
@@ -1012,10 +1162,6 @@
       "castShadows": true,
       "visible": true,
       "renderable": true
-    },
-    "DECOR_SEA": {
-      "lodIn": 0,
-      "lodOut": 60000
     },
     "1GRASS_LAND_0532_grass": {
       "lodIn": 0,
@@ -1654,6 +1800,10 @@
       "lodOut": 60000
     },
     "1GRASS_LAND_0691_rock": {
+      "lodIn": 0,
+      "lodOut": 60000
+    },
+    "DECOR_SEA": {
       "lodIn": 0,
       "lodOut": 60000
     },
@@ -3784,6 +3934,14 @@
     "LAND_0531_rock": {
       "lodIn": 0,
       "lodOut": 60000
+    },
+    "DECOR_VEG_L0_*": {
+      "lodIn": 0,
+      "lodOut": 150
+    },
+    "DECOR_VEG_L1_*": {
+      "lodIn": 150,
+      "lodOut": 600
     }
   }
 }

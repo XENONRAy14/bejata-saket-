@@ -102,7 +102,9 @@ def graph(ways):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('stage', nargs='?', default='all', choices=['all', 'assets', 'route', 'dem', 'centerline', 'mesh', 'acdata', 'decor', 'landscape', 'materials', 'csp', 'render'])
+    parser.add_argument('stage', nargs='?', default='all', choices=['all', 'assets', 'route', 'dem', 'centerline', 'mesh', 'acdata', 'decor', 'landscape', 'vegetation', 'materials', 'csp', 'render'])
+    parser.add_argument('--vegetation',action='store_true')
+    parser.add_argument('--kn5-vegetation',action='store_true',help='Use regular KN5 foliage instead of TreeFX/GrassFX')
     parser.add_argument('--terrain',action='store_true')
     parser.add_argument('--views',nargs='+',choices=['road_10','road_40','road_70','road_95','decor_town','decor_saket'])
     parser.add_argument('--blender', default=str(Path.home() / 'tools/blender-3.6.23-linux-x64/blender'))
@@ -113,8 +115,8 @@ def main():
         (ROOT/folder).mkdir(parents=True, exist_ok=True)
     if args.stage == 'all':
         started = time.monotonic()
-        for stage in ('assets', 'route', 'dem', 'centerline', 'mesh', 'acdata', 'decor', 'materials', 'landscape', 'csp'):
-            subprocess.run([sys.executable, str(ROOT/'scripts/build.py'), stage, '--blender', args.blender], check=True)
+        for stage in ('assets', 'route', 'dem', 'centerline', 'mesh', 'acdata', 'decor', 'materials', 'landscape', 'vegetation', 'csp'):
+            subprocess.run([sys.executable, str(ROOT/'scripts/build.py'), stage, '--blender', args.blender]+(['--kn5-vegetation'] if args.kn5_vegetation else []), check=True)
         package()
         subprocess.run([sys.executable, str(ROOT/'scripts/validate.py')], check=True)
         print(f'ALL_OK seconds={time.monotonic()-started:.3f}', flush=True)
@@ -124,6 +126,10 @@ def main():
         acquire()
         return
     if args.stage == 'render':
+        if args.vegetation:
+            from vegetation import render
+            render(args.blender)
+            return
         if args.terrain:
             from landscape import render
             render(args.blender)
@@ -139,6 +145,10 @@ def main():
     if args.stage == 'landscape':
         from landscape import build
         build(args.blender)
+        return
+    if args.stage == 'vegetation':
+        from vegetation import build
+        build(args.blender,kn5_fallback=args.kn5_vegetation)
         return
     if args.stage == 'materials':
         from materials import build

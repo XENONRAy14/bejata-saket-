@@ -528,3 +528,28 @@ is regraded to pale warm sand, with unchanged UV/normal/map inputs; the two
 requested Cycles views test this correction independently of CSP rendering.
 Asphalt/repair grading is reduced 12% in sRGB as a project artistic adjustment.
 Runtime GrassFX/RainFX/water/Pure appearance and performance remain UNVERIFIED.
+
+## Phase 4b implementation evidence
+
+Fallback foliage uses `ksPerPixelAT`, not an invented vegetation shader. In the local
+`acc-shaders` checkout, `recreated/ksPerPixelAT_ps.fx:1–3` defines the sharpened
+A2C threshold 0.3 and alpha-test path. Source: https://github.com/ac-custom-shaders-patch/acc-shaders .
+Exporter `exporter/material_writer.py:30,66,131,182` maps AlphaToCoverage to 2
+and serializes `alphaTested`; `exporter/node_writer.py:39–40,182–183` supports
+and writes `lodIn`/`lodOut`. Source:
+https://github.com/moppius/blender-assetto-corsa-tools . KN5 readback verifies
+these fields, the six `txDiffuse` slots and normal depth writes.
+Double-sidedness is explicit duplicated reversed geometry, not a guessed CSP key.
+Canopy normals and coverage-preserving BC3 mips are our procedural implementation.
+Three tinted materials per atlas family avoid assuming vertex-colour support.
+Fallback LOD0/LOD1 ranges are 0–150/150–600 m per merged object; beyond 300 m from the
+route placement is skipped. The existing TreeFX sources in §5 describe a separate
+system, not verified wind weights for our merged cards. Wind is deferred; no new
+wind keys, Pure settings or shader replacements are shipped. Runtime rendering,
+MSAA coverage, LOD transitions and performance remain UNVERIFIED.
+
+Primary vegetation now uses external TreeFX BIN models and `[TREES] LIST_0`,
+not baked KN5 trees; low tufts/maquis use GrassFX custom atlas groups. Complete
+field-by-field CM source citations, list syntax, native shader/wind findings and
+Linux writer/readback details are in [TREEFX_FORMAT.md](TREEFX_FORMAT.md).
+The initial regular-mesh implementation remains behind `--kn5-vegetation`.

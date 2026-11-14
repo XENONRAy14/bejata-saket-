@@ -31,9 +31,14 @@ def main():
         bpy.ops.preferences.addon_enable(module='blender_assetto_corsa_tools')
         from blender_materials import material_nodes
         info=json.loads((ROOT/'data/materials_info.json').read_text())
+        if os.environ.get('BS_VEGETATION_PREVIEW') and (ROOT/'data/research_cache/vegetation_preview_materials.json').exists():
+            info=json.loads((ROOT/'data/research_cache/vegetation_preview_materials.json').read_text())
         for name,spec in info['materials'].items():material_nodes(bpy.data.materials[name],spec)
     scene=bpy.context.scene;scene.render.engine='CYCLES'
     scene.cycles.device='CPU';scene.cycles.samples=16;scene.cycles.use_denoising=True
+    scene.cycles.transparent_max_bounces=64
+    for obj in bpy.data.objects:
+        if obj.name.startswith('DECOR_VEG_L1_'):obj.hide_render=True
     scene.render.threads_mode='FIXED';scene.render.threads=8
     scene.render.resolution_x,scene.render.resolution_y=1280,720
     scene.render.resolution_percentage=100
@@ -49,6 +54,15 @@ def main():
         if name=='saket':point[:2]+=np.array([0,18])
         views.append(('decor_'+name,[*data['xy'][i],data['z'][i]+1.6],point))
     terrain=bool(os.environ.get('BS_TERRAIN_PREVIEW'))
+    if os.environ.get('BS_VEGETATION_PREVIEW'):
+        from foliage import SIZES
+        plants=np.load(ROOT/'data/vegetation.npz')['plants']
+        selected_plants=plants[(plants[:,0]==2)&(plants[:,12]<35)&(plants[:,13]<15)]
+        if not len(selected_plants):selected_plants=plants[plants[:,0]<3]
+        plant=selected_plants[len(selected_plants)//2];point=plant[2:5];nearest=np.argmin(np.linalg.norm(data['xy']-point[:2],axis=1))
+        direction=data['xy'][nearest]-point[:2];direction/=np.linalg.norm(direction)
+        origin=np.r_[point[:2]+direction*10,point[2]+2.2]
+        views.append(('trees_closeup',origin,point+np.array([0,0,SIZES[int(plant[0])][1]*plant[6]*.55])))
     if terrain:
         midpoint=(data['xy'].min(0)+data['xy'].max(0))/2
         views.insert(0,('top',[*midpoint,45000],[*midpoint,0]))

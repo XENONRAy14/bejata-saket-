@@ -58,6 +58,23 @@ The shipped v1 track uses no third-party imagery, textures, or raster map tiles.
 - CSP config/wiki and shader sources were read for syntax only; no other track's
   meshes, textures or complete config blocks were imported.
 
+## Phase 4b procedural vegetation
+
+`scripts/foliage.py` generates all new foliage pixels and plant geometry from
+deterministic procedural shapes/noise: Aleppo pine, stone pine, olive, cypress,
+maquis, reeds and dry grass, three shape variants each. Six 1K RGBA atlases cover
+canopies and whole-plant impostors with green/dark/silver tints. These original
+procedural assets are dedicated to **CC0-1.0**:
+https://creativecommons.org/publicdomain/zero/1.0/ . No external foliage images,
+other tracks, paid mods or Poly Haven model geometry are used. Existing bark
+textures retain the CC0 attribution in the material asset inventory above.
+Placement is an artistic deterministic approximation, not surveyed tree data.
+Default tree assets are external procedural TreeFX BIN archives, emitted using
+the documented wire contract read from Content Manager's open-source converter
+(https://github.com/gro-ove/actools, Ms-PL); the source is cited field-by-field in
+`docs/TREEFX_FORMAT.md`. No CM software or third-party models are redistributed.
+GrassFX uses the same original procedural atlas for low maquis/dry tufts.
+
 ## Copernicus GLO-30 DSM
 
 Tiles: `Copernicus_DSM_COG_10_N36_00_E004_00_DEM` and `Copernicus_DSM_COG_10_N36_00_E005_00_DEM`, from https://copernicus-dem-30m.s3.amazonaws.com/ . Exact URLs and SHA-256 checksums are recorded in `data/dem/sources.json`.
