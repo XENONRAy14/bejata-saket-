@@ -1,6 +1,76 @@
 # Béjaïa → Saket: Assetto Corsa track preparation
 
-Phases 0–5: a 24.24 km OSM-derived Béjaïa city-center → Saket coastal RN24 track, with Copernicus DSM elevation, procedural Blender geometry/decor, validated KN5 install folder and ZIP. **Not yet AC-tested.** This is a provisional, unsurveyed low-poly reconstruction, not a claim of racing accuracy.
+Phases 0–5 plus v2 materials: a 24.24 km OSM-derived Béjaïa city-center → Saket coastal RN24 track, with Copernicus DSM elevation, procedural Blender geometry/decor, validated KN5 install folder and ZIP. **The user reports v1 loads and drives in AC; v2 materials still require AC/CSP/Pure acceptance testing.** This is a provisional, unsurveyed low-poly reconstruction, not a claim of racing accuracy.
+
+## v2 material build and comparison
+
+`v1` remains tagged and its install/ZIP are locally backed up under
+`out_backup_v1/`. These large ignored backups are not part of a clone; the tag
+retains the v1 scripts, pinned dependencies and clean-rebuild evidence.
+
+The default full build now runs **assets → route → dem → centerline → mesh →
+acdata → decor → materials → ZIP → validate**. Linux additionally needs `curl`
+and ImageMagick's `convert` with its DDS encoder. Development commands:
+
+```sh
+.venv/bin/python scripts/build.py assets       # pinned CC0 downloads, SHA-256 checked
+.venv/bin/python scripts/build.py materials    # requires existing decor scene
+.venv/bin/python scripts/build.py render       # optional matched Cycles CPU comparisons
+```
+
+`data/assets.lock.json` records exact source IDs, licenses, URLs and SHA-256.
+Raw maps are cached in ignored `data/asset_cache/`. Missing files are downloaded
+atomically; corrupt cached files are rejected and must be explicitly removed
+before re-downloading. Builds never refresh checksums from the network.
+Generated `textures/v2/` is ignored and reproducible from the lock and seeded
+`scripts/materials.py`. The installed KN5 embeds the used textures: no external
+texture folder is needed. See `data/materials_info.json` for the exact exported
+shader/slot/property recipe, per-texture dimensions, format, mip count and bytes.
+
+Road and terrain use verified `ksMultilayer_fresnel_nm4`, chosen because its
+world-XZ detail coordinates avoid anisotropic grain when road UVs span width
+versus chainage. Road uses three 2K atlas/mask variants, 1.75 m CC0 detail,
+normal maps, tyre wear, lighter lane centers, procedural repair masks and worn
+paint. The original **7 m dash period / 440÷1024 painted fraction** is retained;
+this is preservation of v1, **not a verified Algerian road-marking standard**.
+Terrain uses a 256 m low-frequency grass/dry-soil mask and 4 m detail. Other
+surface tiles: gravel/kerb 2 m, rock 6 m, sand 4 m, plaster 3 m, metal 1 m, bark
+2 m. A 140 m strip keeps repairs occasional (one small, feathered repair per
+strip); background macro variation still repeats at 28 m. Detail is neutral
+grey (worn ~95/95/95 sRGB, repairs ~70/70/72), with subtle tyre wear. Gravel is
+grey-beige. Grass is green-olive; dry patches cover 25% of the inland/left
+ribbon and 35% of the coastal/right ribbon. Treating left as mountain-side is
+a route-wide artistic approximation, not a surveyed slope classification.
+Source assets and procedural-derivative qualifications are in CREDITS.
+
+Opaque RGB textures use DXT1; channel masks, detail color/specular-alpha and
+RGB XYZ normals use DXT5. Every DDS has a full mip chain. **No BC5 is used**.
+DirectX-oriented normal RGB is stored explicitly (GL green flipped); AC/CSP
+normal handedness and final gloss still require runtime inspection. DDS memory
+is the exact sum of compressed mip payloads; untouched PNGs are estimated as
+RGBA8 base levels in `texture_gpu_bytes`. Driver overhead/PNG runtime mip
+generation is not measured VRAM. Artist-chosen properties are not stock defaults.
+
+Physical names, surfaces.ini, mesh coordinates/topology/transforms, all foliage,
+and water remain unchanged. Bark, buildings and beach change **materials/UVs
+only**; decor placement and geometry are untouched. No GrassFX, RainFX, lights
+or Pure configuration is added in this phase. See `docs/CSP_NOTES.md` §9 for
+new source citations, verified sampler order and exporter trap handling.
+
+Comparisons: `out/preview/v2_materials/before/` and `after/` contain the same six
+v1 camera views; `side_by_side.jpg` pairs them. These are **Cycles CPU approximations
+using the same maps**, not AC shader/CSP/Pure screenshots. Lighting, camera
+positions, resolution and scene geometry are held fixed. Distant terrain slabs
+and foliage silhouettes are intentionally not fixed here.
+Both sides use 16 samples and denoising, with identical camera/light settings.
+Previews blend all four detail colors and approximate normal mapping; they
+are not proof of AC/CSP shader behavior.
+Material texture generation was tested with ImageMagick 6.9.11-60 Q16.
+Preview rendering is optional and never invoked by `materials` or `all`.
+The optional comparison stage needs the local `v1` tag to read its baseline scene.
+Legacy Blender preview calls are also disabled by the build driver. Existing
+UI thumbnails remain until `render` refreshes them. Cycles replaces the headless
+Eevee comparison path that stalled on this VM (underlying cause UNVERIFIED).
 
 ## What exists / works
 
@@ -47,13 +117,13 @@ Run from project root. The initial country scan takes several minutes; subsequen
 
 ### Linux prerequisites and complete build
 
-Building on Windows is **UNVERIFIED**; scripts currently use Linux runtime-directory handling. On Linux install Python 3.10+ with venv support, official [Blender 3.6.23](https://download.blender.org/release/Blender3.6/) at `~/tools/blender-3.6.23-linux-x64/blender` (or pass `--blender`), and clone the [exporter](https://github.com/moppius/blender-assetto-corsa-tools) to `~/tools/blender-assetto-corsa-tools` (or set `AC_ADDON_SOURCE`). The export stage imports/registers the addon headlessly; no interactive addon setup is needed. Eevee rendering needs a working headless OpenGL/Mesa environment. The pinned Python dependencies are in `scripts/requirements.txt`; Blender uses its own bundled Python/numpy.
+Building on Windows is **UNVERIFIED**; scripts currently use Linux runtime-directory handling. On Linux install Python 3.10+ with venv support, official [Blender 3.6.23](https://download.blender.org/release/Blender3.6/) at `~/tools/blender-3.6.23-linux-x64/blender` (or pass `--blender`), and clone the [exporter](https://github.com/moppius/blender-assetto-corsa-tools) to `~/tools/blender-assetto-corsa-tools` (or set `AC_ADDON_SOURCE`). The export stage imports/registers the addon headlessly; no interactive addon setup is needed. Optional comparison rendering uses Cycles CPU, not an OpenGL renderer. The pinned Python dependencies are in `scripts/requirements.txt`; Blender uses its own bundled Python/numpy.
 
-`all` runs **route → dem → centerline → mesh → acdata → decor → ZIP → validate**, failing immediately on a stage error. It creates missing output directories and downloads missing `data/algeria-latest.osm.pbf` plus `data/dem/N36E004.tif` and `N36E005.tif`. Only those raw downloads need copying to another checkout to avoid bandwidth; do not copy generated arrays, Blender scenes, extracted area caches or outputs for a clean-rebuild proof. Upstream `algeria-latest` is mutable: identical results require the same PBF/DEM bytes and pinned tools, not a later live download. Preserve `data/source_info.json` and `data/dem/sources.json` as provenance.
+`all` runs **assets → route → dem → centerline → mesh → acdata → decor → materials → ZIP → validate**, failing immediately on a stage error. It creates missing output directories and downloads missing `data/algeria-latest.osm.pbf` plus `data/dem/N36E004.tif` and `N36E005.tif`. These raw downloads and `data/asset_cache/` may be copied to another checkout to avoid bandwidth; do not copy generated arrays, Blender scenes, extracted area caches or outputs for a clean-rebuild proof. Upstream `algeria-latest` is mutable: identical results require the same PBF/DEM bytes and pinned tools, not a later live download. Preserve `data/source_info.json` and `data/dem/sources.json` as provenance; v2 material downloads additionally enforce `data/assets.lock.json`.
 
 Deliverables: `out/bejaia_saket/` and `out/bejaia_saket.zip`, whose root is `bejaia_saket/`, not loose install files. ZIP entries have normalized timestamps/permissions and sorted order. `scripts/package.py` recreates only the ZIP. `scripts/validate.py [folder]` needs no Blender or generated centerline arrays: it independently reads the exported KN5 and install files, checks naming/surfaces, UI/pits, logical transforms and raycasts road triangles for spawn/gate heights, physical-track bounds (excluding visual sea), sampled road-triangle cross-width edges, vertex limits, texture signatures/references and map dimensions. **PASS is static validation, not proof of engine compatibility.**
 
-Regression tests: `PYTHONPATH=scripts .venv/bin/python -m unittest test_build test_route test_geometry test_acdata test_decor test_validate -v`. Do not use a blanket `test_*.py` discovery: `test_exporter.py` is a separate Blender smoke script requiring `bpy`, invoked with Blender as shown above, not a pure-Python unittest.
+Regression tests: `PYTHONPATH=scripts .venv/bin/python -m unittest test_build test_route test_geometry test_acdata test_decor test_materials test_validate -v`. Do not use a blanket `test_*.py` discovery: `test_exporter.py` is a separate Blender smoke script requiring `bpy`, invoked with Blender as shown above, not a pure-Python unittest.
 
 ## Phase 2 geometry
 
@@ -89,7 +159,7 @@ Output is **`out/bejaia_saket/`**. Copy that folder under Windows `assettocorsa/
 | `bejaia_saket.kn5` | Full current scene, 517 mesh objects (516 original + end wall), 15 AC empties. Blender cameras/lights retain `__` prefixes to exclude them. |
 | `data/surfaces.ini` | Every actual physical key, checked against mesh prefixes: **ROAD, KERB, GRASS, GRAVEL, WALL**. Source: [Hagn example](https://site.hagn.io/assettocorsa/modding/tracks/data/surfaces-ini), also AC_NOTES §1. |
 | `ui/ui_track.json` | UTF-8 requested name/geotags, Algeria/Béjaïa, full-road meter length, width 6.5–7.0m, pitboxes `"4"`, frite, v0.1, 2026. `run` is descriptive **“Béjaïa → Saket · point-to-point”** per Hagn, **not a mode switch**. |
-| `ui/preview.png` / `ui/outline.png` | **355×200** following the inspected sample: resized road-level 70% Eevee render; white route on transparent RGBA. Mandatory dimension claims **UNVERIFIED**. |
+| `ui/preview.png` / `ui/outline.png` | **355×200** following the inspected sample: resized road-level 70% preview (Cycles after optional `render`); white route on transparent RGBA. Mandatory dimension claims **UNVERIFIED**. |
 | `map.png` / `data/map.ini` | North-up white route on transparent RGBA; dimensions/transform below. |
 | `ai/README.txt` | No AI line, no fake zero-byte `.ai` file. AI racing unsupported. Empty AI directory allowed by the basic guide, but runtime loading without lines **UNVERIFIED locally**. |
 | `CREDITS.md`, `README.md` | Attribution and limitations bundled with the install package. Settings (`blend/settings.json`), convention sources (`docs/AC_NOTES.md`) and detailed placement/export JSON evidence (`data/`) remain in the repository, not the install folder. All texture-named materials use explicit `ksPerPixel` settings with embedded `txDiffuse` PNGs. |

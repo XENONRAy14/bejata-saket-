@@ -1,6 +1,7 @@
 """Light procedural decor, merged by actual terrain chunk and material."""
 import json
 import math
+import os
 from pathlib import Path
 import sys
 
@@ -140,14 +141,14 @@ def main():
     midpoint = (lower+upper)/2
     camera('__DECOR_TOP', [*midpoint,18000],[*midpoint,0],max(upper-lower)*1.12)
     scene.render.filepath = str(ROOT/'out/preview/top.png')
-    bpy.ops.render.render(write_still=True)
+    if not os.environ.get('BS_SKIP_RENDER'):bpy.ops.render.render(write_still=True)
     scene.render.resolution_x,scene.render.resolution_y = 1280,720
     for fraction in (.1,.4,.7,.95):
         i = int(np.searchsorted(data['s'],data['s'][-1]*fraction))
         j = int(np.searchsorted(data['s'],min(data['s'][-1],data['s'][i]+35)))
         camera(f'__DECOR_ROAD_{int(fraction*100)}',[*data['xy'][i],data['z'][i]+1.2],[*data['xy'][j],data['z'][j]+1.2])
         scene.render.filepath = str(ROOT/f'out/preview/road_{int(fraction*100):02d}.png')
-        bpy.ops.render.render(write_still=True)
+        if not os.environ.get('BS_SKIP_RENDER'):bpy.ops.render.render(write_still=True)
     houses = plan['placements'][(plan['placements'][:,0]==5)&(plan['placements'][:,8]<2000)]
     town_chainage = float(houses[len(houses)//2,8]-45)
     for label,chainage in [('town',town_chainage),('saket',float(data['s'][-1]-340))]:
@@ -158,7 +159,7 @@ def main():
             target[:2] += np.array([0,18])
         camera(f'__DECOR_{label.upper()}',[*data['xy'][i],data['z'][i]+1.6],target)
         scene.render.filepath = str(ROOT/f'out/preview/decor_{label}.png')
-        bpy.ops.render.render(write_still=True)
+        if not os.environ.get('BS_SKIP_RENDER'):bpy.ops.render.render(write_still=True)
     export_scene()
 
 

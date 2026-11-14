@@ -15,3 +15,6 @@ out/*.zip*
 data/*.partial
 out_backup_v1/
 data/research_cache/
+data/asset_cache/
+textures/v2/
+out/preview/v2_materials/*.blend

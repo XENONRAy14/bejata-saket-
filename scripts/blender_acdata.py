@@ -76,7 +76,7 @@ def main():
     camera('__AC_END_CHECK',position,[*data['xy'][-1],data['z'][-1]+.8])
     scene.render.resolution_x,scene.render.resolution_y = 1280,720
     scene.render.filepath = str(ROOT/'out/preview/end_barrier.png')
-    bpy.ops.render.render(write_still=True)
+    if not os.environ.get('BS_SKIP_RENDER'):bpy.ops.render.render(write_still=True)
     bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'blend/bejaia_saket.blend'))
     counts = dict(mesh_objects=0,export_meshes=0,vertex_limit_splits=0,max_expanded_vertices_before_split=0)
     original = exporter.NodeWriter

@@ -2,6 +2,7 @@
 import argparse
 import json
 import math
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -101,19 +102,32 @@ def graph(ways):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('stage', nargs='?', default='all', choices=['all', 'route', 'dem', 'centerline', 'mesh', 'acdata', 'decor'])
+    parser.add_argument('stage', nargs='?', default='all', choices=['all', 'assets', 'route', 'dem', 'centerline', 'mesh', 'acdata', 'decor', 'materials', 'render'])
     parser.add_argument('--blender', default=str(Path.home() / 'tools/blender-3.6.23-linux-x64/blender'))
     parser.add_argument('--list-places', action='store_true')
     args = parser.parse_args()
+    os.environ['BS_SKIP_RENDER']='1'
     for folder in ('data', 'blend', 'textures', 'out/preview'):
         (ROOT/folder).mkdir(parents=True, exist_ok=True)
     if args.stage == 'all':
         started = time.monotonic()
-        for stage in ('route', 'dem', 'centerline', 'mesh', 'acdata', 'decor'):
+        for stage in ('assets', 'route', 'dem', 'centerline', 'mesh', 'acdata', 'decor', 'materials'):
             subprocess.run([sys.executable, str(ROOT/'scripts/build.py'), stage, '--blender', args.blender], check=True)
         package()
         subprocess.run([sys.executable, str(ROOT/'scripts/validate.py')], check=True)
         print(f'ALL_OK seconds={time.monotonic()-started:.3f}', flush=True)
+        return
+    if args.stage == 'assets':
+        from assets import acquire
+        acquire()
+        return
+    if args.stage == 'render':
+        from materials import render
+        render(args.blender)
+        return
+    if args.stage == 'materials':
+        from materials import build
+        build(args.blender)
         return
     if args.stage == 'decor':
         from decor import build

@@ -1,7 +1,7 @@
 {
   "materials": {
     "asphalt": {
-      "shaderName": "ksPerPixel",
+      "shaderName": "ksMultilayer_fresnel_nm4",
       "alphaBlendMode": "Opaque",
       "alphaTested": false,
       "depthMode": "DepthNormal",
@@ -10,23 +10,101 @@
           "valueA": 0.4
         },
         "ksDiffuse": {
-          "valueA": 0.4
-        },
-        "ksSpecular": {
-          "valueA": 0.1
+          "valueA": 0.6
         },
         "ksSpecularEXP": {
-          "valueA": 10
+          "valueA": 28.0
+        },
+        "fresnelC": {
+          "valueA": 0.012
+        },
+        "fresnelEXP": {
+          "valueA": 5.0
+        },
+        "fresnelMaxLevel": {
+          "valueA": 0.16
+        },
+        "tarmacSpecularMultiplier": {
+          "valueA": 0.16
+        },
+        "magicMult": {
+          "valueA": 1.0
+        },
+        "multTilingFix": {
+          "valueA": 0.0
+        },
+        "tilingFixR": {
+          "valueA": 0.0
+        },
+        "tilingFixG": {
+          "valueA": 0.0
+        },
+        "tilingFixB": {
+          "valueA": 0.0
+        },
+        "tilingFixA": {
+          "valueA": 0.0
+        },
+        "extColoredReflection": {
+          "valueA": 0.0
+        },
+        "extColoredReflectionNorm": {
+          "valueA": 0.0
+        },
+        "extLocalAO": {
+          "valueA": 0.0
+        },
+        "detailNMMult": {
+          "valueA": 1.0
+        },
+        "multR": {
+          "valueA": 0.5714285714285714
+        },
+        "multG": {
+          "valueA": 0.5714285714285714
+        },
+        "multB": {
+          "valueA": 0.5714285714285714
+        },
+        "multA": {
+          "valueA": 0.5714285714285714
         }
       },
       "textures": {
         "txDiffuse": {
-          "textureName": "asphalt.png"
+          "textureName": "road_0_macro.dds"
+        },
+        "txMask": {
+          "textureName": "road_0_mask.dds"
+        },
+        "txDetailR": {
+          "textureName": "asphalt_diffuse.dds"
+        },
+        "txDetailG": {
+          "textureName": "repair_diffuse.dds"
+        },
+        "txDetailB": {
+          "textureName": "gravel_diffuse.dds"
+        },
+        "txDetailA": {
+          "textureName": "white.dds"
+        },
+        "txNormalR": {
+          "textureName": "asphalt_normal.dds"
+        },
+        "txNormalG": {
+          "textureName": "repair_normal.dds"
+        },
+        "txNormalB": {
+          "textureName": "gravel_normal.dds"
+        },
+        "txNormalA": {
+          "textureName": "flat_normal.dds"
         }
       }
     },
     "bark": {
-      "shaderName": "ksPerPixel",
+      "shaderName": "ksPerPixelMultiMap",
       "alphaBlendMode": "Opaque",
       "alphaTested": false,
       "depthMode": "DepthNormal",
@@ -35,23 +113,50 @@
           "valueA": 0.4
         },
         "ksDiffuse": {
-          "valueA": 0.4
+          "valueA": 0.6
         },
         "ksSpecular": {
-          "valueA": 0.1
+          "valueA": 0.12
         },
         "ksSpecularEXP": {
-          "valueA": 10
+          "valueA": 24.0
+        },
+        "fresnelC": {
+          "valueA": 0.015
+        },
+        "fresnelEXP": {
+          "valueA": 5.0
+        },
+        "fresnelMaxLevel": {
+          "valueA": 0.12
+        },
+        "isAdditive": {
+          "valueA": 0.0
+        },
+        "useDetail": {
+          "valueA": 0.0
+        },
+        "detailUVMultiplier": {
+          "valueA": 1.0
         }
       },
       "textures": {
         "txDiffuse": {
-          "textureName": "bark.png"
+          "textureName": "bark_diffuse.dds"
+        },
+        "txNormal": {
+          "textureName": "bark_normal.dds"
+        },
+        "txMaps": {
+          "textureName": "bark_maps.dds"
+        },
+        "txDetail": {
+          "textureName": "white.dds"
         }
       }
     },
     "grass": {
-      "shaderName": "ksPerPixel",
+      "shaderName": "ksMultilayer_fresnel_nm4",
       "alphaBlendMode": "Opaque",
       "alphaTested": false,
       "depthMode": "DepthNormal",
@@ -60,23 +165,101 @@
           "valueA": 0.4
         },
         "ksDiffuse": {
-          "valueA": 0.4
-        },
-        "ksSpecular": {
-          "valueA": 0.1
+          "valueA": 0.6
         },
         "ksSpecularEXP": {
-          "valueA": 10
+          "valueA": 28.0
+        },
+        "fresnelC": {
+          "valueA": 0.012
+        },
+        "fresnelEXP": {
+          "valueA": 5.0
+        },
+        "fresnelMaxLevel": {
+          "valueA": 0.04
+        },
+        "tarmacSpecularMultiplier": {
+          "valueA": 0.03
+        },
+        "magicMult": {
+          "valueA": 1.0
+        },
+        "multTilingFix": {
+          "valueA": 0.0
+        },
+        "tilingFixR": {
+          "valueA": 0.0
+        },
+        "tilingFixG": {
+          "valueA": 0.0
+        },
+        "tilingFixB": {
+          "valueA": 0.0
+        },
+        "tilingFixA": {
+          "valueA": 0.0
+        },
+        "extColoredReflection": {
+          "valueA": 0.0
+        },
+        "extColoredReflectionNorm": {
+          "valueA": 0.0
+        },
+        "extLocalAO": {
+          "valueA": 0.0
+        },
+        "detailNMMult": {
+          "valueA": 1.0
+        },
+        "multR": {
+          "valueA": 0.25
+        },
+        "multG": {
+          "valueA": 0.25
+        },
+        "multB": {
+          "valueA": 0.25
+        },
+        "multA": {
+          "valueA": 0.25
         }
       },
       "textures": {
         "txDiffuse": {
-          "textureName": "grass.png"
+          "textureName": "terrain_macro.dds"
+        },
+        "txMask": {
+          "textureName": "terrain_mask.dds"
+        },
+        "txDetailR": {
+          "textureName": "grass_diffuse.dds"
+        },
+        "txDetailG": {
+          "textureName": "dirt_diffuse.dds"
+        },
+        "txDetailB": {
+          "textureName": "grass_diffuse.dds"
+        },
+        "txDetailA": {
+          "textureName": "dirt_diffuse.dds"
+        },
+        "txNormalR": {
+          "textureName": "grass_normal.dds"
+        },
+        "txNormalG": {
+          "textureName": "dirt_normal.dds"
+        },
+        "txNormalB": {
+          "textureName": "grass_normal.dds"
+        },
+        "txNormalA": {
+          "textureName": "dirt_normal.dds"
         }
       }
     },
     "gravel": {
-      "shaderName": "ksPerPixel",
+      "shaderName": "ksPerPixelMultiMap",
       "alphaBlendMode": "Opaque",
       "alphaTested": false,
       "depthMode": "DepthNormal",
@@ -85,23 +268,50 @@
           "valueA": 0.4
         },
         "ksDiffuse": {
-          "valueA": 0.4
+          "valueA": 0.6
         },
         "ksSpecular": {
-          "valueA": 0.1
+          "valueA": 0.12
         },
         "ksSpecularEXP": {
-          "valueA": 10
+          "valueA": 24.0
+        },
+        "fresnelC": {
+          "valueA": 0.015
+        },
+        "fresnelEXP": {
+          "valueA": 5.0
+        },
+        "fresnelMaxLevel": {
+          "valueA": 0.12
+        },
+        "isAdditive": {
+          "valueA": 0.0
+        },
+        "useDetail": {
+          "valueA": 0.0
+        },
+        "detailUVMultiplier": {
+          "valueA": 1.0
         }
       },
       "textures": {
         "txDiffuse": {
-          "textureName": "gravel.png"
+          "textureName": "gravel_diffuse.dds"
+        },
+        "txNormal": {
+          "textureName": "gravel_normal.dds"
+        },
+        "txMaps": {
+          "textureName": "gravel_maps.dds"
+        },
+        "txDetail": {
+          "textureName": "white.dds"
         }
       }
     },
     "kerb": {
-      "shaderName": "ksPerPixel",
+      "shaderName": "ksPerPixelMultiMap",
       "alphaBlendMode": "Opaque",
       "alphaTested": false,
       "depthMode": "DepthNormal",
@@ -110,18 +320,45 @@
           "valueA": 0.4
         },
         "ksDiffuse": {
-          "valueA": 0.4
+          "valueA": 0.6
         },
         "ksSpecular": {
-          "valueA": 0.1
+          "valueA": 0.12
         },
         "ksSpecularEXP": {
-          "valueA": 10
+          "valueA": 24.0
+        },
+        "fresnelC": {
+          "valueA": 0.015
+        },
+        "fresnelEXP": {
+          "valueA": 5.0
+        },
+        "fresnelMaxLevel": {
+          "valueA": 0.12
+        },
+        "isAdditive": {
+          "valueA": 0.0
+        },
+        "useDetail": {
+          "valueA": 0.0
+        },
+        "detailUVMultiplier": {
+          "valueA": 1.0
         }
       },
       "textures": {
         "txDiffuse": {
-          "textureName": "kerb.png"
+          "textureName": "kerb_diffuse.dds"
+        },
+        "txNormal": {
+          "textureName": "plaster_normal.dds"
+        },
+        "txMaps": {
+          "textureName": "plaster_maps.dds"
+        },
+        "txDetail": {
+          "textureName": "white.dds"
         }
       }
     },
@@ -176,7 +413,7 @@
       }
     },
     "metal": {
-      "shaderName": "ksPerPixel",
+      "shaderName": "ksPerPixelMultiMap",
       "alphaBlendMode": "Opaque",
       "alphaTested": false,
       "depthMode": "DepthNormal",
@@ -185,18 +422,45 @@
           "valueA": 0.4
         },
         "ksDiffuse": {
-          "valueA": 0.4
+          "valueA": 0.6
         },
         "ksSpecular": {
           "valueA": 0.5
         },
         "ksSpecularEXP": {
-          "valueA": 20
+          "valueA": 65.0
+        },
+        "fresnelC": {
+          "valueA": 0.12
+        },
+        "fresnelEXP": {
+          "valueA": 5.0
+        },
+        "fresnelMaxLevel": {
+          "valueA": 0.6
+        },
+        "isAdditive": {
+          "valueA": 0.0
+        },
+        "useDetail": {
+          "valueA": 0.0
+        },
+        "detailUVMultiplier": {
+          "valueA": 1.0
         }
       },
       "textures": {
         "txDiffuse": {
-          "textureName": "metal.png"
+          "textureName": "metal_diffuse.dds"
+        },
+        "txNormal": {
+          "textureName": "metal_normal.dds"
+        },
+        "txMaps": {
+          "textureName": "metal_maps.dds"
+        },
+        "txDetail": {
+          "textureName": "white.dds"
         }
       }
     },
@@ -251,7 +515,7 @@
       }
     },
     "plaster": {
-      "shaderName": "ksPerPixel",
+      "shaderName": "ksPerPixelMultiMap",
       "alphaBlendMode": "Opaque",
       "alphaTested": false,
       "depthMode": "DepthNormal",
@@ -260,23 +524,50 @@
           "valueA": 0.4
         },
         "ksDiffuse": {
-          "valueA": 0.4
+          "valueA": 0.6
         },
         "ksSpecular": {
-          "valueA": 0.1
+          "valueA": 0.12
         },
         "ksSpecularEXP": {
-          "valueA": 10
+          "valueA": 24.0
+        },
+        "fresnelC": {
+          "valueA": 0.015
+        },
+        "fresnelEXP": {
+          "valueA": 5.0
+        },
+        "fresnelMaxLevel": {
+          "valueA": 0.12
+        },
+        "isAdditive": {
+          "valueA": 0.0
+        },
+        "useDetail": {
+          "valueA": 0.0
+        },
+        "detailUVMultiplier": {
+          "valueA": 1.0
         }
       },
       "textures": {
         "txDiffuse": {
-          "textureName": "plaster.png"
+          "textureName": "plaster_diffuse.dds"
+        },
+        "txNormal": {
+          "textureName": "plaster_normal.dds"
+        },
+        "txMaps": {
+          "textureName": "plaster_maps.dds"
+        },
+        "txDetail": {
+          "textureName": "white.dds"
         }
       }
     },
     "rock": {
-      "shaderName": "ksPerPixel",
+      "shaderName": "ksPerPixelMultiMap",
       "alphaBlendMode": "Opaque",
       "alphaTested": false,
       "depthMode": "DepthNormal",
@@ -285,23 +576,50 @@
           "valueA": 0.4
         },
         "ksDiffuse": {
-          "valueA": 0.4
+          "valueA": 0.6
         },
         "ksSpecular": {
-          "valueA": 0.1
+          "valueA": 0.12
         },
         "ksSpecularEXP": {
-          "valueA": 10
+          "valueA": 24.0
+        },
+        "fresnelC": {
+          "valueA": 0.015
+        },
+        "fresnelEXP": {
+          "valueA": 5.0
+        },
+        "fresnelMaxLevel": {
+          "valueA": 0.12
+        },
+        "isAdditive": {
+          "valueA": 0.0
+        },
+        "useDetail": {
+          "valueA": 0.0
+        },
+        "detailUVMultiplier": {
+          "valueA": 1.0
         }
       },
       "textures": {
         "txDiffuse": {
-          "textureName": "rock.png"
+          "textureName": "rock_diffuse.dds"
+        },
+        "txNormal": {
+          "textureName": "rock_normal.dds"
+        },
+        "txMaps": {
+          "textureName": "rock_maps.dds"
+        },
+        "txDetail": {
+          "textureName": "white.dds"
         }
       }
     },
     "sand": {
-      "shaderName": "ksPerPixel",
+      "shaderName": "ksPerPixelMultiMap",
       "alphaBlendMode": "Opaque",
       "alphaTested": false,
       "depthMode": "DepthNormal",
@@ -310,18 +628,45 @@
           "valueA": 0.4
         },
         "ksDiffuse": {
-          "valueA": 0.4
+          "valueA": 0.6
         },
         "ksSpecular": {
-          "valueA": 0.1
+          "valueA": 0.12
         },
         "ksSpecularEXP": {
-          "valueA": 10
+          "valueA": 24.0
+        },
+        "fresnelC": {
+          "valueA": 0.015
+        },
+        "fresnelEXP": {
+          "valueA": 5.0
+        },
+        "fresnelMaxLevel": {
+          "valueA": 0.12
+        },
+        "isAdditive": {
+          "valueA": 0.0
+        },
+        "useDetail": {
+          "valueA": 0.0
+        },
+        "detailUVMultiplier": {
+          "valueA": 1.0
         }
       },
       "textures": {
         "txDiffuse": {
-          "textureName": "sand.png"
+          "textureName": "sand_diffuse.dds"
+        },
+        "txNormal": {
+          "textureName": "sand_normal.dds"
+        },
+        "txMaps": {
+          "textureName": "sand_maps.dds"
+        },
+        "txDetail": {
+          "textureName": "white.dds"
         }
       }
     },
@@ -347,6 +692,315 @@
       "textures": {
         "txDiffuse": {
           "textureName": "water.png"
+        }
+      }
+    },
+    "asphalt_v1": {
+      "shaderName": "ksMultilayer_fresnel_nm4",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.6
+        },
+        "ksSpecularEXP": {
+          "valueA": 28.0
+        },
+        "fresnelC": {
+          "valueA": 0.012
+        },
+        "fresnelEXP": {
+          "valueA": 5.0
+        },
+        "fresnelMaxLevel": {
+          "valueA": 0.16
+        },
+        "tarmacSpecularMultiplier": {
+          "valueA": 0.16
+        },
+        "magicMult": {
+          "valueA": 1.0
+        },
+        "multTilingFix": {
+          "valueA": 0.0
+        },
+        "tilingFixR": {
+          "valueA": 0.0
+        },
+        "tilingFixG": {
+          "valueA": 0.0
+        },
+        "tilingFixB": {
+          "valueA": 0.0
+        },
+        "tilingFixA": {
+          "valueA": 0.0
+        },
+        "extColoredReflection": {
+          "valueA": 0.0
+        },
+        "extColoredReflectionNorm": {
+          "valueA": 0.0
+        },
+        "extLocalAO": {
+          "valueA": 0.0
+        },
+        "detailNMMult": {
+          "valueA": 1.0
+        },
+        "multR": {
+          "valueA": 0.5714285714285714
+        },
+        "multG": {
+          "valueA": 0.5714285714285714
+        },
+        "multB": {
+          "valueA": 0.5714285714285714
+        },
+        "multA": {
+          "valueA": 0.5714285714285714
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "road_1_macro.dds"
+        },
+        "txMask": {
+          "textureName": "road_1_mask.dds"
+        },
+        "txDetailR": {
+          "textureName": "asphalt_diffuse.dds"
+        },
+        "txDetailG": {
+          "textureName": "repair_diffuse.dds"
+        },
+        "txDetailB": {
+          "textureName": "gravel_diffuse.dds"
+        },
+        "txDetailA": {
+          "textureName": "white.dds"
+        },
+        "txNormalR": {
+          "textureName": "asphalt_normal.dds"
+        },
+        "txNormalG": {
+          "textureName": "repair_normal.dds"
+        },
+        "txNormalB": {
+          "textureName": "gravel_normal.dds"
+        },
+        "txNormalA": {
+          "textureName": "flat_normal.dds"
+        }
+      }
+    },
+    "asphalt_v2": {
+      "shaderName": "ksMultilayer_fresnel_nm4",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.6
+        },
+        "ksSpecularEXP": {
+          "valueA": 28.0
+        },
+        "fresnelC": {
+          "valueA": 0.012
+        },
+        "fresnelEXP": {
+          "valueA": 5.0
+        },
+        "fresnelMaxLevel": {
+          "valueA": 0.16
+        },
+        "tarmacSpecularMultiplier": {
+          "valueA": 0.16
+        },
+        "magicMult": {
+          "valueA": 1.0
+        },
+        "multTilingFix": {
+          "valueA": 0.0
+        },
+        "tilingFixR": {
+          "valueA": 0.0
+        },
+        "tilingFixG": {
+          "valueA": 0.0
+        },
+        "tilingFixB": {
+          "valueA": 0.0
+        },
+        "tilingFixA": {
+          "valueA": 0.0
+        },
+        "extColoredReflection": {
+          "valueA": 0.0
+        },
+        "extColoredReflectionNorm": {
+          "valueA": 0.0
+        },
+        "extLocalAO": {
+          "valueA": 0.0
+        },
+        "detailNMMult": {
+          "valueA": 1.0
+        },
+        "multR": {
+          "valueA": 0.5714285714285714
+        },
+        "multG": {
+          "valueA": 0.5714285714285714
+        },
+        "multB": {
+          "valueA": 0.5714285714285714
+        },
+        "multA": {
+          "valueA": 0.5714285714285714
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "road_2_macro.dds"
+        },
+        "txMask": {
+          "textureName": "road_2_mask.dds"
+        },
+        "txDetailR": {
+          "textureName": "asphalt_diffuse.dds"
+        },
+        "txDetailG": {
+          "textureName": "repair_diffuse.dds"
+        },
+        "txDetailB": {
+          "textureName": "gravel_diffuse.dds"
+        },
+        "txDetailA": {
+          "textureName": "white.dds"
+        },
+        "txNormalR": {
+          "textureName": "asphalt_normal.dds"
+        },
+        "txNormalG": {
+          "textureName": "repair_normal.dds"
+        },
+        "txNormalB": {
+          "textureName": "gravel_normal.dds"
+        },
+        "txNormalA": {
+          "textureName": "flat_normal.dds"
+        }
+      }
+    },
+    "grass_mountain": {
+      "shaderName": "ksMultilayer_fresnel_nm4",
+      "alphaBlendMode": "Opaque",
+      "alphaTested": false,
+      "depthMode": "DepthNormal",
+      "properties": {
+        "ksAmbient": {
+          "valueA": 0.4
+        },
+        "ksDiffuse": {
+          "valueA": 0.6
+        },
+        "ksSpecularEXP": {
+          "valueA": 28.0
+        },
+        "fresnelC": {
+          "valueA": 0.012
+        },
+        "fresnelEXP": {
+          "valueA": 5.0
+        },
+        "fresnelMaxLevel": {
+          "valueA": 0.04
+        },
+        "tarmacSpecularMultiplier": {
+          "valueA": 0.03
+        },
+        "magicMult": {
+          "valueA": 1.0
+        },
+        "multTilingFix": {
+          "valueA": 0.0
+        },
+        "tilingFixR": {
+          "valueA": 0.0
+        },
+        "tilingFixG": {
+          "valueA": 0.0
+        },
+        "tilingFixB": {
+          "valueA": 0.0
+        },
+        "tilingFixA": {
+          "valueA": 0.0
+        },
+        "extColoredReflection": {
+          "valueA": 0.0
+        },
+        "extColoredReflectionNorm": {
+          "valueA": 0.0
+        },
+        "extLocalAO": {
+          "valueA": 0.0
+        },
+        "detailNMMult": {
+          "valueA": 1.0
+        },
+        "multR": {
+          "valueA": 0.25
+        },
+        "multG": {
+          "valueA": 0.25
+        },
+        "multB": {
+          "valueA": 0.25
+        },
+        "multA": {
+          "valueA": 0.25
+        }
+      },
+      "textures": {
+        "txDiffuse": {
+          "textureName": "terrain_macro.dds"
+        },
+        "txMask": {
+          "textureName": "terrain_mountain_mask.dds"
+        },
+        "txDetailR": {
+          "textureName": "grass_diffuse.dds"
+        },
+        "txDetailG": {
+          "textureName": "dirt_diffuse.dds"
+        },
+        "txDetailB": {
+          "textureName": "grass_diffuse.dds"
+        },
+        "txDetailA": {
+          "textureName": "dirt_diffuse.dds"
+        },
+        "txNormalR": {
+          "textureName": "grass_normal.dds"
+        },
+        "txNormalG": {
+          "textureName": "dirt_normal.dds"
+        },
+        "txNormalB": {
+          "textureName": "grass_normal.dds"
+        },
+        "txNormalA": {
+          "textureName": "dirt_normal.dds"
         }
       }
     }

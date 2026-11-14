@@ -9,7 +9,7 @@ import numpy as np
 from PIL import Image
 from scipy.spatial import cKDTree
 
-from check_kn5 import inspect_kn5
+from check_kn5 import inspect_kn5, mask_mip_error
 
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = ('README.md','CREDITS.md','data/surfaces.ini','data/map.ini','ui/ui_track.json',
@@ -49,7 +49,7 @@ def validate(folder):
     check('required_files', files)
     parsed = {}
     def readback():
-        parsed.update(inspect_kn5(folder/(folder.name+'.kn5'), geometry=True))
+        parsed.update(inspect_kn5(folder/(folder.name+'.kn5'), geometry=True, texture_data=True))
         return f"v5, {parsed['bytes']} bytes"
     check('kn5_readback', readback)
     nodes = parsed.get('nodes',[])
@@ -133,6 +133,47 @@ def validate(folder):
             require(format_ in ('PNG','DDS') and Path(name).suffix.lower()=='.'+format_.lower(), f'unsupported texture {name}: {format_}')
         return f'{len(names)} embedded PNG/DDS textures, signatures and references valid'
     check('textures', textures)
+    def materials():
+        entries=parsed.get('materials',[])
+        require(entries,'no materials')
+        slots={'ksPerPixel':['txDiffuse'],
+               'ksPerPixelMultiMap':['txDiffuse','txNormal','txMaps','txDetail'],
+               'ksMultilayer_fresnel_nm4':['txDiffuse','txMask']+[f'txDetail{c}' for c in 'RGBA']+[f'txNormal{c}' for c in 'RGBA']}
+        for mat in entries:
+            require(mat['shader'] in slots,f'unsupported/unreviewed shader {mat["shader"]}')
+            expected=slots[mat['shader']]
+            require(list(mat['textures'])==expected,f'incorrect named texture slots for {mat["name"]}')
+            require(mat['texture_slots']=={k:i for i,k in enumerate(expected)},f'incorrect numeric slots for {mat["name"]}')
+            require((mat['blend'],mat['alpha_tested'],mat['depth'])==(0,False,0),f'unexpected transparency/depth for {mat["name"]}')
+            require(mat['properties'] and all(np.isfinite(list(mat['properties'].values()))),f'invalid shader properties for {mat["name"]}')
+        for mesh in meshes:
+            if entries[mesh['material']]['shader']=='ksPerPixel':continue
+            stats=mesh['tangent_stats']
+            require(stats['finite'] and max(stats['normal_length_error'],stats['tangent_length_error'],stats['max_normal_dot_tangent'])<.001,f'invalid normal/tangent basis: {mesh["name"]}')
+        ui_data=json.loads((folder/'ui/ui_track.json').read_text())
+        if ui_data.get('version')=='0.2':
+            recipe=json.loads((ROOT/'data/materials_info.json').read_text())
+            actual={m['name']:m for m in entries}
+            for name,spec in recipe['materials'].items():
+                require(name in actual,f'missing material {name}')
+                mat=actual[name]
+                require(mat['shader']==spec['shaderName'] and mat['textures']=={k:v['textureName'] for k,v in spec['textures'].items()},f'material differs from recipe: {name}')
+                require(mat['properties'].keys()==spec['properties'].keys(),f'property set differs from recipe: {name}')
+                require(all(np.isclose(mat['properties'][k],v['valueA']) for k,v in spec['properties'].items()),f'property values differ from recipe: {name}')
+            for name,expected in recipe['textures'].items():
+                require(parsed['texture_info'].get(name,{}).get('sha256')==expected['sha256'],f'embedded DDS differs from generated recipe: {name}')
+        return f'{len(entries)} materials; shader, ordered slots, properties and opaque/depth flags valid'
+    check('materials_and_shaders',materials)
+    def dds_headers():
+        info=parsed.get('texture_info',{})
+        dds=[v for k,v in info.items() if parsed['texture_formats'][k]=='DDS']
+        require(parsed.get('textures'),'missing textures')
+        require(all(v['mips']==max(v['width'],v['height']).bit_length() for v in dds),'missing DDS mip levels')
+        masks={m['textures']['txMask'] for m in parsed.get('materials',[]) if 'txMask' in m['textures']}
+        for name in masks:
+            require(mask_mip_error(parsed['texture_blobs'][name])<.15,f'blend weights lost in mip chain: {name}')
+        return f'{len(dds)} DXT1/DXT5 headers/payloads and {len(masks)} mask mip weight means verified; compressed DDS bytes={sum(v["gpu_bytes"] for v in dds)}'
+    check('dds_headers',dds_headers)
     def map_image():
         ini = configparser.ConfigParser();ini.read(folder/'data/map.ini');params=ini['PARAMETERS']
         with Image.open(folder/'map.png') as im:

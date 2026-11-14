@@ -1,6 +1,7 @@
 """Blender-only scene construction from the pure-Python metric arrays."""
 import json
 import math
+import os
 from pathlib import Path
 
 import bpy
@@ -170,7 +171,7 @@ def main():
     scene.render.resolution_x = 1400
     scene.render.resolution_y = 1400
     scene.render.filepath = str(preview/'top.png')
-    bpy.ops.render.render(write_still=True)
+    if not os.environ.get('BS_SKIP_RENDER'):bpy.ops.render.render(write_still=True)
     scene.render.resolution_x = 1280
     scene.render.resolution_y = 720
     for fraction in (.1,.4,.7,.95):
@@ -178,7 +179,7 @@ def main():
         j = int(np.searchsorted(s,min(s[-1],s[i]+35)))
         camera(f'Road_{int(fraction*100):02d}', [*xy[i],z[i]+1.2], [*xy[j],z[j]+1.2])
         scene.render.filepath = str(preview/f'road_{int(fraction*100):02d}.png')
-        bpy.ops.render.render(write_still=True)
+        if not os.environ.get('BS_SKIP_RENDER'):bpy.ops.render.render(write_still=True)
     bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'blend/bejaia_saket.blend'))
     print('MESH_OK',json.dumps(metrics))
 

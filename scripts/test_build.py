@@ -12,12 +12,17 @@ import build
 
 
 class BuildTests(unittest.TestCase):
+    def test_optional_render_dispatch(self):
+        with tempfile.TemporaryDirectory() as folder,patch.object(build,'ROOT',Path(folder)),patch('sys.argv',['build.py','render']),patch('materials.render') as render:
+            build.main()
+            render.assert_called_once()
+
     def test_default_and_explicit_all_order(self):
         for arguments in (['build.py'],['build.py','all']):
             with self.subTest(arguments=arguments),tempfile.TemporaryDirectory() as folder:
                 with patch.object(build,'ROOT',Path(folder)),patch('sys.argv',arguments),patch('build.subprocess.run') as run,patch('build.package') as package,contextlib.redirect_stdout(io.StringIO()):
                     build.main()
-                self.assertEqual([c.args[0][2] for c in run.call_args_list[:-1]],['route','dem','centerline','mesh','acdata','decor'])
+                self.assertEqual([c.args[0][2] for c in run.call_args_list[:-1]],['assets','route','dem','centerline','mesh','acdata','decor','materials'])
                 self.assertTrue(run.call_args_list[-1].args[0][1].endswith('scripts/validate.py'))
                 self.assertTrue(all(c.kwargs['check'] for c in run.call_args_list))
                 package.assert_called_once()

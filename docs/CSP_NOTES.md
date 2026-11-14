@@ -1,8 +1,9 @@
-# Visual upgrade research — no visual changes
+# Visual upgrade research and v2 material implementation
 
 ## Scope, baseline and source notation
 
-This is an audit and implementation proposal, **not an applied configuration**.
+Sections 1–8 preserve the original audit/proposal. Section 9 records the applied
+v2 material pass; no CSP extension configuration has been added.
 No assets from other tracks are to be imported; examples below establish syntax only.
 The local backup and annotated `v1` tag preserve commit
 `8c91a90831e36aa8f6cccde21b20017aa6cda4b4`; hashes, paths and copy/ZIP checks
@@ -369,3 +370,117 @@ included in this work.
   large water-plane rendering cost, distant-terrain accuracy and final LOD budgets.
 * Official Pure track-author/manual availability beyond the public creator pages;
   no authenticated Patreon/download or Discord documentation was read.
+
+## 9. Implemented v2 material decisions (material phase only)
+
+This section supersedes the earlier research-only status for material export,
+not for AC runtime verification. Implemented recipes and measured evidence are
+in `scripts/materials.py`, `scripts/blender_materials.py` and
+`data/materials_info.json`; source downloads are locked in `data/assets.lock.json`.
+Numeric tuning, masks, wear, tile scales and the galvanised-style finish are
+project artistic choices, not claims about real RN24 appearance or AC defaults.
+
+**Road and terrain:** `ksMultilayer_fresnel_nm4` uses world XZ multiplied by
+`multR/G/B/A` for its detail and normal samples
+(`S:recreated/ksMultilayer_fresnel_nm4_ps.fx:116–151`). This avoids a scalar
+detailUVMultiplier stretching grain between the road's ~7 m width and 140 m
+atlas period. Its four mask channels weight both normals and colors
+(`S:recreated/ksMultilayer_fresnel_nm4_ps.fx:154–183`). Road RGB weights select
+asphalt/repair/gravel-edge; A selects white paint with a flat normal. Terrain
+weights grass and dry dirt. `magicMult`, Fresnel controls and tiling controls
+are declared in `S:recreated/ksMultilayer_fresnel_nm4_ps.fx:10–34`.
+The shader uses diffuse alpha for Fresnel/specular intensity and explicitly
+does **not** use `ksSpecular`
+(`S:recreated/ksMultilayer_fresnel_nm4_ps.fx:187–200`), so detail textures carry
+a restrained roughness-derived alpha; it is not a guessed txMaps convention.
+Whether this numeric tuning looks correct under the user's LCS/Pure is
+**UNVERIFIED**. No guessed `_detail_NM` shader is used.
+
+**Other surfaces:** `ksPerPixelMultiMap` reads diffuse, normal, maps and optional
+detail (`S:recreated/ksPerPixelMultiMap_ps.fx:19–38`). Our txMaps is deliberately
+authored from roughness for artistic specular strength/exponent/reflection
+control, **not** a direct PBR ORM map. Current source scales specular by R and
+exponent by G (`S:recreated/include_new/base/utils_ps.fx:892–900`); B also affects
+reflection-related behavior (`S:recreated/include_new/base/utils_ps.fx:711–737`).
+Uniform wetness is not baked in; RainFX configuration remains deferred.
+
+**Critical binding detail:** the exporter emits numeric texture slots in JSON
+insertion order (`E:exporter/material_writer.py:63–84`). Therefore multilayer
+bindings are explicitly **diffuse, mask, detail R/G/B/A, normal R/G/B/A**, matching
+`S:recreated/include_new/base/textures_ps.fx:6–19` and
+`S:recreated/ksMultilayer_fresnel_nm4_ps.fx:38–47`. MultiMap order is diffuse,
+normal, maps, detail. KN5 readback checks names **and numeric indices**, complete
+property sets, values and opacity/depth flags against the generated recipe.
+Blender material UI flags are explicitly set to 0/false/0 before applying
+settings, avoiding the exporter's falsy-override problem; UI enums are declared
+in `E:ui/materials_ui.py:44–63`. Existing property dictionaries are not partially
+patched: complete intended sets are supplied.
+
+**DDS:** ImageMagick writes full mip chains for DXT1 and DXT5; generated headers
+and payload sizes are checked by `scripts/check_kn5.py:inspect_dds` and embedded
+bytes are SHA-256 compared to the recipe. RGB normals use DXT5, not unverified
+BC5 reconstruction. `_nm4` decodes RGB using xzy*2−1
+(`S:recreated/ksMultilayer_fresnel_nm4_ps.fx:156–173`). GL green is inverted for
+the authored DirectX convention; **actual AC tangent handedness and compressed
+normal quality remain UNVERIFIED**. Blender previews reverse green for their approximation;
+its output is not evidence of AC shader behavior.
+
+**Additional exporter defect found during implementation:**
+`E:exporter/node_writer.py:254–267` converts positions/normals but assigns the
+unconverted Blender loop tangent. The shader consumes that tangent and forms
+its bitangent via a cross product
+(`S:recreated/include_new/base/_include_vs.fx:241–243`,
+`S:recreated/include_new/base/utils_vs.fx:5–11`), so leaving a Blender-XY tangent
+beside an AC-Y-up normal is unsuitable for new normal maps. Our **local writer
+adapter**, not a change to the addon checkout, derives ordinary mapped tangents
+from the already-converted triangle positions and UVs. It does not retain the
+addon's wrapped `loop.tangent` vectors after `obj.to_mesh_clear()`
+(`E:exporter/node_writer.py:263–284`); readback caught zero tangents in mapped
+meshes when those vectors were reused. Multilayer tangents instead use projected
+AC +X to align with that shader's world-XZ detail coordinates. They are
+orthogonalised/normalised; KN5 readback checks finite, unit, orthogonal bases
+for every mapped mesh. Unchanged diffuse-only foliage/water retain v1 tangents.
+This verifies serialized bases, **not** the final in-game normal appearance.
+
+**CC0 provenance:** each asset's page URL and the provider CC0 license link are
+in CREDITS and the lock. Individual pages were downloaded and checked for CC0;
+Poly Haven map downloads were additionally checked against API MD5 metadata
+before SHA-256 locking. ambientCG Metal003 archive integrity was checked before
+locking. Metal003 is silver steel, not provider-verified galvanisation
+(https://ambientcg.com/view?id=Metal003); zinc spangling is procedural. No vaulted
+Poly Haven asset, track texture or paid-mod content was downloaded.
+
+**Data-channel mip correction found by visual inspection:** the installed
+ImageMagick encoder's automatic mips treated mask A as transparency: decoding
+our initial terrain mask gave RGB=(0,0,0), A=0 from mip 1 onward despite R+G=1
+at level 0. That output was rejected. Masks and color/specular-alpha textures
+now downsample channels independently, compress each level with ImageMagick
+`dds:mipmaps=0`, then assemble the full legacy DDS chain. That define is verified
+in https://github.com/ImageMagick/ImageMagick6/blob/main/coders/dds.c
+(`GetImageOption(image_info,"dds:mipmaps")`, zero disables mip generation).
+The validator decodes and samples **every mask mip** to check mean channel
+weights stay close to one; BC3 can locally alter independent RGB/alpha weights,
+so pointwise sums are not required to be exact. Header validity alone would
+not detect the lost RGB fault. Header/caps/format constants follow
+https://learn.microsoft.com/en-us/windows/win32/direct3ddds/dds-header and
+https://learn.microsoft.com/en-us/windows/win32/direct3ddds/dds-pixelformat.
+Preview DDS images use `CHANNEL_PACKED`, so RGB and data alpha do not affect each
+other (https://docs.blender.org/api/3.6/bpy.types.Image.html#bpy.types.Image.alpha_mode).
+The installed Blender 3.6 loader also emits an enum warning when the addon reads
+the DDS image's `file_format`; the local texture-writer adapter instead reads
+the verified original DDS bytes directly, bypassing that enum access and image
+copy. PNG handling still delegates to the addon. Embedded DDS SHA-256 comparison
+checks that the adapter does not transcode the files.
+
+**Optional comparison rendering:** `build.py render` uses Cycles CPU for both
+tagged-v1 and v2 scenes, 16 samples and denoising, with identical camera/light
+settings. Cycles sampling/denoising controls are documented at
+https://docs.blender.org/manual/en/3.6/render/cycles/render_settings/sampling.html.
+The renderer is an approximation of the maps, not AC shader execution. Headless
+Eevee stalled on later views here; its underlying cause remains **UNVERIFIED**.
+Rendering is excluded from `materials`/`all`, including legacy preview calls.
+Grey asphalt/repair targets, green-olive grass and grey-beige gravel are artistic
+color grades, not new shader properties. A 140 m strip spaces small soft repairs;
+background macro detail repeats at 28 m. Dry patches cover 25% of the inland/left
+terrain mask and 35% of the coastal/right mask; the side assignment is a broad
+artistic approximation rather than a survey-derived classification.

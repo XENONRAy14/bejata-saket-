@@ -1,0 +1,55 @@
+"""Optional, matched v1/v2 Cycles CPU comparisons; no scene/export changes."""
+from pathlib import Path
+import json
+import sys
+
+import bpy
+import numpy as np
+
+ROOT=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT/'scripts'))
+from blender_mesh import camera
+
+
+def main():
+    label=sys.argv[sys.argv.index('--')+1]
+    if label not in ('before','after'):raise ValueError('Expected before or after')
+    output=ROOT/'out/preview/v2_materials'/label;output.mkdir(parents=True,exist_ok=True)
+    for image in bpy.data.images:
+        if image.source=='FILE':
+            source=Path(bpy.path.abspath(image.filepath))
+            if not source.exists():
+                candidate=ROOT/'textures'/source.name
+                if not candidate.exists():candidate=ROOT/'textures/v2'/source.name
+                if not candidate.exists():raise FileNotFoundError(source)
+                image.filepath=str(candidate)
+    if label=='after':
+        bpy.utils.refresh_script_paths()
+        bpy.ops.preferences.addon_enable(module='blender_assetto_corsa_tools')
+        from blender_materials import material_nodes
+        info=json.loads((ROOT/'data/materials_info.json').read_text())
+        for name,spec in info['materials'].items():material_nodes(bpy.data.materials[name],spec)
+    scene=bpy.context.scene;scene.render.engine='CYCLES'
+    scene.cycles.device='CPU';scene.cycles.samples=16;scene.cycles.use_denoising=True
+    scene.render.threads_mode='FIXED';scene.render.threads=8
+    scene.render.resolution_x,scene.render.resolution_y=1280,720
+    scene.render.resolution_percentage=100
+    data=np.load(ROOT/'data/centerline.npz');plan=np.load(ROOT/'data/decor_plan.npz')
+    views=[]
+    for fraction in (.1,.4,.7,.95):
+        i=int(np.searchsorted(data['s'],data['s'][-1]*fraction));j=int(np.searchsorted(data['s'],min(data['s'][-1],data['s'][i]+35)))
+        views.append((f'road_{int(fraction*100):02d}',[*data['xy'][i],data['z'][i]+1.2],[*data['xy'][j],data['z'][j]+1.2]))
+    houses=plan['placements'][(plan['placements'][:,0]==5)&(plan['placements'][:,8]<2000)]
+    for name,chainage in [('town',float(houses[len(houses)//2,8]-45)),('saket',float(data['s'][-1]-340))]:
+        i=int(np.searchsorted(data['s'],chainage));j=int(np.searchsorted(data['s'],chainage+50))
+        point=np.r_[data['xy'][j],data['z'][i]+1.6]
+        if name=='saket':point[:2]+=np.array([0,18])
+        views.append(('decor_'+name,[*data['xy'][i],data['z'][i]+1.6],point))
+    for name,origin,target in views:
+        camera('__COMPARISON_'+name,origin,target)
+        scene.render.filepath=str(output/(name+'.png'))
+        bpy.ops.render.render(write_still=True)
+    print(f'COMPARISON_RENDER_OK side={label} views={len(views)} engine=CYCLES device=CPU samples=16 denoising=True')
+
+
+if __name__=='__main__':main()

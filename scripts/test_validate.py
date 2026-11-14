@@ -18,10 +18,11 @@ from validate import EMPTIES, REQUIRED, UI_KEYS, validate
 def scene():
     matrix=np.eye(4);matrix[3,1]=1.5
     nodes=[dict(kind=1,name=name,matrix=matrix.ravel().tolist()) for name in sorted(EMPTIES)]
-    nodes.append(dict(kind=2,name='1ROAD_000',vertices=3,triangles=1,
+    nodes.append(dict(kind=2,name='1ROAD_000',vertices=3,triangles=1,material=0,
                       positions=np.array([[-1,0,-3.5],[-1,0,3.5],[1,0,-3.5]]),
                       indices=np.array([[0,1,2]]),bounds=(np.zeros(3),np.array([13000,338,8300]))))
-    return dict(bytes=100,textures=['road.png'],texture_formats={'road.png':'PNG'},nodes=nodes)
+    material=dict(name='asphalt',shader='ksPerPixel',textures={'txDiffuse':'road.png'},texture_slots={'txDiffuse':0},properties={'ksDiffuse':.4},blend=0,alpha_tested=False,depth=0)
+    return dict(bytes=100,textures=['road.png'],texture_formats={'road.png':'PNG'},texture_info={},materials=[material],nodes=nodes)
 
 
 class ValidationTests(unittest.TestCase):
@@ -46,7 +47,7 @@ class ValidationTests(unittest.TestCase):
     def test_valid_package(self):
         passed,output=self.run_check(scene())
         self.assertTrue(passed,output)
-        self.assertIn('VALIDATION_PASS checks=11 passed=11',output)
+        self.assertIn('VALIDATION_PASS checks=13 passed=13',output)
 
     def test_geometry_and_binary_semantic_failures(self):
         mutations={
@@ -56,6 +57,7 @@ class ValidationTests(unittest.TestCase):
             'units_scale_and_road_width':lambda p:p['nodes'][-1].update(bounds=(np.zeros(3),np.ones(3))),
             'mesh_names_and_surfaces':lambda p:p['nodes'][-1].update(name='1MISSING_000'),
             'textures':lambda p:p['texture_formats'].update({'road.png':'UNKNOWN'}),
+            'materials_and_shaders':lambda p:p['materials'][0].update(shader='invented'),
         }
         for name,mutate in mutations.items():
             with self.subTest(name=name):
