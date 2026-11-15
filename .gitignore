@@ -16,6 +16,8 @@ data/asset_cache/
 textures/v2/*
 !textures/v2/*.dds
 !blend/pilot300.blend
+out/preview/pilot300/
+out/preview/shortened/
 out/preview/v2_materials/*.blend
 out/preview/csp_material_fixes/*.blend
 data/landscape.npz
