@@ -1,0 +1,20 @@
+{
+  "origin": "Current full-route source snapshot used for this pilot build",
+  "snapshot_commit": "ab150e2aa53fc10668ab5faa2241aafbce060932",
+  "files": {
+    "data/centerline.npz": "94628ff6c3e637feb50bbaba67c81220ad99edeccf66283815072246f1e07441",
+    "data/shortening_info.json": "d6d2b7290a5d799f4c24cd7bb94002a4b5331ffdf78f10c9ae4a1f02384d2f72",
+    "blend/bejaia_saket.blend": "09462da2084277c913ee73d5523fb9b9e93e723b70b5bd0b9a5c866304b3d8dd",
+    "blend/settings.json": "54935e785759dc43011c702902050470435bec035ac77e0a6a47d156003ea0ca",
+    "out/bejaia_saket/bejaia_saket.kn5": "884220a9c1546c3d171704a9bc4e202563b5b73480a745815f061d0ae29eaae6",
+    "out/bejaia_saket/data/surfaces.ini": "55d3ddc817522d85ddf5f3b39571bc0eb8f25ea41e6ebd5028cbd8070bdccbd5",
+    "scripts/blender_mesh.py": "d35438092fc181729f03c6e2dc0850d81b1bfa32263ee32d80f87629048be94c",
+    "scripts/blender_materials.py": "1f7a2654d10777ad8f133010ebe648c5a6314f3ebc1945aa0f787b713eb1328c",
+    "scripts/geometry.py": "42760a470b99e8f3bef492955a7efeeff27eacd9362040fa6d6c2b609de6a021",
+    "scripts/mesh_geometry.py": "57400170dd076df873ce43ef06a6ee956b3a2289b6585a6800c6de8bab58172b",
+    "scripts/blender_collision_fix.py": "c559898212d3609e487519aa2c3786dd447bbf61a4d950955541692587df954d",
+    "scripts/acdata.py": "c66c7287ec8d3a1c5c7170696650ca9c14b5e7da623d6b3389b64f91f467a344",
+    "scripts/validate_shortened.py": "28ea160bd2dd4e351b63c11d7506362b250d79cfe72597da1ecf2c675fc20178",
+    "data/kn5_export_info.json": "2d736efee9b59c5e729a13757ed9dbb7761a9927557405c2c6081149f0d5d320"
+  }
+}

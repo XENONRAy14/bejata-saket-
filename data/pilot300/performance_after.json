@@ -1,0 +1,417 @@
+{
+  "before_kn5": {
+    "bytes": 70164221,
+    "triangles": 359927,
+    "meshes": 175,
+    "materials": 11,
+    "texture_gpu_mb": 48.668243408203125,
+    "material_stats": [
+      {
+        "name": "asphalt",
+        "shader": "ksMultilayer_fresnel_nm4",
+        "blend": 0,
+        "alpha_tested": false,
+        "meshes": 1,
+        "triangles": 300,
+        "lod_out": [
+          5000.0
+        ],
+        "textures": 10
+      },
+      {
+        "name": "Dots Stroke",
+        "shader": "ksPerPixel",
+        "blend": 0,
+        "alpha_tested": false,
+        "meshes": 0,
+        "triangles": 0,
+        "lod_out": [],
+        "textures": 0
+      },
+      {
+        "name": "fern_02",
+        "shader": "ksPerPixelAT",
+        "blend": 2,
+        "alpha_tested": true,
+        "meshes": 25,
+        "triangles": 1950,
+        "lod_out": [
+          700.0
+        ],
+        "textures": 4
+      },
+      {
+        "name": "grass",
+        "shader": "ksMultilayer_fresnel_nm4",
+        "blend": 0,
+        "alpha_tested": false,
+        "meshes": 26,
+        "triangles": 46911,
+        "lod_out": [
+          5000.0
+        ],
+        "textures": 10
+      },
+      {
+        "name": "gravel",
+        "shader": "ksPerPixelMultiMap",
+        "blend": 0,
+        "alpha_tested": false,
+        "meshes": 2,
+        "triangles": 600,
+        "lod_out": [
+          5000.0
+        ],
+        "textures": 4
+      },
+      {
+        "name": "guard-rail_body_pbr",
+        "shader": "ksPerPixelMultiMap",
+        "blend": 0,
+        "alpha_tested": false,
+        "meshes": 76,
+        "triangles": 277200,
+        "lod_out": [
+          700.0,
+          5000.0
+        ],
+        "textures": 4
+      },
+      {
+        "name": "kerb",
+        "shader": "ksPerPixelMultiMap",
+        "blend": 0,
+        "alpha_tested": false,
+        "meshes": 2,
+        "triangles": 600,
+        "lod_out": [
+          5000.0
+        ],
+        "textures": 4
+      },
+      {
+        "name": "roadside_concrete",
+        "shader": "ksPerPixel",
+        "blend": 0,
+        "alpha_tested": false,
+        "meshes": 2,
+        "triangles": 24,
+        "lod_out": [
+          5000.0
+        ],
+        "textures": 1
+      },
+      {
+        "name": "rock",
+        "shader": "ksPerPixelMultiMap",
+        "blend": 0,
+        "alpha_tested": false,
+        "meshes": 14,
+        "triangles": 1151,
+        "lod_out": [
+          5000.0
+        ],
+        "textures": 4
+      },
+      {
+        "name": "rock_moss_set_01",
+        "shader": "ksPerPixelMultiMap",
+        "blend": 0,
+        "alpha_tested": false,
+        "meshes": 26,
+        "triangles": 28220,
+        "lod_out": [
+          700.0,
+          5000.0
+        ],
+        "textures": 4
+      },
+      {
+        "name": "water",
+        "shader": "ksPerPixelMultiMap",
+        "blend": 0,
+        "alpha_tested": false,
+        "meshes": 1,
+        "triangles": 2971,
+        "lod_out": [
+          60000.0
+        ],
+        "textures": 4
+      }
+    ]
+  },
+  "after_kn5": {
+    "vertices": 452990,
+    "triangles": 392927,
+    "meshes": 250,
+    "kn5_bytes": 73355788,
+    "sha256": "6df1570df687326bd44cf8bb3aed792a2e2f62b87d3a6c24a1aae3d2c276b4b5"
+  },
+  "tree_lods": {
+    "ph_pine_01": [
+      {
+        "distance": 22.0,
+        "triangles": 20000
+      },
+      {
+        "distance": 75.0,
+        "triangles": 9000
+      },
+      {
+        "distance": 320.0,
+        "triangles": 16
+      }
+    ],
+    "ph_pine_03": [
+      {
+        "distance": 22.0,
+        "triangles": 20000
+      },
+      {
+        "distance": 75.0,
+        "triangles": 9000
+      },
+      {
+        "distance": 320.0,
+        "triangles": 16
+      }
+    ],
+    "ph_pine_04": [
+      {
+        "distance": 22.0,
+        "triangles": 20000
+      },
+      {
+        "distance": 75.0,
+        "triangles": 9000
+      },
+      {
+        "distance": 320.0,
+        "triangles": 16
+      }
+    ],
+    "ph_pine_sapling_small_a": [
+      {
+        "distance": 22.0,
+        "triangles": 16
+      },
+      {
+        "distance": 75.0,
+        "triangles": 16
+      },
+      {
+        "distance": 320.0,
+        "triangles": 16
+      }
+    ]
+  },
+  "tree_placements_identical": true,
+  "impostor_metrics": [
+    {
+      "model": "ph_pine_01",
+      "texture": "PH_pine_01_impostor_0.dds",
+      "alpha_coverage": 0.15549468994140625,
+      "white_fraction": 0.0,
+      "rgb_mean": [
+        87.53130366517836,
+        81.72624012560718,
+        52.16339973504735
+      ]
+    },
+    {
+      "model": "ph_pine_01",
+      "texture": "PH_pine_01_impostor_1.dds",
+      "alpha_coverage": 0.15557289123535156,
+      "white_fraction": 0.0,
+      "rgb_mean": [
+        87.2907742291424,
+        81.52728498743333,
+        52.193649236805
+      ]
+    },
+    {
+      "model": "ph_pine_01",
+      "texture": "PH_pine_01_impostor_2.dds",
+      "alpha_coverage": 0.1529865264892578,
+      "white_fraction": 0.0,
+      "rgb_mean": [
+        87.22073582765026,
+        81.38579211809149,
+        52.18875687267015
+      ]
+    },
+    {
+      "model": "ph_pine_01",
+      "texture": "PH_pine_01_impostor_3.dds",
+      "alpha_coverage": 0.14999961853027344,
+      "white_fraction": 0.0,
+      "rgb_mean": [
+        87.40388845796829,
+        81.49031700214896,
+        52.15745838790484
+      ]
+    },
+    {
+      "model": "ph_pine_03",
+      "texture": "PH_pine_03_impostor_0.dds",
+      "alpha_coverage": 0.19136810302734375,
+      "white_fraction": 0.0,
+      "rgb_mean": [
+        88.02309333014392,
+        82.35736355300402,
+        52.27955188773273
+      ]
+    },
+    {
+      "model": "ph_pine_03",
+      "texture": "PH_pine_03_impostor_1.dds",
+      "alpha_coverage": 0.18607139587402344,
+      "white_fraction": 0.0,
+      "rgb_mean": [
+        87.5126749013377,
+        81.84824970529445,
+        52.217620829275795
+      ]
+    },
+    {
+      "model": "ph_pine_03",
+      "texture": "PH_pine_03_impostor_2.dds",
+      "alpha_coverage": 0.18776893615722656,
+      "white_fraction": 0.0,
+      "rgb_mean": [
+        87.39723703590838,
+        81.83502463304383,
+        52.29794301386561
+      ]
+    },
+    {
+      "model": "ph_pine_03",
+      "texture": "PH_pine_03_impostor_3.dds",
+      "alpha_coverage": 0.19200706481933594,
+      "white_fraction": 0.0,
+      "rgb_mean": [
+        87.26194284124887,
+        81.52078635501206,
+        52.20017483385816
+      ]
+    },
+    {
+      "model": "ph_pine_04",
+      "texture": "PH_pine_04_impostor_0.dds",
+      "alpha_coverage": 0.2131938934326172,
+      "white_fraction": 0.0,
+      "rgb_mean": [
+        86.41834936255871,
+        80.63678819056139,
+        51.604670096175354
+      ]
+    },
+    {
+      "model": "ph_pine_04",
+      "texture": "PH_pine_04_impostor_1.dds",
+      "alpha_coverage": 0.2218914031982422,
+      "white_fraction": 0.0,
+      "rgb_mean": [
+        86.85534018137275,
+        81.15089182103408,
+        51.79308032836206
+      ]
+    },
+    {
+      "model": "ph_pine_04",
+      "texture": "PH_pine_04_impostor_2.dds",
+      "alpha_coverage": 0.21984481811523438,
+      "white_fraction": 0.0,
+      "rgb_mean": [
+        87.16863320088147,
+        81.25097603720221,
+        51.75872360361611
+      ]
+    },
+    {
+      "model": "ph_pine_04",
+      "texture": "PH_pine_04_impostor_3.dds",
+      "alpha_coverage": 0.2250537872314453,
+      "white_fraction": 0.0,
+      "rgb_mean": [
+        87.3285957641555,
+        81.36358936547083,
+        51.88135736865746
+      ]
+    },
+    {
+      "model": "ph_pine_sapling_small_a",
+      "texture": "PH_pine_sapling_small_a_impostor_0.dds",
+      "alpha_coverage": 0.1905517578125,
+      "white_fraction": 0.0,
+      "rgb_mean": [
+        81.31311058616272,
+        85.47235345932094,
+        54.29099935938501
+      ]
+    },
+    {
+      "model": "ph_pine_sapling_small_a",
+      "texture": "PH_pine_sapling_small_a_impostor_1.dds",
+      "alpha_coverage": 0.23536300659179688,
+      "white_fraction": 0.0,
+      "rgb_mean": [
+        81.21627579053145,
+        85.45513703625666,
+        54.291082513492924
+      ]
+    },
+    {
+      "model": "ph_pine_sapling_small_a",
+      "texture": "PH_pine_sapling_small_a_impostor_2.dds",
+      "alpha_coverage": 0.28137969970703125,
+      "white_fraction": 0.0,
+      "rgb_mean": [
+        80.84688593042488,
+        84.85064803015102,
+        54.09147664108891
+      ]
+    },
+    {
+      "model": "ph_pine_sapling_small_a",
+      "texture": "PH_pine_sapling_small_a_impostor_3.dds",
+      "alpha_coverage": 0.20142364501953125,
+      "white_fraction": 0.0,
+      "rgb_mean": [
+        81.36275141093141,
+        85.59033748721639,
+        54.34268588311049
+      ]
+    }
+  ],
+  "rail_lod_triangles": {
+    "near": 275400,
+    "far": 33000
+  },
+  "reference_files_unchanged": 86,
+  "installed_pilot_unchanged": true,
+  "installed_main_unchanged": true,
+  "naive_distance_envelope_before": {
+    "max": {
+      "triangles": 4038066,
+      "lod_counts": [
+        79,
+        115,
+        50,
+        0
+      ]
+    },
+    "note": "Geometric distance only, no camera culling, FOV or engine LOD scaling; NOT a measured frame"
+  },
+  "naive_distance_envelope_after": {
+    "triangles": 904672,
+    "lod_counts": [
+      34,
+      99,
+      111,
+      0
+    ]
+  },
+  "fps_tested": false,
+  "note": "Distance-only estimate, not FPS or measured frame geometry; no camera culling or engine LOD scaling"
+}

@@ -132,7 +132,12 @@ def exporter_settings(names=('asphalt','grass','gravel','rock','metal','kerb')):
     materials = {}
     for name in names:
         materials[name] = dict(shaderName='ksPerPixel',alphaBlendMode='Opaque',alphaTested=False,depthMode='DepthNormal',properties={key:dict(valueA=value) for key,value in dict(ksAmbient=.4,ksDiffuse=.4,ksSpecular=.5 if name=='metal' else .1,ksSpecularEXP=20 if name=='metal' else 10).items()},textures=dict(txDiffuse=dict(textureName=f'{name}.png')))
-    return dict(materials=materials,nodes={'*':dict(lodIn=0,lodOut=10000,castShadows=True,visible=True,renderable=True)})
+    nodes={
+        '*':dict(lodIn=0,lodOut=10000,castShadows=True,visible=True,renderable=True),
+        'DETAIL_GUARD_*':dict(lodIn=0,lodOut=10000,castShadows=True,visible=True,renderable=True),
+        '1WALL_COLLIDER_GUARD_*':dict(lodIn=0,lodOut=10000,castShadows=False,visible=False,renderable=False),
+    }
+    return dict(materials=materials,nodes=nodes)
 
 
 def write_files(data, output=OUTPUT):

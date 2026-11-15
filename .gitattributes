@@ -2,3 +2,6 @@
 out/*.zip filter=lfs diff=lfs merge=lfs -text
 out/bejaia_saket/extension/trees/** filter=lfs diff=lfs merge=lfs -text
 out_backup_v1/** filter=lfs diff=lfs merge=lfs -text
+*.blend filter=lfs diff=lfs merge=lfs -text
+*.dds filter=lfs diff=lfs merge=lfs -text
+out/*/extension/trees/*.bin filter=lfs diff=lfs merge=lfs -text

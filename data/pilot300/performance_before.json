@@ -1,0 +1,876 @@
+{
+  "active_race": {
+    "RACE": {
+      "TRACK": "bejaia_saket_pilot300",
+      "CONFIG_TRACK": "",
+      "CARS": "1"
+    },
+    "WEATHER": {
+      "NAME": "sol_45_tornado"
+    }
+  },
+  "pilot": {
+    "bytes": 70164221,
+    "triangles": 359927,
+    "meshes": 175,
+    "materials": 11,
+    "texture_gpu_mb": 48.668243408203125,
+    "material_stats": [
+      {
+        "name": "asphalt",
+        "shader": "ksMultilayer_fresnel_nm4",
+        "blend": 0,
+        "alpha_tested": false,
+        "meshes": 1,
+        "triangles": 300,
+        "lod_out": [
+          5000.0
+        ],
+        "textures": 10
+      },
+      {
+        "name": "Dots Stroke",
+        "shader": "ksPerPixel",
+        "blend": 0,
+        "alpha_tested": false,
+        "meshes": 0,
+        "triangles": 0,
+        "lod_out": [],
+        "textures": 0
+      },
+      {
+        "name": "fern_02",
+        "shader": "ksPerPixelAT",
+        "blend": 2,
+        "alpha_tested": true,
+        "meshes": 25,
+        "triangles": 1950,
+        "lod_out": [
+          700.0
+        ],
+        "textures": 4
+      },
+      {
+        "name": "grass",
+        "shader": "ksMultilayer_fresnel_nm4",
+        "blend": 0,
+        "alpha_tested": false,
+        "meshes": 26,
+        "triangles": 46911,
+        "lod_out": [
+          5000.0
+        ],
+        "textures": 10
+      },
+      {
+        "name": "gravel",
+        "shader": "ksPerPixelMultiMap",
+        "blend": 0,
+        "alpha_tested": false,
+        "meshes": 2,
+        "triangles": 600,
+        "lod_out": [
+          5000.0
+        ],
+        "textures": 4
+      },
+      {
+        "name": "guard-rail_body_pbr",
+        "shader": "ksPerPixelMultiMap",
+        "blend": 0,
+        "alpha_tested": false,
+        "meshes": 76,
+        "triangles": 277200,
+        "lod_out": [
+          700.0,
+          5000.0
+        ],
+        "textures": 4
+      },
+      {
+        "name": "kerb",
+        "shader": "ksPerPixelMultiMap",
+        "blend": 0,
+        "alpha_tested": false,
+        "meshes": 2,
+        "triangles": 600,
+        "lod_out": [
+          5000.0
+        ],
+        "textures": 4
+      },
+      {
+        "name": "roadside_concrete",
+        "shader": "ksPerPixel",
+        "blend": 0,
+        "alpha_tested": false,
+        "meshes": 2,
+        "triangles": 24,
+        "lod_out": [
+          5000.0
+        ],
+        "textures": 1
+      },
+      {
+        "name": "rock",
+        "shader": "ksPerPixelMultiMap",
+        "blend": 0,
+        "alpha_tested": false,
+        "meshes": 14,
+        "triangles": 1151,
+        "lod_out": [
+          5000.0
+        ],
+        "textures": 4
+      },
+      {
+        "name": "rock_moss_set_01",
+        "shader": "ksPerPixelMultiMap",
+        "blend": 0,
+        "alpha_tested": false,
+        "meshes": 26,
+        "triangles": 28220,
+        "lod_out": [
+          700.0,
+          5000.0
+        ],
+        "textures": 4
+      },
+      {
+        "name": "water",
+        "shader": "ksPerPixelMultiMap",
+        "blend": 0,
+        "alpha_tested": false,
+        "meshes": 1,
+        "triangles": 2971,
+        "lod_out": [
+          60000.0
+        ],
+        "textures": 4
+      }
+    ]
+  },
+  "reference_main": {
+    "parser_not_compatible": "Unexpected trailing KN5 data",
+    "bytes": 117434311
+  },
+  "reference_downhill": {
+    "parser_not_compatible": "Unexpected trailing KN5 data",
+    "bytes": 4231
+  },
+  "tree_models": {
+    "ph_pine_01.bin": {
+      "config": {
+        "BASIC": {
+          "height": "20.9445572",
+          "width": "9.8816309"
+        },
+        "SHADING": {
+          "specular": "1",
+          "subscattering": "1",
+          "reflectivity": "1",
+          "brightness": "1",
+          "use_ao_channel": "0"
+        },
+        "NORMALS": {
+          "boost": "0.9",
+          "sphere": "1"
+        },
+        "LEAVES": {
+          "mult": "20",
+          "offset": "0"
+        },
+        "FAKE_SHADOW": {
+          "size": "1",
+          "opacity": "1"
+        },
+        "LOD_0": {
+          "model": "LOD0.mesh",
+          "distance": "45"
+        },
+        "LOD_1": {
+          "model": "LOD1.mesh",
+          "distance": "120"
+        },
+        "LOD_2": {
+          "model": "LOD2.mesh",
+          "distance": "320"
+        }
+      },
+      "lods": [
+        {
+          "distance": "45",
+          "triangles": 69999,
+          "vertices": 150278,
+          "runtime_processing_flag": 1
+        },
+        {
+          "distance": "120",
+          "triangles": 12000,
+          "vertices": 21055,
+          "runtime_processing_flag": 1
+        },
+        {
+          "distance": "320",
+          "triangles": 16,
+          "vertices": 32,
+          "runtime_processing_flag": 1
+        }
+      ],
+      "images": [
+        {
+          "name": "PH_PH_pine_twig_02_card_diff.dds",
+          "width": 1024,
+          "height": 1024,
+          "alpha_coverage": 0.061011314392089844,
+          "opaque_rgb_mean": [
+            85.85716295427902,
+            85.37208284486127,
+            54.126080500195386
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_PH_pine_twig_03_card_diff.dds",
+          "width": 1024,
+          "height": 1024,
+          "alpha_coverage": 0.04107666015625,
+          "opaque_rgb_mean": [
+            88.62934156760772,
+            86.685433692422,
+            54.45426263001486
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_PH_pine_twig_04_card_diff.dds",
+          "width": 1024,
+          "height": 1024,
+          "alpha_coverage": 0.0733175277709961,
+          "opaque_rgb_mean": [
+            89.63938136552244,
+            86.04280752871395,
+            53.46150444204529
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_PH_pine_twig_05_card_diff.dds",
+          "width": 1024,
+          "height": 1024,
+          "alpha_coverage": 0.0992584228515625,
+          "opaque_rgb_mean": [
+            93.62734435049961,
+            89.24672367409684,
+            54.43427171406611
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_PH_pine_twig_06_card_diff.dds",
+          "width": 1024,
+          "height": 1024,
+          "alpha_coverage": 0.09939098358154297,
+          "opaque_rgb_mean": [
+            87.59487233613832,
+            86.30594229459119,
+            54.70070716472044
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_PH_pine_twig_07_card_diff.dds",
+          "width": 1024,
+          "height": 1024,
+          "alpha_coverage": 0.044826507568359375,
+          "opaque_rgb_mean": [
+            89.17830397412986,
+            86.63135052335971,
+            54.91809207727002
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_pine_01_impostor_0.dds",
+          "width": 512,
+          "height": 1024,
+          "alpha_coverage": 0.34668731689453125,
+          "opaque_rgb_mean": [
+            255.0,
+            255.0,
+            255.0
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_pine_01_impostor_1.dds",
+          "width": 512,
+          "height": 1024,
+          "alpha_coverage": 0.3509998321533203,
+          "opaque_rgb_mean": [
+            255.0,
+            255.0,
+            255.0
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_pine_01_impostor_2.dds",
+          "width": 512,
+          "height": 1024,
+          "alpha_coverage": 0.35065460205078125,
+          "opaque_rgb_mean": [
+            255.0,
+            255.0,
+            255.0
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_pine_01_impostor_3.dds",
+          "width": 512,
+          "height": 1024,
+          "alpha_coverage": 0.33931922912597656,
+          "opaque_rgb_mean": [
+            255.0,
+            255.0,
+            255.0
+          ],
+          "mips": 11
+        }
+      ],
+      "uncompressed_bytes": 30407784
+    },
+    "ph_pine_03.bin": {
+      "config": {
+        "BASIC": {
+          "height": "17.9888458",
+          "width": "9.23675156"
+        },
+        "SHADING": {
+          "specular": "1",
+          "subscattering": "1",
+          "reflectivity": "1",
+          "brightness": "1",
+          "use_ao_channel": "0"
+        },
+        "NORMALS": {
+          "boost": "0.9",
+          "sphere": "1"
+        },
+        "LEAVES": {
+          "mult": "20",
+          "offset": "0"
+        },
+        "FAKE_SHADOW": {
+          "size": "1",
+          "opacity": "1"
+        },
+        "LOD_0": {
+          "model": "LOD0.mesh",
+          "distance": "45"
+        },
+        "LOD_1": {
+          "model": "LOD1.mesh",
+          "distance": "120"
+        },
+        "LOD_2": {
+          "model": "LOD2.mesh",
+          "distance": "320"
+        }
+      },
+      "lods": [
+        {
+          "distance": "45",
+          "triangles": 70000,
+          "vertices": 143896,
+          "runtime_processing_flag": 1
+        },
+        {
+          "distance": "120",
+          "triangles": 12000,
+          "vertices": 22238,
+          "runtime_processing_flag": 1
+        },
+        {
+          "distance": "320",
+          "triangles": 16,
+          "vertices": 32,
+          "runtime_processing_flag": 1
+        }
+      ],
+      "images": [
+        {
+          "name": "PH_PH_pine_twig_02_card_diff.dds",
+          "width": 1024,
+          "height": 1024,
+          "alpha_coverage": 0.061011314392089844,
+          "opaque_rgb_mean": [
+            85.85716295427902,
+            85.37208284486127,
+            54.126080500195386
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_PH_pine_twig_03_card_diff.dds",
+          "width": 1024,
+          "height": 1024,
+          "alpha_coverage": 0.04107666015625,
+          "opaque_rgb_mean": [
+            88.62934156760772,
+            86.685433692422,
+            54.45426263001486
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_PH_pine_twig_04_card_diff.dds",
+          "width": 1024,
+          "height": 1024,
+          "alpha_coverage": 0.0733175277709961,
+          "opaque_rgb_mean": [
+            89.63938136552244,
+            86.04280752871395,
+            53.46150444204529
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_PH_pine_twig_05_card_diff.dds",
+          "width": 1024,
+          "height": 1024,
+          "alpha_coverage": 0.0992584228515625,
+          "opaque_rgb_mean": [
+            93.62734435049961,
+            89.24672367409684,
+            54.43427171406611
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_PH_pine_twig_06_card_diff.dds",
+          "width": 1024,
+          "height": 1024,
+          "alpha_coverage": 0.09939098358154297,
+          "opaque_rgb_mean": [
+            87.59487233613832,
+            86.30594229459119,
+            54.70070716472044
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_PH_pine_twig_07_card_diff.dds",
+          "width": 1024,
+          "height": 1024,
+          "alpha_coverage": 0.044826507568359375,
+          "opaque_rgb_mean": [
+            89.17830397412986,
+            86.63135052335971,
+            54.91809207727002
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_pine_03_impostor_0.dds",
+          "width": 512,
+          "height": 1024,
+          "alpha_coverage": 0.39118003845214844,
+          "opaque_rgb_mean": [
+            255.0,
+            255.0,
+            255.0
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_pine_03_impostor_1.dds",
+          "width": 512,
+          "height": 1024,
+          "alpha_coverage": 0.39037513732910156,
+          "opaque_rgb_mean": [
+            255.0,
+            255.0,
+            255.0
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_pine_03_impostor_2.dds",
+          "width": 512,
+          "height": 1024,
+          "alpha_coverage": 0.40194129943847656,
+          "opaque_rgb_mean": [
+            255.0,
+            255.0,
+            255.0
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_pine_03_impostor_3.dds",
+          "width": 512,
+          "height": 1024,
+          "alpha_coverage": 0.4041309356689453,
+          "opaque_rgb_mean": [
+            255.0,
+            255.0,
+            255.0
+          ],
+          "mips": 11
+        }
+      ],
+      "uncompressed_bytes": 30179035
+    },
+    "ph_pine_04.bin": {
+      "config": {
+        "BASIC": {
+          "height": "17.2842464",
+          "width": "9.70164108"
+        },
+        "SHADING": {
+          "specular": "1",
+          "subscattering": "1",
+          "reflectivity": "1",
+          "brightness": "1",
+          "use_ao_channel": "0"
+        },
+        "NORMALS": {
+          "boost": "0.9",
+          "sphere": "1"
+        },
+        "LEAVES": {
+          "mult": "20",
+          "offset": "0"
+        },
+        "FAKE_SHADOW": {
+          "size": "1",
+          "opacity": "1"
+        },
+        "LOD_0": {
+          "model": "LOD0.mesh",
+          "distance": "45"
+        },
+        "LOD_1": {
+          "model": "LOD1.mesh",
+          "distance": "120"
+        },
+        "LOD_2": {
+          "model": "LOD2.mesh",
+          "distance": "320"
+        }
+      },
+      "lods": [
+        {
+          "distance": "45",
+          "triangles": 70000,
+          "vertices": 150230,
+          "runtime_processing_flag": 1
+        },
+        {
+          "distance": "120",
+          "triangles": 12000,
+          "vertices": 22008,
+          "runtime_processing_flag": 1
+        },
+        {
+          "distance": "320",
+          "triangles": 16,
+          "vertices": 32,
+          "runtime_processing_flag": 1
+        }
+      ],
+      "images": [
+        {
+          "name": "PH_PH_pine_twig_02_card_diff.dds",
+          "width": 1024,
+          "height": 1024,
+          "alpha_coverage": 0.061011314392089844,
+          "opaque_rgb_mean": [
+            85.85716295427902,
+            85.37208284486127,
+            54.126080500195386
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_PH_pine_twig_03_card_diff.dds",
+          "width": 1024,
+          "height": 1024,
+          "alpha_coverage": 0.04107666015625,
+          "opaque_rgb_mean": [
+            88.62934156760772,
+            86.685433692422,
+            54.45426263001486
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_PH_pine_twig_04_card_diff.dds",
+          "width": 1024,
+          "height": 1024,
+          "alpha_coverage": 0.0733175277709961,
+          "opaque_rgb_mean": [
+            89.63938136552244,
+            86.04280752871395,
+            53.46150444204529
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_PH_pine_twig_05_card_diff.dds",
+          "width": 1024,
+          "height": 1024,
+          "alpha_coverage": 0.0992584228515625,
+          "opaque_rgb_mean": [
+            93.62734435049961,
+            89.24672367409684,
+            54.43427171406611
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_PH_pine_twig_06_card_diff.dds",
+          "width": 1024,
+          "height": 1024,
+          "alpha_coverage": 0.09939098358154297,
+          "opaque_rgb_mean": [
+            87.59487233613832,
+            86.30594229459119,
+            54.70070716472044
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_PH_pine_twig_07_card_diff.dds",
+          "width": 1024,
+          "height": 1024,
+          "alpha_coverage": 0.044826507568359375,
+          "opaque_rgb_mean": [
+            89.17830397412986,
+            86.63135052335971,
+            54.91809207727002
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_pine_04_impostor_0.dds",
+          "width": 512,
+          "height": 1024,
+          "alpha_coverage": 0.4765205383300781,
+          "opaque_rgb_mean": [
+            255.0,
+            255.0,
+            255.0
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_pine_04_impostor_1.dds",
+          "width": 512,
+          "height": 1024,
+          "alpha_coverage": 0.45932579040527344,
+          "opaque_rgb_mean": [
+            255.0,
+            255.0,
+            255.0
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_pine_04_impostor_2.dds",
+          "width": 512,
+          "height": 1024,
+          "alpha_coverage": 0.4709911346435547,
+          "opaque_rgb_mean": [
+            255.0,
+            255.0,
+            255.0
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_pine_04_impostor_3.dds",
+          "width": 512,
+          "height": 1024,
+          "alpha_coverage": 0.46109771728515625,
+          "opaque_rgb_mean": [
+            255.0,
+            255.0,
+            255.0
+          ],
+          "mips": 11
+        }
+      ],
+      "uncompressed_bytes": 30447611
+    },
+    "ph_pine_sapling_small_a.bin": {
+      "config": {
+        "BASIC": {
+          "height": "1.64013183",
+          "width": "1.70833111"
+        },
+        "SHADING": {
+          "specular": "1",
+          "subscattering": "1",
+          "reflectivity": "1",
+          "brightness": "1",
+          "use_ao_channel": "0"
+        },
+        "NORMALS": {
+          "boost": "0.9",
+          "sphere": "1"
+        },
+        "LEAVES": {
+          "mult": "20",
+          "offset": "0"
+        },
+        "FAKE_SHADOW": {
+          "size": "1",
+          "opacity": "1"
+        },
+        "LOD_0": {
+          "model": "LOD0.mesh",
+          "distance": "45"
+        },
+        "LOD_1": {
+          "model": "LOD1.mesh",
+          "distance": "120"
+        },
+        "LOD_2": {
+          "model": "LOD2.mesh",
+          "distance": "320"
+        }
+      },
+      "lods": [
+        {
+          "distance": "45",
+          "triangles": 16,
+          "vertices": 32,
+          "runtime_processing_flag": 1
+        },
+        {
+          "distance": "120",
+          "triangles": 16,
+          "vertices": 32,
+          "runtime_processing_flag": 1
+        },
+        {
+          "distance": "320",
+          "triangles": 16,
+          "vertices": 32,
+          "runtime_processing_flag": 1
+        }
+      ],
+      "images": [
+        {
+          "name": "PH_PH_pine_sapling_small_a_card_diff.dds",
+          "width": 1024,
+          "height": 1024,
+          "alpha_coverage": 0.09896087646484375,
+          "opaque_rgb_mean": [
+            62.4637749595251,
+            55.828357489784906,
+            48.61154691234292
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_pine_sapling_small_a_impostor_0.dds",
+          "width": 512,
+          "height": 1024,
+          "alpha_coverage": 0.2646045684814453,
+          "opaque_rgb_mean": [
+            63.40295828557836,
+            57.358973250005405,
+            49.58135645755394
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_pine_sapling_small_a_impostor_1.dds",
+          "width": 512,
+          "height": 1024,
+          "alpha_coverage": 0.2501869201660156,
+          "opaque_rgb_mean": [
+            63.41062743005261,
+            57.329084394297475,
+            49.56530456659297
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_pine_sapling_small_a_impostor_2.dds",
+          "width": 512,
+          "height": 1024,
+          "alpha_coverage": 0.24213218688964844,
+          "opaque_rgb_mean": [
+            63.34082727437435,
+            57.26259777702506,
+            49.443137687381345
+          ],
+          "mips": 11
+        },
+        {
+          "name": "PH_pine_sapling_small_a_impostor_3.dds",
+          "width": 512,
+          "height": 1024,
+          "alpha_coverage": 0.2578716278076172,
+          "opaque_rgb_mean": [
+            63.36735478812713,
+            57.294003653873176,
+            49.467451682334925
+          ],
+          "mips": 11
+        }
+      ],
+      "uncompressed_bytes": 4201337
+    }
+  },
+  "plant_schema_example": [
+    {
+      "model": "PH_pine_04",
+      "position": [
+        -5847.218795532898,
+        2719.6196680830244,
+        315.47073632865056
+      ],
+      "angle": 3.10027951484063,
+      "scale": 0.7283291050562154,
+      "width": 1.240266342545059,
+      "station": 7.633494919166136,
+      "side": 0,
+      "offset": 9.44837241587153
+    },
+    {
+      "model": "PH_pine_01",
+      "position": [
+        -5850.107260952615,
+        2723.2712698016226,
+        315.7690954868203
+      ],
+      "angle": 4.141370366963623,
+      "scale": 0.8122929105154393,
+      "width": 1.2361998769004336,
+      "station": 13.744187192720904,
+      "side": 0,
+      "offset": 8.958186311101715
+    }
+  ],
+  "naive_distance_envelope": {
+    "max": {
+      "triangles": 4038066,
+      "lod_counts": [
+        79,
+        115,
+        50,
+        0
+      ]
+    },
+    "note": "Geometric distance only, no camera culling, FOV or engine LOD scaling; NOT a measured frame"
+  },
+  "runtime_log_selected": [
+    "   3725     M \ud83d\ude80 Loading trees: 1133787.80 \u03bcs"
+  ]
+}

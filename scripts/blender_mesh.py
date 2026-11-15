@@ -8,6 +8,8 @@ import bpy
 from mathutils import Vector
 import numpy as np
 
+from mesh_geometry import guardrail_wall
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -75,6 +77,64 @@ def add_box(verts, faces, a, b, width, low, high):
         faces.append(tuple(start+k for k in f))
 
 
+def collision_uvs(obj):
+    if obj:
+        layer = obj.data.uv_layers.active
+        coordinates = ((0, 0), (1, 0), (1, 1), (0, 1))
+        for polygon in obj.data.polygons:
+            if len(polygon.loop_indices) != 4:
+                raise AssertionError(f'Collision face is not a quad: {obj.name}')
+            for index, loop in enumerate(polygon.loop_indices):
+                layer.data[loop].uv = coordinates[index]
+    return obj
+
+
+def guardrail_meshes(data, a, b, side, chunk, letter, mat):
+    visual_verts, visual_faces = [], []
+    collider_verts, collider_faces = [], []
+    sides, tangent, s = data['sides'], data['tangent'], data['s']
+
+    for i in range(a, b):
+        if data['guard'][side, i] and data['guard'][side, i + 1]:
+            p = sides[side, i, 2].copy()
+            q = sides[side, i + 1, 2].copy()
+            add_box(visual_verts, visual_faces, p, q, .16, .65, .95)
+            if i == a or int(s[i] / 4) != int(s[i - 1] / 4):
+                pa, pb = p.copy(), p.copy()
+                pa[:2] -= tangent[i] * .07
+                pb[:2] += tangent[i] * .07
+                add_box(visual_verts, visual_faces, pa, pb, .12, -.08, .95)
+
+    active_edges = np.flatnonzero(
+        data['guard'][side, a:b] & data['guard'][side, a + 1:b + 1]
+    )
+    if len(active_edges):
+        groups = np.split(active_edges, np.flatnonzero(np.diff(active_edges) > 1) + 1)
+        for edges in groups:
+            indices = a + np.r_[edges[:1], edges + 1]
+            points, normals = sides[side, indices, 2], data['normal'][indices]
+            vertices, faces = guardrail_wall(points, normals, .18, -.08, .95)
+            offset = len(collider_verts)
+            collider_verts.extend(vertices)
+            collider_faces.extend(
+                tuple(offset + index for index in face) for face in faces
+            )
+
+    visual = object_mesh(
+        f'DETAIL_GUARD_{chunk:03d}_{letter}', visual_verts, visual_faces, mat
+    )
+    collider = object_mesh(
+        f'1WALL_COLLIDER_GUARD_{chunk:03d}_{letter}',
+        collider_verts,
+        collider_faces,
+        mat,
+    )
+    if collider:
+        collider.hide_render = True
+        collision_uvs(collider)
+    return visual, collider
+
+
 def camera(name, position, target, ortho=None):
     data = bpy.data.cameras.new(name)
     obj = bpy.data.objects.new(name, data)
@@ -113,30 +173,20 @@ def main():
             strip(f'1KERB_{chunk:03d}_{letter}', grid[:,:2], mats['kerb'], s[subset], [0,1], side==1)
             strip(f'1GRAVEL_{chunk:03d}_{letter}', grid[:,1:3], mats['gravel'], s[subset], [0,1], side==1)
             strip(f'1GRASS_{chunk:03d}_{letter}', grid[:,2:], mats['grass'], s[subset], [0,.2,.4,.65,1], side==1)
-            verts, faces = [], []
             cut_verts, cut_faces = [], []
-            for i in range(a,b):
-                if data['guard'][side,i] and data['guard'][side,i+1]:
-                    p = sides[side,i,2].copy()
-                    q = sides[side,i+1,2].copy()
-                    add_box(verts,faces,p,q,.16,.65,.95)
-                    if i == a or int(s[i]/4) != int(s[i-1]/4):
-                        pa, pb = p.copy(),p.copy()
-                        pa[:2] -= tangent[i]*.07
-                        pb[:2] += tangent[i]*.07
-                        add_box(verts,faces,pa,pb,.12,-.08,.95)
-                if data['cut'][side,i] and data['cut'][side,i+1]:
+            for i in range(a, b):
+                if data['cut'][side, i] and data['cut'][side, i + 1]:
                     # Cut-face toe shares the shoulder edge, leaning into the terrain.
                     start = len(cut_verts)
-                    for j in (i,i+1):
-                        toe = sides[side,j,2].copy()
-                        top = sides[side,j,3].copy()
-                        top[2] = max(toe[2]+.5, sides[side,j,4,2])
-                        cut_verts.extend([toe.tolist(),top.tolist()])
-                    face = (start,start+2,start+3,start+1)
+                    for j in (i, i + 1):
+                        toe = sides[side, j, 2].copy()
+                        top = sides[side, j, 3].copy()
+                        top[2] = max(toe[2] + .5, sides[side, j, 4, 2])
+                        cut_verts.extend([toe.tolist(), top.tolist()])
+                    face = (start, start + 2, start + 3, start + 1)
                     cut_faces.append(face if side == 0 else tuple(reversed(face)))
-            object_mesh(f'1WALL_GUARD_{chunk:03d}_{letter}',verts,faces,mats['metal'])
-            object_mesh(f'1WALL_CUT_{chunk:03d}_{letter}',cut_verts,cut_faces,mats['rock'])
+            guardrail_meshes(data, a, b, side, chunk, letter, mats['metal'])
+            object_mesh(f'1WALL_CUT_{chunk:03d}_{letter}', cut_verts, cut_faces, mats['rock'])
     meshes = [o for o in scene.objects if o.type == 'MESH']
     metrics = json.loads((ROOT/'data/geometry_info.json').read_text())
     metrics.update(mesh_objects=len(meshes), vertices=sum(len(o.data.vertices) for o in meshes), triangles=sum(sum(len(p.vertices)-2 for p in o.data.polygons) for o in meshes), max_object_vertices=max(len(o.data.vertices) for o in meshes), downward_strip_triangles=0)

@@ -1,0 +1,306 @@
+{
+  "ek_akagi.kn5": {
+    "version": 6,
+    "model_bytes": 117434311,
+    "triangles": 980322,
+    "mesh_count": 3752,
+    "materials": 34,
+    "embedded_texture_mb": 0.00080108642578125,
+    "uninterpreted_appendix_bytes": 51403751,
+    "selected_material_metadata": [
+      {
+        "name": "ROAD SIDE",
+        "shader": "ksPerPixelMultiMap",
+        "alpha_tested": false,
+        "blend": 0,
+        "triangles": 5924,
+        "mesh_count": 18,
+        "lod_outs": [
+          0.0
+        ],
+        "texture_count": 4,
+        "physical_named_meshes": 18,
+        "visible_meshes": 18
+      },
+      {
+        "name": "GRASS EDGE",
+        "shader": "ksPerPixelMultiMap",
+        "alpha_tested": false,
+        "blend": 0,
+        "triangles": 2280,
+        "mesh_count": 49,
+        "lod_outs": [
+          0.0
+        ],
+        "texture_count": 4,
+        "physical_named_meshes": 49,
+        "visible_meshes": 49
+      },
+      {
+        "name": "ROAD RUMBLE",
+        "shader": "ksPerPixelMultiMap",
+        "alpha_tested": false,
+        "blend": 0,
+        "triangles": 1070,
+        "mesh_count": 8,
+        "lod_outs": [
+          0.0
+        ],
+        "texture_count": 4,
+        "physical_named_meshes": 0,
+        "visible_meshes": 8
+      },
+      {
+        "name": "RAILS EXTRA",
+        "shader": "ksPerPixelMultiMap",
+        "alpha_tested": false,
+        "blend": 0,
+        "triangles": 10886,
+        "mesh_count": 3,
+        "lod_outs": [
+          0.0
+        ],
+        "texture_count": 4,
+        "physical_named_meshes": 0,
+        "visible_meshes": 3
+      },
+      {
+        "name": "RAILS",
+        "shader": "ksPerPixelMultiMap",
+        "alpha_tested": false,
+        "blend": 0,
+        "triangles": 160647,
+        "mesh_count": 49,
+        "lod_outs": [
+          0.0
+        ],
+        "texture_count": 4,
+        "physical_named_meshes": 0,
+        "visible_meshes": 49
+      },
+      {
+        "name": "RAILS START",
+        "shader": "ksPerPixelMultiMap",
+        "alpha_tested": false,
+        "blend": 0,
+        "triangles": 1723,
+        "mesh_count": 2,
+        "lod_outs": [
+          0.0
+        ],
+        "texture_count": 4,
+        "physical_named_meshes": 0,
+        "visible_meshes": 2
+      },
+      {
+        "name": "WALLS",
+        "shader": "ksPerPixelMultiMap",
+        "alpha_tested": false,
+        "blend": 0,
+        "triangles": 13207,
+        "mesh_count": 72,
+        "lod_outs": [
+          0.0
+        ],
+        "texture_count": 4,
+        "physical_named_meshes": 72,
+        "visible_meshes": 72
+      },
+      {
+        "name": "ROAD MARKINGS",
+        "shader": "ksPerPixelMultiMap",
+        "alpha_tested": false,
+        "blend": 0,
+        "triangles": 3039,
+        "mesh_count": 30,
+        "lod_outs": [
+          0.0
+        ],
+        "texture_count": 4,
+        "physical_named_meshes": 0,
+        "visible_meshes": 30
+      },
+      {
+        "name": "GRASS",
+        "shader": "ksPerPixelMultiMap",
+        "alpha_tested": false,
+        "blend": 0,
+        "triangles": 25834,
+        "mesh_count": 71,
+        "lod_outs": [
+          0.0
+        ],
+        "texture_count": 4,
+        "physical_named_meshes": 71,
+        "visible_meshes": 71
+      },
+      {
+        "name": "VIS ROAD",
+        "shader": "ksPerPixelMultiMap",
+        "alpha_tested": false,
+        "blend": 0,
+        "triangles": 26791,
+        "mesh_count": 61,
+        "lod_outs": [
+          0.0
+        ],
+        "texture_count": 4,
+        "physical_named_meshes": 1,
+        "visible_meshes": 61
+      },
+      {
+        "name": "TREES",
+        "shader": "ksTree",
+        "alpha_tested": true,
+        "blend": 0,
+        "triangles": 522833,
+        "mesh_count": 2780,
+        "lod_outs": [
+          0.0
+        ],
+        "texture_count": 1,
+        "physical_named_meshes": 0,
+        "visible_meshes": 2780
+      },
+      {
+        "name": "BUSHES",
+        "shader": "ksTree",
+        "alpha_tested": true,
+        "blend": 0,
+        "triangles": 18225,
+        "mesh_count": 99,
+        "lod_outs": [
+          0.0
+        ],
+        "texture_count": 1,
+        "physical_named_meshes": 0,
+        "visible_meshes": 99
+      },
+      {
+        "name": "BUSHES ROADSIDE",
+        "shader": "ksTree",
+        "alpha_tested": true,
+        "blend": 0,
+        "triangles": 75198,
+        "mesh_count": 55,
+        "lod_outs": [
+          0.0
+        ],
+        "texture_count": 1,
+        "physical_named_meshes": 0,
+        "visible_meshes": 55
+      },
+      {
+        "name": "TREES FLAT",
+        "shader": "ksTree",
+        "alpha_tested": true,
+        "blend": 0,
+        "triangles": 7639,
+        "mesh_count": 59,
+        "lod_outs": [
+          0.0
+        ],
+        "texture_count": 1,
+        "physical_named_meshes": 0,
+        "visible_meshes": 59
+      }
+    ]
+  },
+  "real_downhill.kn5": {
+    "version": 6,
+    "model_bytes": 4231,
+    "triangles": 0,
+    "mesh_count": 0,
+    "materials": 0,
+    "embedded_texture_mb": 0.0,
+    "uninterpreted_appendix_bytes": 42,
+    "selected_material_metadata": []
+  },
+  "real_barriers.kn5": {
+    "version": 6,
+    "model_bytes": 48552261,
+    "triangles": 9796,
+    "mesh_count": 6,
+    "materials": 2,
+    "embedded_texture_mb": 0.000400543212890625,
+    "uninterpreted_appendix_bytes": 47197437,
+    "selected_material_metadata": []
+  },
+  "end_barriers.kn5": {
+    "version": 6,
+    "model_bytes": 21703145,
+    "triangles": 2455,
+    "mesh_count": 2,
+    "materials": 1,
+    "embedded_texture_mb": 0.0002002716064453125,
+    "uninterpreted_appendix_bytes": 21383642,
+    "selected_material_metadata": []
+  },
+  "collision.kn5": {
+    "version": 6,
+    "model_bytes": 17486939,
+    "triangles": 450492,
+    "mesh_count": 100,
+    "materials": 4,
+    "embedded_texture_mb": 6.67572021484375e-05,
+    "uninterpreted_appendix_bytes": 154206,
+    "selected_material_metadata": [
+      {
+        "name": "ROAD MESH",
+        "shader": "ksPerPixel",
+        "alpha_tested": false,
+        "blend": 0,
+        "triangles": 428888,
+        "mesh_count": 60,
+        "lod_outs": [
+          0.0
+        ],
+        "texture_count": 1,
+        "physical_named_meshes": 60,
+        "visible_meshes": 0
+      },
+      {
+        "name": "RAIL EXTRA COLS",
+        "shader": "ksPerPixel",
+        "alpha_tested": false,
+        "blend": 0,
+        "triangles": 558,
+        "mesh_count": 3,
+        "lod_outs": [
+          0.0
+        ],
+        "texture_count": 1,
+        "physical_named_meshes": 3,
+        "visible_meshes": 0
+      },
+      {
+        "name": "ROAD RUMBLE MESH",
+        "shader": "ksPerPixel",
+        "alpha_tested": false,
+        "blend": 0,
+        "triangles": 17120,
+        "mesh_count": 8,
+        "lod_outs": [
+          0.0
+        ],
+        "texture_count": 1,
+        "physical_named_meshes": 8,
+        "visible_meshes": 0
+      },
+      {
+        "name": "RAIL COLLISIONS",
+        "shader": "ksPerPixel",
+        "alpha_tested": false,
+        "blend": 0,
+        "triangles": 3926,
+        "mesh_count": 29,
+        "lod_outs": [
+          0.0
+        ],
+        "texture_count": 1,
+        "physical_named_meshes": 29,
+        "visible_meshes": 0
+      }
+    ]
+  }
+}

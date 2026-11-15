@@ -1,20 +1,17 @@
 {
-  "file": "out/bejaia_saket/bejaia_saket.kn5",
-  "bytes": 160628830,
-  "seconds": 20.137360016989987,
-  "sha256": "7256881bd34fa636df3ffb886846b982cb1aa6b6d98e800b865b628c9cbcb8f0",
+  "file": "out\\bejaia_saket\\bejaia_saket.kn5",
+  "bytes": 163350978,
+  "seconds": 34.11724369999865,
+  "blender": "3.6.23",
   "warnings": [
-    "Unknown logical object 'AC_AB_FINISH_L' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it.",
-    "Unknown logical object 'AC_AB_FINISH_R' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it.",
-    "Unknown logical object 'AC_AB_START_L' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it.",
-    "Unknown logical object 'AC_AB_START_R' might prevent other objects from loading.\n\tRename it to '__{obj.name}' if you do not want to export it."
+    "Unknown logical object 'AC_AB_FINISH_L' might prevent other objects from loading.\r\n\tRename it to '__{obj.name}' if you do not want to export it.",
+    "Unknown logical object 'AC_AB_FINISH_R' might prevent other objects from loading.\r\n\tRename it to '__{obj.name}' if you do not want to export it.",
+    "Unknown logical object 'AC_AB_START_L' might prevent other objects from loading.\r\n\tRename it to '__{obj.name}' if you do not want to export it.",
+    "Unknown logical object 'AC_AB_START_R' might prevent other objects from loading.\r\n\tRename it to '__{obj.name}' if you do not want to export it."
   ],
-  "mesh_objects": 1159,
-  "export_meshes": 1159,
-  "vertex_limit_splits": 0,
-  "max_exported_vertices": 10486,
-  "triangles": 774188,
-  "materials": 20,
-  "textures": 49,
-  "material_recipe": "data/materials_info.json"
+  "visual_guard_sections": 27,
+  "collision_guard_sections": 27,
+  "collision_renderable": false,
+  "collision_height_m": 1.03,
+  "sha256": "884220a9c1546c3d171704a9bc4e202563b5b73480a745815f061d0ae29eaae6"
 }
