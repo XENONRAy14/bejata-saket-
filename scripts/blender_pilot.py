@@ -300,7 +300,7 @@ def package_metadata(data,meta,guard_material):
     assert original.read_bytes()==(OUT/'data/surfaces.ini').read_bytes()
     meta['surfaces_sha256']=hashlib.sha256(original.read_bytes()).hexdigest()
     (OUT/'models.ini').write_text('[MODEL_0]\nFILE=bejaia_saket_pilot300.kn5\nPOSITION=0,0,0\nROTATION=0,0,0\n')
-    ui=dict(name='Bejaia - Saket / Pilote sommet 300 m',description='Prototype graphique isole de 300 m. Pins sylvestres Poly Haven CC0, glissiere Grab3D CC0, asphalte Poly Haven CC0. PAS le circuit principal. Essai AC requis.',tags=['road','point-to-point','pilot'],country='Algeria',city='Bejaia',author='Project contributors',version='pilot-0.3-layered',length='300 m',width='7 m',pitboxes='1',run='point-to-point')
+    ui=dict(name='Bejaia - Saket / Pilote sommet 300 m',description='Prototype graphique isole de 300 m. Pins sylvestres Poly Haven CC0, glissiere Grab3D CC0, asphalte Poly Haven CC0. PAS le circuit principal. Essai AC requis.',tags=['road','point-to-point','pilot'],country='Algeria',city='Bejaia',author='Project contributors',version='pilot-0.4-treefx-lod',length='300 m',width='7 m',pitboxes='1',run='point-to-point')
     dump(OUT/'ui/ui_track.json',ui)
     xy=data['xy']*np.array([1,-1]);lower=xy.min(axis=0);span=np.ptp(xy,axis=0);scale=float(max(span)/472);offset=20*scale-lower
     size=np.ceil(span/scale+40).astype(int);pixels=(xy+offset)/scale
@@ -422,7 +422,7 @@ def build():
     bpy.data.libraries.write(str(DATA/'prototypes.blend'),set(prototypes),path_remap='RELATIVE',compress=True)
     for obj in prototypes:bpy.data.objects.remove(obj,do_unlink=True)
     clean_unused()
-    settings=dict(materials={name:{k:v for k,v in spec.items() if k!='preview'} for name,spec in info['materials'].items()},nodes={'*':dict(lodIn=0,lodOut=5000,castShadows=True,visible=True,renderable=True),'1WALL_COLLIDER_*':dict(visible=False,renderable=False,castShadows=False),'DETAIL_*':dict(lodIn=0,lodOut=350),'DETAIL_RAIL_*':dict(lodIn=0,lodOut=45),'LOD_RAIL_*':dict(lodIn=45,lodOut=350),'DETAIL_EDGE_*':dict(lodIn=0,lodOut=110,castShadows=True),'LOD_EDGE_*':dict(lodIn=110,lodOut=350,castShadows=False),'DECOR_SEA':dict(lodIn=0,lodOut=60000,castShadows=False)})
+    settings=dict(materials={name:{k:v for k,v in spec.items() if k!='preview'} for name,spec in info['materials'].items()},nodes={'*':dict(lodIn=0,lodOut=5000,castShadows=True,visible=True,renderable=True),'1WALL_COLLIDER_*':dict(visible=True,renderable=False,castShadows=False),'DETAIL_*':dict(lodIn=0,lodOut=350),'DETAIL_RAIL_*':dict(lodIn=0,lodOut=45),'LOD_RAIL_*':dict(lodIn=45,lodOut=350),'DETAIL_EDGE_*':dict(lodIn=0,lodOut=110,castShadows=True),'LOD_EDGE_*':dict(lodIn=110,lodOut=350,castShadows=False),'DECOR_SEA':dict(lodIn=0,lodOut=60000,castShadows=False)})
     dump(DATA/'settings.json',settings)
     original_texture_writer=exporter.TextureWriter
     class DDSWriter(original_texture_writer):

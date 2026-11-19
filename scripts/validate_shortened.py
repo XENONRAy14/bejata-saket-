@@ -7,7 +7,7 @@ import numpy as np
 from acdata import plan_empties
 from check_kn5 import inspect_kn5
 from shortening import road_distance
-from mesh_geometry import guardrail_wall
+from mesh_geometry import guardrail_wall, rail_stations
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -50,8 +50,8 @@ def main():
         name.replace('DETAIL_GUARD_', '1WALL_COLLIDER_GUARD_', 1)
         for name in guard_visuals
     }
-    assert all(not node['visible'] and not node['renderable'] for node in guard_colliders.values()), (
-        'Guardrail collision meshes must be invisible and non-renderable'
+    assert all(node['visible'] and not node['renderable'] for node in guard_colliders.values()), (
+        'Guardrail collision meshes must stay physics-visible but non-renderable'
     )
     assert all(node['visible'] and node['renderable'] for node in guard_visuals.values()), (
         'Visible guardrail meshes must remain renderable'
@@ -65,7 +65,7 @@ def main():
     for chunk, (a, b) in enumerate(zip(chunk_ends, chunk_ends[1:])):
         for side, letter in enumerate(('L', 'R')):
             active_edges = np.flatnonzero(
-                data['guard'][side, a:b] & data['guard'][side, a + 1:b + 1]
+                rail_stations(data, side)[a:b] & rail_stations(data, side)[a + 1:b + 1]
             )
             if not len(active_edges):
                 continue

@@ -143,7 +143,7 @@ def compile_models(prototypes,specs):
         payloads=dict(textures);lod_metrics=[]
         shrub=source_name.startswith('PH_shrub_')
         targets=(10000,2000,16) if shrub else ((1000,500,16) if 'sapling' in source_name else (20000,9000,16))
-        distances=(14,45,160) if shrub else (22,75,320)
+        distances=(20,75,900) if shrub else (28,100,900)
         for lod,(target,distance) in enumerate(zip(targets,distances)):
             temporary=bpy.data.objects.new('__TREE_LOD_BUILD',proto.data.copy())
             bpy.context.collection.objects.link(temporary)
@@ -187,7 +187,7 @@ def compile_models(prototypes,specs):
             background_payload=dict(background_textures)
             background_payload['LOD2.mesh']=background_blob
             background_config=config.split('[LOD_0]')[0]
-            for lod,distance in enumerate((40,110,320)):
+            for lod,distance in enumerate((180,450,900)):
                 background_config+=f'[LOD_{lod}]\nMODEL=LOD2.mesh\nDISTANCE={distance}\n'
             background_payload['tree.ini']=background_config.encode()
             with zipfile.ZipFile(folder/background_file,'w',compression=zipfile.ZIP_DEFLATED) as archive:
@@ -214,7 +214,7 @@ def compile_models(prototypes,specs):
             medium_file=medium_name.lower()+'.bin'
             medium_payload={name:blob for name,blob in payloads.items() if name.endswith('.dds') or name in ('LOD1.mesh','LOD2.mesh')}
             medium_config=config.split('[LOD_0]')[0]
-            for lod,(mesh_name,distance) in enumerate((('LOD1.mesh',18),('LOD1.mesh',60),('LOD2.mesh',250))):
+            for lod,(mesh_name,distance) in enumerate((('LOD1.mesh',28),('LOD1.mesh',110),('LOD2.mesh',900))):
                 medium_config+=f'[LOD_{lod}]\nMODEL={mesh_name}\nDISTANCE={distance}\n'
             medium_payload['tree.ini']=medium_config.encode()
             with zipfile.ZipFile(folder/medium_file,'w',compression=zipfile.ZIP_DEFLATED) as archive:

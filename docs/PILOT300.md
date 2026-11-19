@@ -1,6 +1,6 @@
 # Pilote graphique Bejaia-Saket : 300 m au sommet
 
-**Etat : pilote 0.3 layered, controle statique valide, essai Assetto Corsa NON EFFECTUE, non installe automatiquement.** Les images sont des rendus Blender, pas des captures AC. Ancien pilote 0.2 et nouveau pilote 0.3, populations TreeFX affichees aux memes camera/eclairage. Camera de cette revision : 1,30 m, 28 mm, 1280x720. Les pins de fond du nouvel apercu utilisent exactement les cartes exportees a 16 triangles. Le moteur, les shaders CSP et les bascules LOD restent a comparer en jeu. Le pilote ne remplace pas le circuit principal et ne prouve pas une qualite equivalente a Akagi.
+**Etat : pilote 0.4 TreeFX, controle statique valide, essai Assetto Corsa NON EFFECTUE, non installe automatiquement.** Les images sont des rendus Blender, pas des captures AC. Ancien pilote 0.2 et nouveau pilote 0.4, populations TreeFX affichees aux memes camera/eclairage. Camera de cette revision : 1,30 m, 28 mm, 1280x720. Les pins de fond du nouvel apercu utilisent exactement les cartes exportees a 16 triangles. Le moteur, les shaders CSP et les bascules LOD restent a comparer en jeu. Le pilote ne remplace pas le circuit principal et ne prouve pas une qualite equivalente a Akagi.
 
 ## Livrables et metriques
 
@@ -9,7 +9,7 @@
 - Glissiere professionnelle : 75 modules visuels CC0 de 4 m ; collisions simplifiees distinctes, invisibles.
 - Vegetation TreeFX : 330 instances, 12 modeles. Leurs geometries sont externes au KN5 et ne sont PAS incluses dans le compteur de sommets ci-dessus.
 - Longueur pilote : 300.000000 m suivant la route en 3D. Toute la route conservee et les profils lateraux proviennent de la source, sans changement d'altitude ni de largeur.
-- 33 tests unitaires Python et 5 regressions Blender ; controle syntaxique des scripts ; lecture KN5 ; mipmaps DDS ; CRC, checksums et maillages des TreeFX ; chemins Blender relatifs ; positions des spawns et gates ; protections du circuit principal.
+- 35 tests unitaires Python et 5 regressions Blender ; controle syntaxique des scripts ; lecture KN5 ; mipmaps DDS ; CRC, checksums et maillages des TreeFX ; chemins Blender relatifs ; positions des spawns et gates ; protections du circuit principal.
 - Reference source : ab150e2aa53fc10668ab5faa2241aafbce060932. Les fichiers majeurs du circuit principal (dont KN5, scene Blender, centreline, surfaces et generateurs) sont compares par SHA256 au snapshot du build pilote ; les empreintes ont aussi ete comparees a la sauvegarde prise avant cette phase graphique.
 
 | Modele | Triangles LOD proche / moyen / lointain |
@@ -28,6 +28,10 @@
 | PH_shrub_02 | 11061 / 3595 / 16 |
 
 Le jeune pin est un imposteur photographique croise (16 triangles), y compris de pres. Les grands pins conservent tronc et branches 3D, avec rameaux photographiques cuits depuis les modeles CC0. Les arbres restent des pins sylvestres, PAS des pins d'Alep. Les textures couleur sont derivees de photos CC0 ; aucune texture ni geometrie de circuit de reference n'est utilisee.
+
+## Revision 0.4 : stabilite TreeFX
+
+Les pins adultes utilisent les seuils LOD 28 / 100 / 900 m ; les arbustes 20 / 75 / 900 m. Les imposteurs lointains restent a 16 triangles. Le culling a 900 m repousse la disparition au-dela du pilote et les transitions conservent le detail plus longtemps. La validation statique mesure les dimensions visibles des silhouettes alpha par rapport aux modeles source ; la simple presence du fichier ne suffit pas a controler une bascule de taille. Le rendu, les collisions et les FPS restent a confirmer dans AC.
 
 ## Revision 0.3 : corridor par plans
 
@@ -64,7 +68,7 @@ Le premier rendu avait des aiguilles detruites par decimation. Elles ont ete rem
 
 ## Ou sont les fichiers sur ton PC ?
 
-Copie de travail complete : `/home/ubuntu/attachments/publish_cache/package-work`.
+Copie de travail complete : `F:\route bejaia Saket assetto corssa\_dev_remaster`.
 
 - Scene finale du pilote : `project/blend/pilot300.blend`.
 - Projet principal conserve : `project/blend/bejaia_saket.blend`.
@@ -80,7 +84,7 @@ Copie de travail complete : `/home/ubuntu/attachments/publish_cache/package-work
 Dans une invite de commandes Windows disposant de Python :
 
 ```bat
-python "/home/ubuntu/attachments/publish_cache/package-work/project/scripts/build_pilot.py"
+python "F:\route bejaia Saket assetto corssa\_dev_remaster\project\scripts\build_pilot.py"
 ```
 
 Cette entree regenere les assets, le KN5, l'audit Blender, les deux rendus, les tests, les controles et les archives. Le Blender portable et les dependances deja prepares restent dans `tools/`. Les sources Poly Haven et l'asphalte restent dans `assets/`. Aucun acces a l'installation Assetto Corsa n'est effectue par ce script.

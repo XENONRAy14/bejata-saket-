@@ -135,7 +135,7 @@ def exporter_settings(names=('asphalt','grass','gravel','rock','metal','kerb')):
     nodes={
         '*':dict(lodIn=0,lodOut=10000,castShadows=True,visible=True,renderable=True),
         'DETAIL_GUARD_*':dict(lodIn=0,lodOut=10000,castShadows=True,visible=True,renderable=True),
-        '1WALL_COLLIDER_GUARD_*':dict(lodIn=0,lodOut=10000,castShadows=False,visible=False,renderable=False),
+        '1WALL_COLLIDER_GUARD_*':dict(lodIn=0,lodOut=10000,castShadows=False,visible=True,renderable=False),
     }
     return dict(materials=materials,nodes=nodes)
 

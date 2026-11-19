@@ -74,6 +74,26 @@ def parser(path):
     return config
 
 
+def impostor_size_ratios(mesh, textures, config):
+    geometry=read_mesh(mesh,textures,geometry=True)['positions']
+    height=config.getfloat('BASIC','HEIGHT')
+    width=config.getfloat('BASIC','WIDTH')
+    plane_height=float(np.ptp(geometry[:,1]))*height
+    plane_width=plane_height/2
+    ratios=[]
+    for name,blob in textures.items():
+        if '_impostor_' not in name:continue
+        alpha=np.asarray(Image.open(io.BytesIO(blob)).convert('RGBA'))[:,:,3]>=128
+        ys,xs=np.where(alpha)
+        if len(xs)==0:raise AssertionError('Empty far tree silhouette: '+name)
+        ratios.append((
+            (xs.max()-xs.min()+1)/alpha.shape[1]*plane_width/width,
+            (ys.max()-ys.min()+1)/alpha.shape[0]*plane_height/height,
+        ))
+    if not ratios:raise AssertionError('No far tree silhouettes in TreeFX package')
+    return np.asarray(ratios)
+
+
 def validate(require_previews=True):
     checks=[]
     def check(condition,label):
@@ -109,7 +129,7 @@ def validate(require_previews=True):
     expected=vector_ac(data['sides'][:,:,0].reshape(-1,3)).astype('<f4')
     check(np.array_equal(actual,np.unique(expected,axis=0)),'Exported road vertices exactly match the source')
     colliders=[n for n in meshes if n['name'].startswith('1WALL_COLLIDER_RAIL_')]
-    check(len(colliders)==1 and all(not n['visible'] and not n['renderable'] for n in colliders),'One simplified rail collider is hidden from rendering')
+    check(len(colliders)==1 and all(n['visible'] and not n['renderable'] for n in colliders),'One simplified rail collider stays physics-visible but non-renderable')
     for collider in colliders:
         side=int(collider['name'].rsplit('_',1)[1])
         vertices,_=guardrail_wall(data['sides'][side,:,2],data['normal'],.25,-.15,.8)
@@ -174,15 +194,29 @@ def validate(require_previews=True):
             check(all(a<b for a,b in zip(distances,distances[1:])),'TreeFX LOD distances increase: '+name)
             check(lods[-1]['triangles']==16,'Distant TreeFX impostor is only 16 triangles: '+name)
             check(lods[0]['triangles']<=20003 and lods[1]['triangles']<=9003,'Near and medium TreeFX meshes respect performance budgets: '+name)
+            size_ratios=impostor_size_ratios(
+                archive.read(config['LOD_2']['MODEL']),textures,config,
+            )
+            check(
+                bool(np.all((size_ratios[:,0]>=.65)&(size_ratios[:,0]<=1.1)
+                            &(size_ratios[:,1]>=.65)&(size_ratios[:,1]<=1.2))),
+                'Far TreeFX silhouettes stay near the source model scale: '+name,
+            )
             if model.get('kind')=='background':
                 check(all(lod['triangles']==16 for lod in lods),'Background trees have only 16 triangles at every distance: '+name)
-                check(distances==[40,110,320],'Background tree distances: '+name)
+                check(distances==[180,450,900],'Background impostors remain cheap at distance: '+name)
             if model.get('kind')=='midstory':
-                check(lods[0]['triangles']<=9003 and distances==[18,60,250],'Midstory reuses the lighter pine representation: '+name)
+                check(lods[0]['triangles']<=9003 and distances==[28,110,900],'Midstory uses the lighter pine representation and long cull range: '+name)
             if model.get('kind')=='shrub':
                 check(lods[0]['triangles']<=18000 and lods[1]['triangles']<=4000,'Two-sided shrub meshes meet their stricter budgets: '+name)
-                check(distances==[14,45,160],'Shrubs use short LOD transitions: '+name)
-            model_stats[name]=dict(lods=lods,distances=distances)
+                check(distances==[20,75,900],'Shrubs avoid near culling and abrupt billboard thresholds: '+name)
+            if model.get('kind') in ('pine','shrub','midstory','background'):
+                check(distances[-1]>=900,'TreeFX keeps final impostors visible beyond the pilot corridor: '+name)
+            model_stats[name]=dict(
+                lods=lods,distances=distances,
+                far_size_ratio_min=np.round(size_ratios.min(axis=0),3).tolist(),
+                far_size_ratio_max=np.round(size_ratios.max(axis=0),3).tolist(),
+            )
     plants=json.loads((DATA/'plants.json').read_text())
     lines=(tree_folder/'trees.txt').read_text().splitlines()
     check(len(plants)==len(lines)==build['tree_instances'],'All tree placements reference generated models')

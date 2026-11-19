@@ -8,7 +8,7 @@ import bpy
 from mathutils import Vector
 import numpy as np
 
-from mesh_geometry import guardrail_wall
+from mesh_geometry import guardrail_wall, rail_stations, w_beam
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -94,25 +94,25 @@ def guardrail_meshes(data, a, b, side, chunk, letter, mat):
     collider_verts, collider_faces = [], []
     sides, tangent, s = data['sides'], data['tangent'], data['s']
 
-    for i in range(a, b):
-        if data['guard'][side, i] and data['guard'][side, i + 1]:
-            p = sides[side, i, 2].copy()
-            q = sides[side, i + 1, 2].copy()
-            add_box(visual_verts, visual_faces, p, q, .16, .65, .95)
-            if i == a or int(s[i] / 4) != int(s[i - 1] / 4):
-                pa, pb = p.copy(), p.copy()
-                pa[:2] -= tangent[i] * .07
-                pb[:2] += tangent[i] * .07
-                add_box(visual_verts, visual_faces, pa, pb, .12, -.08, .95)
-
-    active_edges = np.flatnonzero(
-        data['guard'][side, a:b] & data['guard'][side, a + 1:b + 1]
-    )
+    mask = rail_stations(data, side)
+    active_edges = np.flatnonzero(mask[a:b] & mask[a+1:b+1])
     if len(active_edges):
         groups = np.split(active_edges, np.flatnonzero(np.diff(active_edges) > 1) + 1)
         for edges in groups:
             indices = a + np.r_[edges[:1], edges + 1]
             points, normals = sides[side, indices, 2], data['normal'][indices]
+            outward = normals if side == 0 else -normals
+            vertices, faces = w_beam(points, outward)
+            offset = len(visual_verts)
+            visual_verts.extend(vertices)
+            visual_faces.extend(tuple(offset + index for index in face) for face in faces)
+            for i in indices[:-1]:
+                if i != indices[0] and int(s[i]/4) == int(s[i-1]/4):
+                    continue
+                n = data['normal'][i] * (1 if side == 0 else -1)
+                center = sides[side,i,2] + np.r_[n*.10,0]
+                axis = np.r_[tangent[i]*.065,0]
+                add_box(visual_verts, visual_faces, center-axis, center+axis, .11, -.08, .81)
             vertices, faces = guardrail_wall(points, normals, .18, -.08, .95)
             offset = len(collider_verts)
             collider_verts.extend(vertices)

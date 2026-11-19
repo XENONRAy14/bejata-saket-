@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 
 from check_kn5 import inspect_kn5
-from mesh_geometry import guardrail_wall
+from mesh_geometry import guardrail_wall, rail_stations
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -30,7 +30,7 @@ def main():
         for name in visuals
     }
     assert all(
-        not node['visible'] and not node['renderable'] and not node['castShadows']
+        node['visible'] and not node['renderable'] and not node['castShadows']
         for node in colliders.values()
     )
     assert all(node['visible'] and node['renderable'] for node in visuals.values())
@@ -46,7 +46,7 @@ def main():
     for chunk, (a, b) in enumerate(zip(ends, ends[1:])):
         for side, letter in enumerate(('L', 'R')):
             active = np.flatnonzero(
-                source['guard'][side, a:b] & source['guard'][side, a + 1:b + 1]
+                rail_stations(source, side)[a:b] & rail_stations(source, side)[a + 1:b + 1]
             )
             if not len(active):
                 continue
@@ -100,7 +100,7 @@ def main():
         'visible_guardrail_sections': len(visuals),
         'collision_triangles': total_triangles,
         'minimum_collision_triangle_area_m2': min_triangle_area,
-        'all_collision_meshes_hidden': True,
+        'collision_nodes_visible_but_nonrenderable': True,
         'all_collision_geometry_matches_source': True,
     }
     print('GUARDRAIL_KN5_VALIDATION_PASS ' + json.dumps(result))

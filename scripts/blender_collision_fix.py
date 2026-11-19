@@ -66,7 +66,7 @@ def main():
         lodIn=0, lodOut=10000, castShadows=True, visible=True, renderable=True,
     )
     nodes['1WALL_COLLIDER_GUARD_*'] = dict(
-        lodIn=0, lodOut=10000, castShadows=False, visible=False, renderable=False,
+        lodIn=0, lodOut=10000, castShadows=False, visible=True, renderable=False,
     )
     settings_path.write_text(
         json.dumps(settings, indent=2, ensure_ascii=False) + '\n',
@@ -127,6 +127,7 @@ def main():
         'warnings': warnings,
         'visual_guard_sections': len(visuals),
         'collision_guard_sections': len(colliders),
+        'collision_visible': True,
         'collision_renderable': False,
         'collision_height_m': .95 - (-.08),
         'sha256': hashlib.sha256(output.read_bytes()).hexdigest(),
