@@ -12,6 +12,29 @@ from pilot_common import np,Image,dds,source_data,select_sector,interpolate,fram
 from check_kn5 import inspect_dds
 from treefx_wire import checksum,vector_ac,mesh_blob,read_mesh
 from pilot_scenery import edge_layout, vista_open
+import validate_pilot
+
+
+class SourceBaselineTests(unittest.TestCase):
+    def test_text_source_hash_ignores_line_ending_style(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);path=root/'settings.json'
+            with patch.object(validate_pilot,'ROOT',root):
+                path.write_bytes(b'{\n  "enabled": true\n}\n')
+                lf=validate_pilot.source_baseline_hash('settings.json')
+                path.write_bytes(b'{\r\n  "enabled": true\r\n}\r\n')
+                crlf=validate_pilot.source_baseline_hash('settings.json')
+        self.assertEqual(lf,crlf)
+
+    def test_binary_source_hash_preserves_exact_bytes(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);path=root/'scene.blend'
+            with patch.object(validate_pilot,'ROOT',root):
+                path.write_bytes(b'\x00\r\n\x01')
+                crlf=validate_pilot.source_baseline_hash('scene.blend')
+                path.write_bytes(b'\x00\n\x01')
+                lf=validate_pilot.source_baseline_hash('scene.blend')
+        self.assertNotEqual(crlf,lf)
 
 
 class PilotConfigTests(unittest.TestCase):

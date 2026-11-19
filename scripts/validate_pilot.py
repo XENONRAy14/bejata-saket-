@@ -25,6 +25,17 @@ def sha(stream):
     return digest.hexdigest()
 
 
+TEXT_SOURCE_SUFFIXES={'.ini','.json','.py'}
+
+
+def source_baseline_hash(relative):
+    path=ROOT/relative
+    if path.suffix.lower() in TEXT_SOURCE_SUFFIXES:
+        content=path.read_bytes().replace(b'\r\n',b'\n').replace(b'\r',b'\n')
+        return hashlib.sha256(content).hexdigest()
+    with path.open('rb') as stream:return sha(stream)
+
+
 SOURCE_BASELINE_PATHS = [
     'data/centerline.npz', 'data/shortening_info.json',
     'blend/bejaia_saket.blend', 'blend/settings.json',
@@ -39,8 +50,7 @@ SOURCE_BASELINE_PATHS = [
 def refresh_baseline():
     hashes = {}
     for relative in SOURCE_BASELINE_PATHS:
-        with (ROOT / relative).open('rb') as stream:
-            hashes[relative] = sha(stream)
+        hashes[relative] = source_baseline_hash(relative)
     result = dict(
         origin='Current full-route source snapshot used for this pilot build',
         snapshot_commit=json.loads((ROOT / 'PROJECT_SNAPSHOT.json').read_text())['commit'],
@@ -101,7 +111,7 @@ def validate(require_previews=True):
         checks.append(label)
     original=baseline()
     for relative,digest in original['files'].items():
-        with (ROOT/relative).open('rb') as stream:actual=sha(stream)
+        actual=source_baseline_hash(relative)
         check(actual==digest,'Main source unchanged: '+relative)
     meta=json.loads((DATA/'selection.json').read_text());build=json.loads((DATA/'build_report.json').read_text())
     with np.load(DATA/'centerline.npz') as source:data={key:source[key] for key in source.files}
