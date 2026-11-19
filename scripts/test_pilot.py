@@ -77,6 +77,48 @@ class SourceOverlayTests(unittest.TestCase):
             with patch.multiple(package_pilot,ROOT=root,WORK=root.parent,DATA=root/'data/pilot300'):
                 with self.assertRaises(FileNotFoundError):package_pilot.package_source_overlay()
 
+    def test_overlay_refuses_mismatched_baseline_members_without_replacing_existing_zip(self):
+        surface_relative='out/bejaia_saket/data/surfaces.ini'
+        for relative in (surface_relative,'scripts/fixture.py','data/pilot300/fixture.npz'):
+            with self.subTest(relative=relative),tempfile.TemporaryDirectory() as folder:
+                work=Path(folder);root=work/'project';data=root/'data/pilot300'
+                surface=root/surface_relative
+                surface.parent.mkdir(parents=True);data.mkdir(parents=True)
+                content=surfaces_text().encode('utf-8');surface.write_bytes(content)
+                member=root/relative;member.parent.mkdir(parents=True,exist_ok=True)
+                baseline={'files':{surface_relative:hashlib.sha256(content).hexdigest(),relative:hashlib.sha256(b'original\n').hexdigest()}}
+                member.write_bytes(b'changed\n')
+                (data/'source_baseline.json').write_text(json.dumps(baseline))
+                archive=root/'out/bejaia_saket_pilot300_sources.zip';archive.write_bytes(b'previous package')
+                with patch.multiple(package_pilot,ROOT=root,WORK=work,DATA=data):
+                    with self.assertRaisesRegex(ValueError,'Source overlay baseline mismatch: '+relative):
+                        package_pilot.package_source_overlay()
+                self.assertEqual(archive.read_bytes(),b'previous package')
+                self.assertFalse(archive.with_suffix('.zip.partial').exists())
+
+    def test_overlay_accepts_text_line_endings_using_the_validation_hash_rules(self):
+        with tempfile.TemporaryDirectory() as folder:
+            work=Path(folder);root=work/'project';data=root/'data/pilot300'
+            relative='out/bejaia_saket/data/surfaces.ini';surface=root/relative
+            surface.parent.mkdir(parents=True);data.mkdir(parents=True)
+            content=surfaces_text().encode('utf-8');surface.write_bytes(content.replace(b'\n',b'\r\n'))
+            (data/'source_baseline.json').write_text(json.dumps({'files':{relative:hashlib.sha256(content).hexdigest()}}))
+            with patch.multiple(package_pilot,ROOT=root,WORK=work,DATA=data):
+                archive=package_pilot.package_source_overlay()
+            with zipfile.ZipFile(archive) as zipped:
+                self.assertEqual(zipped.read('project/'+relative),surface.read_bytes())
+
+    def test_overlay_requires_main_surface_in_the_packaged_baseline(self):
+        with tempfile.TemporaryDirectory() as folder:
+            work=Path(folder);root=work/'project';data=root/'data/pilot300'
+            surface=root/'out/bejaia_saket/data/surfaces.ini'
+            surface.parent.mkdir(parents=True);data.mkdir(parents=True)
+            surface.write_text(surfaces_text())
+            (data/'source_baseline.json').write_text('{"files":{}}')
+            with patch.multiple(package_pilot,ROOT=root,WORK=work,DATA=data):
+                with self.assertRaisesRegex(ValueError,'Source overlay baseline missing main surfaces.ini'):
+                    package_pilot.package_source_overlay()
+
 
 class PilotConfigTests(unittest.TestCase):
     source='''[GRASS_FX]

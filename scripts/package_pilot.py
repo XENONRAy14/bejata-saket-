@@ -7,6 +7,7 @@ import shutil
 import zipfile
 
 from pilot_common import ROOT,WORK,DATA,OUT,PREVIEW,Image
+from validate_pilot import source_baseline_digest
 from PIL import ImageDraw,ImageFont
 
 
@@ -23,13 +24,26 @@ def package_source_overlay():
     surface=ROOT/'out/bejaia_saket/data/surfaces.ini'
     if not surface.is_file():raise FileNotFoundError(surface)
     source=ROOT/'out/bejaia_saket_pilot300_sources.zip'
-    with zipfile.ZipFile(source,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as archive:
-        for path in sorted(source_overlay_paths()):
-            if path.is_file():
-                member=Path('project')/path.relative_to(ROOT) if path.is_relative_to(ROOT) else path.relative_to(WORK)
-                archive.write(path,member.as_posix())
-    with zipfile.ZipFile(source) as archive:
-        if archive.testzip() is not None:raise ValueError('Source ZIP failed CRC')
+    partial=source.with_suffix('.zip.partial')
+    try:
+        with zipfile.ZipFile(partial,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as archive:
+            for path in sorted(source_overlay_paths()):
+                if path.is_file():
+                    member=Path('project')/path.relative_to(ROOT) if path.is_relative_to(ROOT) else path.relative_to(WORK)
+                    archive.write(path,member.as_posix())
+        with zipfile.ZipFile(partial) as archive:
+            baseline=json.loads(archive.read('project/data/pilot300/source_baseline.json'))['files']
+            if 'out/bejaia_saket/data/surfaces.ini' not in baseline:raise ValueError('Source overlay baseline missing main surfaces.ini')
+            members=set(archive.namelist())
+            for relative,expected in baseline.items():
+                member='project/'+relative
+                if member in members:
+                    with archive.open(member) as stream:actual=source_baseline_digest(relative,stream)
+                    if actual!=expected:raise ValueError('Source overlay baseline mismatch: '+relative)
+            if archive.testzip() is not None:raise ValueError('Source ZIP failed CRC')
+        partial.replace(source)
+    finally:
+        partial.unlink(missing_ok=True)
     return source
 
 
