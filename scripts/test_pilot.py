@@ -48,6 +48,22 @@ class SourceBaselineTests(unittest.TestCase):
 
 
 class SourceOverlayTests(unittest.TestCase):
+    def test_scenery_overlay_restores_zones_and_verifies_its_baseline(self):
+        with tempfile.TemporaryDirectory() as folder:
+            work=Path(folder);root=work/'project';data=root/'data/pilot300'
+            surface=root/'out/bejaia_saket/data/surfaces.ini'
+            surface.parent.mkdir(parents=True);data.mkdir(parents=True)
+            surface.write_text(surfaces_text());(root/'scripts').mkdir()
+            (root/'scripts/scenery_placement.py').write_text('# fixture\n')
+            zones=root/'data/scenery_zones.json';zones.write_text('{"pilot": {"exclusions": []}}')
+            baseline={'files':{str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in (surface,zones)}}
+            (data/'source_baseline.json').write_text(json.dumps(baseline))
+            with patch.multiple(package_pilot,ROOT=root,WORK=work,DATA=data):archive=package_pilot.package_source_overlay()
+            with zipfile.ZipFile(archive) as zipped:self.assertEqual(zipped.read('project/data/scenery_zones.json'),zones.read_bytes())
+            zones.write_text('{}')
+            with patch.multiple(package_pilot,ROOT=root,WORK=work,DATA=data):
+                with self.assertRaisesRegex(ValueError,'baseline mismatch: data/scenery_zones.json'):package_pilot.package_source_overlay()
+
     def test_overlay_refreshes_stale_main_surface_and_its_baseline(self):
         with tempfile.TemporaryDirectory() as folder:
             work=Path(folder);root=work/'renamed-project';data=root/'data/pilot300'

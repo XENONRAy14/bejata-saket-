@@ -17,12 +17,15 @@ def source_overlay_paths():
     paths.update(DATA.glob('*.json'));paths.update(DATA.glob('*.npz'));paths.update((ROOT/'textures/v2').glob('*.dds'))
     paths.update((ROOT/'blend/pilot300.blend',DATA/'prototypes.blend',ROOT/'PROJECT_SNAPSHOT.json',ROOT/'docs/PILOT300.md',WORK/'bake_pine_cards.py',WORK/'optimize_pines.py',WORK/'fetch_cc0_shrubs.py',WORK/'asset_licenses.json'))
     paths.add(ROOT/'out/bejaia_saket/data/surfaces.ini')
+    paths.add(ROOT/'data/scenery_zones.json')
     return paths
 
 
 def package_source_overlay():
     surface=ROOT/'out/bejaia_saket/data/surfaces.ini'
     if not surface.is_file():raise FileNotFoundError(surface)
+    zones=ROOT/'data/scenery_zones.json'
+    if (ROOT/'scripts/scenery_placement.py').is_file() and not zones.is_file():raise FileNotFoundError(zones)
     source=ROOT/'out/bejaia_saket_pilot300_sources.zip'
     partial=source.with_suffix('.zip.partial')
     try:
@@ -34,6 +37,8 @@ def package_source_overlay():
         with zipfile.ZipFile(partial) as archive:
             baseline=json.loads(archive.read('project/data/pilot300/source_baseline.json'))['files']
             if 'out/bejaia_saket/data/surfaces.ini' not in baseline:raise ValueError('Source overlay baseline missing main surfaces.ini')
+            if 'project/scripts/scenery_placement.py' in archive.namelist() and 'data/scenery_zones.json' not in baseline:
+                raise ValueError('Source overlay baseline missing scenery_zones.json')
             members=set(archive.namelist())
             for relative,expected in baseline.items():
                 member='project/'+relative

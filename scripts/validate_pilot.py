@@ -41,6 +41,7 @@ def source_baseline_hash(relative):
 
 
 SOURCE_BASELINE_PATHS = [
+    'data/scenery_zones.json',
     'data/centerline.npz', 'data/shortening_info.json',
     'blend/bejaia_saket.blend', 'blend/settings.json',
     'out/bejaia_saket/bejaia_saket.kn5', 'out/bejaia_saket/data/surfaces.ini',

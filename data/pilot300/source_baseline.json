@@ -2,6 +2,7 @@
   "origin": "Current full-route source snapshot used for this pilot build",
   "snapshot_commit": "ab150e2aa53fc10668ab5faa2241aafbce060932",
   "files": {
+    "data/scenery_zones.json": "cf065540030112ef008184494c4413659efa522e75b2c667b21f97ed5ea9041d",
     "data/centerline.npz": "94628ff6c3e637feb50bbaba67c81220ad99edeccf66283815072246f1e07441",
     "data/shortening_info.json": "d6d2b7290a5d799f4c24cd7bb94002a4b5331ffdf78f10c9ae4a1f02384d2f72",
     "blend/bejaia_saket.blend": "395e5cb1091c615f5244453d2f8f019aaa4627c970ffad67c371071c84369492",

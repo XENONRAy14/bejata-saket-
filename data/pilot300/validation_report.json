@@ -1,7 +1,8 @@
 {
   "passed": true,
-  "checks": 764,
+  "checks": 765,
   "check_names": [
+    "Main source unchanged: data/scenery_zones.json",
     "Main source unchanged: data/centerline.npz",
     "Main source unchanged: data/shortening_info.json",
     "Main source unchanged: blend/bejaia_saket.blend",
