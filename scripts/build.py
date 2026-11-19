@@ -102,7 +102,10 @@ def graph(ways):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('stage', nargs='?', default='all', choices=['all', 'assets', 'route', 'dem', 'centerline', 'mesh', 'acdata', 'decor', 'landscape', 'vegetation', 'roadside', 'materials', 'csp', 'render'])
+    parser.add_argument('stage', nargs='?', default='all', choices=['all', 'assets', 'route', 'dem', 'centerline', 'mesh', 'acdata', 'decor', 'landscape', 'vegetation', 'roadside', 'materials', 'csp', 'render', 'scenery'])
+    parser.add_argument('--sector',choices=['summit'],default='summit')
+    parser.add_argument('--scenery-output',type=Path)
+    parser.add_argument('--scenery-render',action='store_true')
     parser.add_argument('--vegetation',action='store_true')
     parser.add_argument('--roadside',action='store_true')
     parser.add_argument('--kn5-vegetation',action='store_true',help='Use regular KN5 foliage instead of TreeFX/GrassFX')
@@ -111,6 +114,13 @@ def main():
     parser.add_argument('--blender', default=str(Path.home() / 'tools/blender-3.6.23-linux-x64/blender'))
     parser.add_argument('--list-places', action='store_true')
     args = parser.parse_args()
+    if args.stage=='scenery':
+        from qualify_scenery import qualify
+        output=qualify(args.sector,args.scenery_output)
+        if args.scenery_render:
+            subprocess.run([args.blender,'--background','--factory-startup','--disable-autoexec',
+                '--python-exit-code','1','--python',str(ROOT/'scripts/blender_scenery_preview.py'),'--',str(output)],check=True)
+        return
     os.environ['BS_SKIP_RENDER']='1'
     for folder in ('data', 'blend', 'textures', 'out/preview'):
         (ROOT/folder).mkdir(parents=True, exist_ok=True)

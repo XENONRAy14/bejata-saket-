@@ -1,0 +1,23 @@
+{
+  "name": "RN24 summit approach – Saket",
+  "description": "Shortened RN24: spawn exactly 1000m of 3D road before the graded summit, then the main descent toward Saket. Includes a 30m rear grid pad. Copernicus DSM-derived, not surveyed. © OpenStreetMap contributors; see CREDITS.md.",
+  "tags": [
+    "point-to-point",
+    "mountain",
+    "coastal"
+  ],
+  "geotags": [
+    "36.77504324966629",
+    "5.026555990213126"
+  ],
+  "country": "Algeria",
+  "city": "Béjaïa",
+  "length": "15542m",
+  "width": "7.0m-7.0m",
+  "pitboxes": "4",
+  "run": "Summit approach → Saket · point-to-point",
+  "author": "frite",
+  "version": "0.4",
+  "year": 2026,
+  "url": ""
+}

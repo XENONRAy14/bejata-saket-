@@ -1,0 +1,61 @@
+{
+  "sector": "summit",
+  "placement": {
+    "start_m": 880.0,
+    "end_m": 1180.0,
+    "seed": 4455844121828896665,
+    "tree_instances": 106,
+    "edge_clumps": 354,
+    "tree_instances_per_100m": 35.333333333333336,
+    "sector_tree_limit": 153,
+    "full_route_budget_ceiling": 7926,
+    "total_tree_limit": 8000,
+    "minimum_all_road_leg_clearance_m": 4.098438176117515,
+    "per_100m": [
+      {
+        "start_m": 880.0,
+        "end_m": 980.0,
+        "tree_instances": 36,
+        "instances_per_100m": 36.0
+      },
+      {
+        "start_m": 980.0,
+        "end_m": 1080.0,
+        "tree_instances": 39,
+        "instances_per_100m": 39.0
+      },
+      {
+        "start_m": 1080.0,
+        "end_m": 1180.0,
+        "tree_instances": 31,
+        "instances_per_100m": 31.0
+      }
+    ],
+    "budget_passed": true
+  },
+  "old_tree_instances_removed": 135,
+  "main_tree_instances_retained": 6670,
+  "new_tree_instances": 106,
+  "total_tree_instances": 6776,
+  "legacy_foliage_triangles_removed": 0,
+  "forest_floor_triangles": 0,
+  "forest_floor_applied": false,
+  "qualification_complete": false,
+  "forest_floor_blocker": "No existing visual-only ground inside the 80m summit corridor; nearby ground is physical and locked",
+  "added_meshes": 32,
+  "added_vertices": 8496,
+  "added_triangles": 4248,
+  "total_meshes": 1242,
+  "total_vertices": 1916621,
+  "total_triangles": 969038,
+  "kn5_bytes": 188628981,
+  "physics_lock": {
+    "physical_meshes": 459,
+    "spawn_gate_empties": 17,
+    "guard_visuals": 39,
+    "all_checksums_identical": true,
+    "reference_sha256": "7cceb8c8aeb9ec72b9031d1356b5450b7e1e38c335748964591d84036d13c61f"
+  },
+  "source_blender_assets_required": false,
+  "runtime_tested": false
+}
