@@ -20,7 +20,7 @@ from scenery_preview_common import tree_lod
 def blender_vector(values):return np.asarray(values)[:,[0,2,1]]*[1,-1,1]
 
 
-def material(name,texture,folder,alpha=False):
+def material(name,texture,folder,alpha=False,object_color=False):
     mat=bpy.data.materials.new(name);mat.use_nodes=True
     shader=mat.node_tree.nodes.get('Principled BSDF');shader.inputs['Roughness'].default_value=.85
     if texture:
@@ -30,6 +30,11 @@ def material(name,texture,folder,alpha=False):
         image.alpha_mode='CHANNEL_PACKED'
         node=mat.node_tree.nodes.new('ShaderNodeTexImage');node.image=image
         mat.node_tree.links.new(node.outputs['Color'],shader.inputs['Base Color'])
+        if object_color:
+            tint=mat.node_tree.nodes.new('ShaderNodeObjectInfo');mixed=mat.node_tree.nodes.new('ShaderNodeMixRGB')
+            mixed.blend_type='MULTIPLY';mixed.inputs[0].default_value=1
+            mat.node_tree.links.new(node.outputs['Color'],mixed.inputs[1]);mat.node_tree.links.new(tint.outputs['Color'],mixed.inputs[2])
+            mat.node_tree.links.new(mixed.outputs[0],shader.inputs['Base Color'])
         if alpha:
             clip=mat.node_tree.nodes.new('ShaderNodeMath');clip.operation='GREATER_THAN';clip.inputs[1].default_value=.3
             mat.node_tree.links.new(node.outputs['Alpha'],clip.inputs[0]);mat.node_tree.links.new(clip.outputs[0],shader.inputs['Alpha'])
@@ -98,7 +103,7 @@ def tree_model(path,folder,lod=0):
             offset=len(vertices);vertices.extend(blender_vector(values[:,:3]*[radius,height,radius]));normals.extend(blender_vector(values[:,3:6]))
             uvs.extend(values[:,6:8]*[1,-1]+[0,1]);faces.extend(indices.astype(np.int64)+offset)
             face_materials.extend([len(materials)]*len(indices))
-            name=names[diffuse];materials.append(material(name,(name,archive.read(name)),folder,alpha=True))
+            name=names[diffuse];materials.append(material(name,(name,archive.read(name)),folder,alpha=True,object_color=True))
         obj=object_mesh(path.stem,np.asarray(vertices),faces,np.asarray(uvs),materials,face_materials,np.asarray(normals))
         bpy.context.collection.objects.unlink(obj)
         return obj.data
@@ -138,6 +143,7 @@ def render(track,output,label,data,station,reverse=False):
         key=(str(path),lod)
         if key not in prototypes:prototypes[key]=tree_model(path,folder,lod)
         obj=bpy.data.objects.new('TREE_'+str(tree_count),prototypes[key]);bpy.context.collection.objects.link(obj)
+        obj.color=(*plant['color'],1)
         obj.location=plant['position'];obj.rotation_euler.z=plant['angle'];obj.scale=(plant['scale']*plant['width'],plant['scale']*plant['width'],plant['scale']);tree_count+=1
     scene=bpy.context.scene;scene.render.engine='CYCLES';scene.cycles.samples=16;scene.cycles.use_denoising=True
     scene.cycles.transparent_max_bounces=128;scene.render.threads_mode='FIXED';scene.render.threads=8

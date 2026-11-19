@@ -22,8 +22,11 @@ def parse_tree(line):
     if not fields[0].startswith('tree: '):raise ValueError('Invalid TreeFX placement')
     values=dict(field.split('=',1) for field in fields[1:])
     position=np.array([float(v) for v in values['pos'].split(',')])
+    color=[float(v) for v in values.get('color','1,1,1').split(',')]
+    if len(color)!=3 or not np.isfinite(color).all() or min(color)<0:raise ValueError('Invalid TreeFX color')
     return dict(model=fields[0][6:],position=position[[0,2,1]]*[1,-1,1],
-        angle=-np.radians(float(values['angle'])),scale=float(values['size']),width=float(values['width']))
+        angle=-np.radians(float(values['angle'])),scale=float(values['size']),width=float(values['width']),
+        color=color)
 
 
 class Reader:

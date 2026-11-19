@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 import numpy as np
 
-from qualify_scenery import legacy_foliage, make_installable, parse_tree, qualify, station_selector
+from qualify_scenery import legacy_foliage, make_installable, parse_tree, qualify, station_selector, tree_line
 from scenery_kn5 import assign_material, clone_material, mesh, nodes, protected, read, string, subset, uint, validate_lock, write
 from scenery_assets import ground_mask
 
@@ -96,6 +96,10 @@ class QualificationTests(unittest.TestCase):
         self.assertEqual(mask.tolist(),[True,False,False])
         tree=parse_tree('tree: pine.bin; pos=1, 3, -2; angle=-90; size=1; width=1; color=1, 1, 1')
         np.testing.assert_equal(tree['position'],[1,2,3])
+        self.assertEqual(tree['color'],[1,1,1])
+        plant=dict(position=[1,2,3],angle=.5,scale=3,width=2,model='shrub',color=[.55,.7,.5])
+        self.assertEqual(parse_tree(tree_line(plant,{'shrub':dict(file='shrub.bin')}))['color'],plant['color'])
+        with self.assertRaises(ValueError):parse_tree('tree: shrub.bin; pos=1,2,3; angle=0; size=1; width=1; color=nan,1,1')
         self.assertTrue(legacy_foliage('DECOR_002_pine_foliage'))
         for name in ('DECOR_002_bark','DECOR_002_plaster','DETAIL_GUARD_000','1WALL_test'):
             self.assertFalse(legacy_foliage(name))

@@ -83,7 +83,7 @@ def edge_layout(data,sea_side=None,*,s0=None,s1=None,zones=None,seed=None):
                 width=float(rng.uniform(*zones.get('edge_widths_m',((3.5,4.5),(4.8,6.0)))[tier]))
                 height=float(rng.uniform(*zones.get('edge_heights_m',((1.4,1.9),(2.5,3.3)))[tier]))
                 half_road=float(np.interp(station,data['s3'],data['width']))/2
-                offset=half_road+((2.5 if pilot else zones.get('road_clearance_m',4)+.1),6.3)[tier]+width/2
+                offset=half_road+zones.get('edge_offsets_m',((2.5 if pilot else zones.get('road_clearance_m',4)+.1),6.3))[tier]+width/2
                 _,tangent,_=frame(data,station)
                 result.append(dict(station=station,side=side,tier=tier,offset=offset,
                     position=ground(data,station,side,offset).tolist(),width=width,height=height,
@@ -216,17 +216,25 @@ def main_tree_layout(data,models,s0,s1,zones):
     for side in (0,1):
         for layer in layers:
             kind=layer['kind'];spacing=layer['spacing'];offset_range=layer['offset']
+            for key in ('height_m','width_m'):
+                if key in layer:
+                    bounds=layer[key]
+                    if len(bounds)!=2 or not np.isfinite(bounds).all() or not 0<bounds[0]<=bounds[1]:raise ValueError('Invalid vegetation dimensions')
+            if 'color' in layer and (len(layer['color'])!=3 or not np.isfinite(layer['color']).all() or min(layer['color'])<0):raise ValueError('Invalid vegetation color')
             for station in np.arange(s0+8,s1-5,spacing):
                 station=float(station+rng.uniform(-1.3,1.3))
                 if vista_open(station,s1-s0,side,sea(station),zones=zones,layer=kind):continue
                 species=kinds[kind][int(rng.integers(len(kinds[kind])))];scale=float(rng.uniform(*layer.get('scale',[.68,.96])))
                 broad=float(rng.uniform(*layer.get('width',[1.08,1.35])))
+                if 'height_m' in layer:scale=float(rng.uniform(*layer['height_m']))/models[species]['height']
+                if 'width_m' in layer:broad=float(rng.uniform(*layer['width_m']))/(models[species]['width']*scale)
                 half=float(np.interp(station,data['s3'],data['width']))/2
                 offset=half+float(rng.uniform(*offset_range))
                 point=ground(data,station,side,offset);point[2]-=.12
                 if layer.get('bury_fraction'):point[2]-=float(models[species]['height'])*scale*layer['bury_fraction']
                 plants.append(dict(model=species,position=point.tolist(),angle=float(rng.uniform(0,2*np.pi)),
                     scale=scale,width=broad,station=station,side=side,offset=offset))
+                if 'color' in layer:plants[-1]['color']=list(layer['color'])
     return plants
 
 

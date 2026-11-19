@@ -4,13 +4,13 @@
     "start_m": 880.0,
     "end_m": 1180.0,
     "seed": 4455844121828896665,
-    "tree_instances": 148,
-    "edge_clumps": 1446,
-    "tree_instances_per_100m": 49.333333333333336,
+    "tree_instances": 152,
+    "edge_clumps": 282,
+    "tree_instances_per_100m": 50.666666666666664,
     "sector_tree_limit": 153,
     "full_route_budget_ceiling": 7926,
     "total_tree_limit": 8000,
-    "minimum_all_road_leg_clearance_m": 4.098026003321536,
+    "minimum_all_road_leg_clearance_m": 4.810903568813432,
     "per_100m": [
       {
         "start_m": 880.0,
@@ -21,22 +21,28 @@
       {
         "start_m": 980.0,
         "end_m": 1080.0,
-        "tree_instances": 50,
-        "instances_per_100m": 50.0
+        "tree_instances": 52,
+        "instances_per_100m": 52.0
       },
       {
         "start_m": 1080.0,
         "end_m": 1180.0,
-        "tree_instances": 48,
-        "instances_per_100m": 48.0
+        "tree_instances": 50,
+        "instances_per_100m": 50.0
       }
     ],
     "budget_passed": true
   },
   "old_tree_instances_removed": 135,
+  "tree_layer_counts": {
+    "shrub": 86,
+    "midstory": 40,
+    "background": 26,
+    "pine": 0
+  },
   "main_tree_instances_retained": 6670,
-  "new_tree_instances": 148,
-  "total_tree_instances": 6818,
+  "new_tree_instances": 152,
+  "total_tree_instances": 6822,
   "legacy_foliage_triangles_removed": 0,
   "forest_floor_triangles": 3024,
   "forest_floor_materials": [
@@ -62,18 +68,6 @@
     }
   ],
   "repaired_medium_lods": {
-    "ph_pine_01.bin": {
-      "triangles": 13698,
-      "vertices": 26106
-    },
-    "ph_pine_03.bin": {
-      "triangles": 12896,
-      "vertices": 25567
-    },
-    "ph_pine_04.bin": {
-      "triangles": 13058,
-      "vertices": 25773
-    },
     "ph_pine_bg_01.bin": false,
     "ph_pine_bg_03.bin": false,
     "ph_pine_bg_04.bin": false,
@@ -88,18 +82,20 @@
     "ph_pine_mid_04.bin": {
       "triangles": 13058,
       "vertices": 25773
-    }
+    },
+    "ph_shrub_01.bin": false
   },
   "forest_floor_applied": true,
   "qualification_complete": false,
+  "visual_review_required": true,
   "forest_floor_blocker": null,
   "added_meshes": 32,
-  "added_vertices": 34704,
-  "added_triangles": 17352,
+  "added_vertices": 6768,
+  "added_triangles": 3384,
   "total_meshes": 1242,
-  "total_vertices": 1942829,
-  "total_triangles": 982142,
-  "kn5_bytes": 201054493,
+  "total_vertices": 1914893,
+  "total_triangles": 968174,
+  "kn5_bytes": 199741501,
   "physics_lock": {
     "physical_meshes": 459,
     "spawn_gate_empties": 17,
@@ -108,6 +104,5 @@
     "reference_sha256": "7cceb8c8aeb9ec72b9031d1356b5450b7e1e38c335748964591d84036d13c61f"
   },
   "source_blender_assets_required": false,
-  "runtime_tested": false,
-  "visual_review_required": true
+  "runtime_tested": false
 }

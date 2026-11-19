@@ -102,6 +102,21 @@ class SectorTests(unittest.TestCase):
         self.assertTrue(first['trees']);self.assertTrue(first['edges'])
         json.dumps(first)
 
+    def test_3d_shrub_sizes_colors_and_filler_offsets(self):
+        self.zones.update(tree_layers=[dict(kind='shrub',spacing=7.5,offset=[11,12],height_m=[2.8,3.5],width_m=[7.8,8.6],color=[.55,.7,.5])],edge_offsets_m=[16,21])
+        plants=main_tree_layout(self.data,self.models,0,300,self.zones)
+        self.assertTrue(plants)
+        for plant in plants:
+            spec=self.models[plant['model']]
+            self.assertTrue(2.8<=spec['height']*plant['scale']<=3.5)
+            self.assertTrue(7.8<=spec['width']*plant['scale']*plant['width']<=8.6)
+            self.assertEqual(plant['color'],[.55,.7,.5])
+        for plant in edge_layout(self.data,s0=0,s1=300,zones=self.zones):self.assertGreaterEqual(plant['offset']-plant['width']/2,19.5)
+        self.zones['exclusions']=[dict(start_m=0,end_m=400,side='both')]
+        self.assertFalse(plan_sector(self.data,self.models,0,300,zones=self.zones)['trees'])
+        self.zones['tree_layers'][0]['height_m']=[0,1]
+        with self.assertRaises(ValueError):main_tree_layout(self.data,self.models,0,300,self.zones)
+
     def test_local_sides_are_smoothed_and_can_switch(self):
         self.data['sides'][0,:100,-1,2]=10
         self.data['sides'][0,100:,-1,2]=0

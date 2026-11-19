@@ -23,8 +23,9 @@ BASE_SHA='7cceb8c8aeb9ec72b9031d1356b5450b7e1e38c335748964591d84036d13c61f'
 
 def tree_line(plant,models):
     x,y,z=plant['position']
+    color=', '.join(f'{v:.9g}' for v in plant.get('color',[1,1,1]))
     return (f"tree: {models[plant['model']]['file']}; pos={x:.9g}, {z:.9g}, {-y:.9g}; "
-        f"angle={-np.degrees(plant['angle']):.9g}; size={plant['scale']:.9g}; width={plant['width']:.9g}; color=1, 1, 1")
+        f"angle={-np.degrees(plant['angle']):.9g}; size={plant['scale']:.9g}; width={plant['width']:.9g}; color={color}")
 
 
 def make_installable(output):
@@ -105,16 +106,19 @@ def qualify(sector='summit',output=None):
     s0,s1=spec['start_m'],spec['end_m']
     with np.load(ROOT/'data/centerline.npz') as datafile:data=dict(datafile)
     models=json.loads((ROOT/'data/pilot300/treefx_models.json').read_text())
-    zones=dict(config['main'],edge_spacings_m=[.65,1.1],edge_widths_m=[[.8,1.4],[1.6,2.4]],edge_heights_m=[[.8,1.4],[1.6,2.4]],tree_layers=[
-        dict(kind='pine',spacing=15,offset=[17,19],scale=[.9,1.05],width=[1.5,1.7],bury_fraction=.1),
-        dict(kind='midstory',spacing=12.5,offset=[17,19],scale=[.95,1.08],width=[1.6,1.85],bury_fraction=.60),
-        dict(kind='background',spacing=9.5,offset=[34,40],scale=[1,1.2],width=[1.8,2.1],bury_fraction=.50)])
-    layout=plan_sector(data,models,s0,s1,zones=zones);select=station_selector(data,s0,s1)
+    zones=dict(config['main'],edge_spacings_m=[3.6,5],edge_offsets_m=[16,21],edge_widths_m=[[2.5,3.5],[3,4]],edge_heights_m=[[1.4,2],[1.8,2.5]],tree_layers=[
+        dict(kind='shrub',spacing=6.8,offset=[9.5,10.5],height_m=[2.8,3.5],width_m=[6.4,6.8],color=[.55,.70,.50]),
+        dict(kind='midstory',spacing=15,offset=[16.8,18.3],height_m=[32,36],width_m=[14,16],bury_fraction=.48),
+        dict(kind='background',spacing=23.5,offset=[45,52],height_m=[30,36],width_m=[29,33],bury_fraction=.48)])
+    dense_models={name:spec for name,spec in models.items() if name!='PH_shrub_02'}
+    layout=plan_sector(data,dense_models,s0,s1,zones=zones);select=station_selector(data,s0,s1)
     base=read(baseline);pilot=read(ROOT/'out/bejaia_saket_pilot300/bejaia_saket_pilot300.kn5')
     original_nodes={node['name']:node['raw'] for node in nodes(base)}
     materials=import_materials(base,pilot,('forest_edge',))
     if layout['edges']:
-        add_texture(base,'SUMMIT_forest_edge.dds',edge_atlas(ROOT/'out/bejaia_saket_pilot300/extension/trees/ph_pine_01.bin',pilot),coverage=True)
+        image=edge_atlas(ROOT/'out/bejaia_saket_pilot300/extension/trees/ph_pine_01.bin',pilot)
+        pixels=np.asarray(image).copy();pixels[:,:,:3]=np.uint8(np.clip(pixels[:,:,:3].astype(float)*[.43,.55,.37],0,255))
+        add_texture(base,'SUMMIT_forest_edge.dds',Image.fromarray(pixels),coverage=True)
         index=materials['forest_edge'];base['materials'][index]=clone_material(base['materials'][index],'forest_edge',dict(txDiffuse='SUMMIT_forest_edge.dds'))
     floor_triangles,floor_materials=forest_ground(base,pilot,select);legacy_triangles=0
     def modify(parent):
@@ -135,9 +139,9 @@ def qualify(sector='summit',output=None):
     modify(base['root'])
     for distant in (False,True):
         for (chunk,side),(vertices,quads,uv,normals) in edge_batches(data,layout['edges'],distant=distant).items():
-            values=np.zeros((len(vertices),11),dtype='<f4');values[:,:3]=vector_ac(vertices);values[:,3:6]=[0,1,0]
+            values=np.zeros((len(vertices),11),dtype='<f4');values[:,:3]=vector_ac(vertices);values[:,3:6]=vector_ac(normals)
             values[:,6:8]=np.asarray(uv)*[1,-1]
-            values[:,8:11]=[1,0,0]
+            tangents=np.cross(values[:,3:6],[0,1,0]);tangents/=np.linalg.norm(tangents,axis=1)[:,None];values[:,8:11]=tangents
             faces=[triangle for a,b,c,d in quads for triangle in ((a,b,c),(a,c,d))]
             node=mesh(f"SCENERY_{'FAR' if distant else 'NEAR'}_EDGE_{chunk}_{side}",values,faces,materials['forest_edge'])
             tail=bytearray(node['tail'])
@@ -178,6 +182,7 @@ def qualify(sector='summit',output=None):
     added=[n for n in nodes(base) if n['name'].startswith('SCENERY_')]
     meshes=[n for n in nodes(base) if n['kind']==2]
     report=dict(sector=sector,placement=layout['report'],old_tree_instances_removed=removed,
+        tree_layer_counts={kind:sum(models[p['model']]['kind']==kind for p in layout['trees']) for kind in ('shrub','midstory','background','pine')},
         main_tree_instances_retained=len(kept),new_tree_instances=len(layout['trees']),total_tree_instances=len(lines),
         legacy_foliage_triangles_removed=legacy_triangles,forest_floor_triangles=floor_triangles,
         forest_floor_materials=floor_materials,repaired_medium_lods=repaired,

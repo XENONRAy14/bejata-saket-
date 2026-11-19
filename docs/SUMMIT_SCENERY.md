@@ -26,8 +26,9 @@ the main `bejaia_saket` folder.
 
 `qualify_scenery.py` removes existing TreeFX placements in the sector and any
 legacy foliage triangles there and adds shared-atlas edge batches and TreeFX
-placements. The low atlas combines smaller cached shrub silhouettes and twig
-clusters; upward card normals avoid hard lighting changes between planes.
+placements. The foreground now uses cached three-dimensional Searsia radial
+clusters, not atlas planes. Darkened atlas filler starts 16/21 m beyond the road
+edge, behind the shrubs, with smoothed upright normals and orthogonal tangents.
 No pilot rail modules are imported. Forest-floor reassignment uses existing
 physical `1GRASS*` geometry, without new ground overlays or UV changes.
 The lateral corridor is 80 m plus half the maximum road width; selection uses
@@ -53,12 +54,24 @@ painting another part of the road. The original duplicate grass channel is
 merged into its identical channel outside the floor mask; no extra ground
 triangles, positions, indices, names, flags or UVs are introduced.
 
-The summit has 148 TreeFX placements (50/50/48 per successive 100 m), below
-153, plus 1,446 low atlas clumps. Near pines, lowered midstory crowns and wider
-16-triangle silhouettes overlap instead of repeating a sparse tall-tree row.
-Midstory/background tree roots are deliberately buried to bring crowns down
-to the hillside. These are visual-only plants; their horizontal footprint
-clearance is still checked against every road leg.
+The budget is reallocated to 86 dense `PH_shrub_01` clusters, 40 midstory pines
+and 26 background silhouettes: 152 TreeFX instances, below 153, plus 282 rear
+atlas clumps. Each cached Searsia model already contains three radial branches.
+The sparser `PH_shrub_02` is not used. Physical shrub dimensions are 2.8–3.5 m
+high and 6.4–6.8 m wide. Taller pines and buried crown bases form the mid/back
+rows. Horizontal footprint clearance is checked against every road leg.
+
+The cached prototypes have no vertex-colour layers. TreeFX packed vertex
+colours, geometry, normals, textures and shading settings are preserved from
+the pilot; shading brightness is 1, with the same sphere/boost normal settings.
+Visible leaf texture samples are warmer/brighter than the pines. An exported
+per-instance `color=0.55,0.70,0.50` tint makes the shrubs a darker natural green.
+The preview now reads and applies this same TreeFX colour, not a render-only
+grade. Atlas filler has its own subdued texture grade; alpha is unchanged.
+
+Terrain masks are four independent weights, not opacity images. Resizing,
+DXT5 colour-block encoding and mip generation preserve RGB even when the fourth
+weight is zero. All four forest-floor masks retain litter at every mip level.
 
 ## Pine LOD defect
 
@@ -92,13 +105,14 @@ The following raw inputs were absent under `/home/ubuntu/repos/assets`:
 - `pine_forest/textures/forest_ground_04_diff.png`
 - `guard-rail.glb` (not needed by this qualification)
 
-The pine shards are repaired, but **visual qualification is still incomplete**:
-the hillside is not fully masked and the foreground cards still read as flat,
-pale cutouts. Three composition passes did not achieve the closed forest-wall
-target. The report deliberately retains `qualification_complete: false` and
-`visual_review_required: true`; passing the geometry/budget checks is not art
-acceptance. A next composition pass should allocate part of the existing tree
-budget to close three-dimensional shrub clusters rather than more atlas cards.
+The report deliberately retains `qualification_complete: false` and
+`visual_review_required: true`; passing geometry/budget checks is not art
+acceptance. Matched summit and reverse exit renders accompany this pass.
+Critical inspection after three composition attempts still finds exposed pale
+hillside at 1030 m and individual open shrub forms rather than a fully closed
+hedge. The pale foreground atlas wall is gone and the 3D shrubs are darker, but
+the closed forest-wall target is **not achieved**. Do not roll this pass out
+route-wide. The installable copy is a qualification candidate, not accepted art.
 
 The previews are Cycles approximations, not in-game acceptance. Native AC
 collision, CSP/Pure appearance, wet
