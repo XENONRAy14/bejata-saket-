@@ -147,6 +147,7 @@ def pilot_tree_layout(data,models,sea_side,*,zones=None):
     for station,side in groups:
         for delta in (-2.4,2.4):
             s=float(station+delta)
+            if vista_open(s,300,side,sea_side,zones=zones,layer='midstory'):continue
             species=middle[int(rng.integers(len(middle)))]
             scale=float(rng.uniform(6,8))/models[species]['height']
             half=float(np.interp(s,data['s3'],data['width']))/2
@@ -156,7 +157,7 @@ def pilot_tree_layout(data,models,sea_side,*,zones=None):
     backgrounds=[name for name in models if name.startswith('PH_pine_bg_')]
     for side in (0,1):
         for station in np.arange(5,297,7):
-            if vista_open(station,300,side,sea_side,zones=zones):continue
+            if vista_open(station,300,side,sea_side,zones=zones,layer='background'):continue
             species=backgrounds[int(rng.integers(len(backgrounds)))];scale=float(rng.uniform(.72,1.0))
             half=float(np.interp(station,data['s3'],data['width']))/2
             offset=half+float(rng.uniform(34,38))
@@ -165,7 +166,7 @@ def pilot_tree_layout(data,models,sea_side,*,zones=None):
     shrubs=[name for name in models if name.startswith('PH_shrub_')]
     for side in (0,1):
         for station in np.arange(6,296,11):
-            if vista_open(station,300,side,sea_side,zones=zones):continue
+            if vista_open(station,300,side,sea_side,zones=zones,layer='shrub'):continue
             species=shrubs[int(rng.integers(len(shrubs)))];scale=float(rng.uniform(1.15,1.55));broad=float(rng.uniform(1.05,1.3))
             half=float(np.interp(station,data['s3'],data['width']))/2
             radius=models[species]['width']/2*math.sqrt(2)*scale*broad

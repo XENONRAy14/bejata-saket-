@@ -74,6 +74,16 @@ class PilotPreservationTests(unittest.TestCase):
         self.assertTrue(all(p['side']!=self.sea for p in edge_layout(self.data,self.sea,zones=zones)))
         self.assertEqual(pilot_tree_layout(self.data,self.models,self.sea,zones=zones),pilot_tree_layout(self.data,self.models,self.sea))
 
+    def test_pilot_vistas_use_each_layers_selector(self):
+        for layer in ('background','shrub','midstory'):
+            with self.subTest(layer=layer):
+                zones=copy.deepcopy(load_zones()['pilot'])
+                zones['vista_openings']=[dict(start_m=-100,end_m=500,side='both',layers=[layer])]
+                plants=pilot_tree_layout(self.data,self.models,self.sea,zones=zones)
+                self.assertFalse(any(self.models[p['model']]['kind']==layer for p in plants))
+                self.assertTrue(any(self.models[p['model']]['kind']=='pine' for p in plants))
+                self.assertEqual(len(edge_layout(self.data,self.sea,zones=zones)),354)
+
 
 class SectorTests(unittest.TestCase):
     @classmethod
