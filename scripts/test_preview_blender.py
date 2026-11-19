@@ -5,12 +5,20 @@ import tempfile
 import unittest
 
 from PIL import Image
+import bpy
 
 sys.path.insert(0,str(Path(__file__).resolve().parent))
-from blender_scenery_preview import material
+from blender_scenery_preview import configure_id_render, material
 
 
 class PreviewTextureTests(unittest.TestCase):
+    def test_ids_are_single_sample_without_denoising_dither_or_wide_filter(self):
+        scene=bpy.context.scene;scene.cycles.use_denoising=True;scene.cycles.samples=16
+        configure_id_render(scene)
+        self.assertFalse(scene.cycles.use_denoising);self.assertFalse(scene.cycles.use_adaptive_sampling)
+        self.assertEqual(scene.cycles.samples,1);self.assertEqual(scene.cycles.pixel_filter_type,'BOX')
+        self.assertLessEqual(scene.render.filter_size,.010001);self.assertEqual(scene.render.dither_intensity,0)
+
     def test_changed_same_named_texture_never_reuses_old_bytes(self):
         with tempfile.TemporaryDirectory() as directory:
             images=[]

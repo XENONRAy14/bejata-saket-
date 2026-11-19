@@ -117,6 +117,12 @@ def tree_model(path,folder,lod=0):
         return obj.data
 
 
+def configure_id_render(scene):
+    scene.cycles.use_denoising=False;scene.cycles.use_adaptive_sampling=False;scene.cycles.samples=1
+    scene.cycles.pixel_filter_type='BOX';scene.render.filter_size=.01;scene.render.dither_intensity=0
+    scene.render.image_settings.file_format='PNG';scene.render.image_settings.color_mode='RGB';scene.render.image_settings.color_depth='8'
+
+
 def measurement(scene,output,label,data,station,reverse):
     width=scene.render.resolution_x;height=scene.render.resolution_y
     def project(point):return world_to_camera_view(scene,scene.camera,Vector(point))
@@ -162,6 +168,7 @@ def measurement(scene,output,label,data,station,reverse):
             obj.data.materials.clear();obj.data.materials.append(barrier)
     scene.world.node_tree.nodes.get('Background').inputs[0].default_value=(0,0,0,1)
     scene.view_settings.view_transform='Standard';scene.view_settings.look='None';scene.view_settings.exposure=0;scene.view_settings.gamma=1
+    configure_id_render(scene)
     scene.render.filepath=str(output/(label+'_ids.png'));bpy.ops.render.render(write_still=True)
     ids=np.asarray(Image.open(output/(label+'_ids.png')).convert('RGB'))
     report=save_measurement(output,label,beauty,ids,bands,(low,high))
