@@ -1,0 +1,282 @@
+import io
+import configparser
+import hashlib
+import json
+from pathlib import Path
+import struct
+import tempfile
+from types import SimpleNamespace
+import unittest
+from unittest.mock import patch
+import zipfile
+
+import pilot_common as common
+from pilot_common import np,Image,dds,source_data,select_sector,interpolate,frame,ground
+from check_kn5 import inspect_dds
+from treefx_wire import checksum,vector_ac,mesh_blob,read_mesh
+from pilot_scenery import edge_layout, vista_open
+import validate_pilot
+import package_pilot
+from acdata import surfaces_text
+
+
+class SourceBaselineTests(unittest.TestCase):
+    def test_text_source_hash_ignores_line_ending_style(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);path=root/'settings.json'
+            with patch.object(validate_pilot,'ROOT',root):
+                path.write_bytes(b'{\n  "enabled": true\n}\n')
+                lf=validate_pilot.source_baseline_hash('settings.json')
+                path.write_bytes(b'{\r\n  "enabled": true\r\n}\r\n')
+                crlf=validate_pilot.source_baseline_hash('settings.json')
+        self.assertEqual(lf,crlf)
+
+    def test_binary_source_hash_preserves_exact_bytes(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);path=root/'scene.blend'
+            with patch.object(validate_pilot,'ROOT',root):
+                path.write_bytes(b'\x00\r\n\x01')
+                crlf=validate_pilot.source_baseline_hash('scene.blend')
+                path.write_bytes(b'\x00\n\x01')
+                lf=validate_pilot.source_baseline_hash('scene.blend')
+        self.assertNotEqual(crlf,lf)
+
+    def test_archive_text_hash_uses_the_same_line_ending_normalization(self):
+        lf=validate_pilot.source_baseline_digest('settings.json',io.BytesIO(b'{\n}\n'))
+        crlf=validate_pilot.source_baseline_digest('settings.json',io.BytesIO(b'{\r\n}\r\n'))
+        self.assertEqual(lf,crlf)
+
+
+class SourceOverlayTests(unittest.TestCase):
+    def test_scenery_overlay_restores_zones_and_verifies_its_baseline(self):
+        with tempfile.TemporaryDirectory() as folder:
+            work=Path(folder);root=work/'project';data=root/'data/pilot300'
+            surface=root/'out/bejaia_saket/data/surfaces.ini'
+            surface.parent.mkdir(parents=True);data.mkdir(parents=True)
+            surface.write_text(surfaces_text());(root/'scripts').mkdir()
+            (root/'scripts/scenery_placement.py').write_text('# fixture\n')
+            zones=root/'data/scenery_zones.json';zones.write_text('{"pilot": {"exclusions": []}}')
+            baseline={'files':{str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in (surface,zones)}}
+            (data/'source_baseline.json').write_text(json.dumps(baseline))
+            with patch.multiple(package_pilot,ROOT=root,WORK=work,DATA=data):archive=package_pilot.package_source_overlay()
+            with zipfile.ZipFile(archive) as zipped:self.assertEqual(zipped.read('project/data/scenery_zones.json'),zones.read_bytes())
+            zones.write_text('{}')
+            with patch.multiple(package_pilot,ROOT=root,WORK=work,DATA=data):
+                with self.assertRaisesRegex(ValueError,'baseline mismatch: data/scenery_zones.json'):package_pilot.package_source_overlay()
+
+    def test_overlay_refreshes_stale_main_surface_and_its_baseline(self):
+        with tempfile.TemporaryDirectory() as folder:
+            work=Path(folder);root=work/'renamed-project';data=root/'data/pilot300'
+            surface=root/'out/bejaia_saket/data/surfaces.ini'
+            surface.parent.mkdir(parents=True);data.mkdir(parents=True)
+            content=surfaces_text().encode('utf-8');surface.write_bytes(content)
+            baseline={'files':{'out/bejaia_saket/data/surfaces.ini':hashlib.sha256(content).hexdigest()}}
+            (data/'source_baseline.json').write_text(json.dumps(baseline))
+            with patch.multiple(package_pilot,ROOT=root,WORK=work,DATA=data):
+                archive=package_pilot.package_source_overlay()
+            destination=work/'existing-worktree'
+            stale=destination/'project/out/bejaia_saket/data/surfaces.ini'
+            stale.parent.mkdir(parents=True)
+            stale.write_text('[SURFACE_4]\nKEY=WALL\n')
+            with zipfile.ZipFile(archive) as zipped:
+                self.assertIn('project/out/bejaia_saket/data/surfaces.ini',zipped.namelist())
+                zipped.extractall(destination)
+            self.assertEqual(stale.read_bytes(),content)
+            config=configparser.ConfigParser();config.read(stale)
+            self.assertNotIn('WALL',{section.get('KEY') for section in config.values()})
+            extracted=json.loads((destination/'project/data/pilot300/source_baseline.json').read_text())
+            self.assertEqual(extracted['files']['out/bejaia_saket/data/surfaces.ini'],hashlib.sha256(stale.read_bytes()).hexdigest())
+
+    def test_missing_main_surface_cannot_produce_an_incomplete_overlay(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)
+            with patch.multiple(package_pilot,ROOT=root,WORK=root.parent,DATA=root/'data/pilot300'):
+                with self.assertRaises(FileNotFoundError):package_pilot.package_source_overlay()
+
+    def test_overlay_refuses_mismatched_baseline_members_without_replacing_existing_zip(self):
+        surface_relative='out/bejaia_saket/data/surfaces.ini'
+        for relative in (surface_relative,'scripts/fixture.py','data/pilot300/fixture.npz'):
+            with self.subTest(relative=relative),tempfile.TemporaryDirectory() as folder:
+                work=Path(folder);root=work/'project';data=root/'data/pilot300'
+                surface=root/surface_relative
+                surface.parent.mkdir(parents=True);data.mkdir(parents=True)
+                content=surfaces_text().encode('utf-8');surface.write_bytes(content)
+                member=root/relative;member.parent.mkdir(parents=True,exist_ok=True)
+                baseline={'files':{surface_relative:hashlib.sha256(content).hexdigest(),relative:hashlib.sha256(b'original\n').hexdigest()}}
+                member.write_bytes(b'changed\n')
+                (data/'source_baseline.json').write_text(json.dumps(baseline))
+                archive=root/'out/bejaia_saket_pilot300_sources.zip';archive.write_bytes(b'previous package')
+                with patch.multiple(package_pilot,ROOT=root,WORK=work,DATA=data):
+                    with self.assertRaisesRegex(ValueError,'Source overlay baseline mismatch: '+relative):
+                        package_pilot.package_source_overlay()
+                self.assertEqual(archive.read_bytes(),b'previous package')
+                self.assertFalse(archive.with_suffix('.zip.partial').exists())
+
+    def test_overlay_accepts_text_line_endings_using_the_validation_hash_rules(self):
+        with tempfile.TemporaryDirectory() as folder:
+            work=Path(folder);root=work/'project';data=root/'data/pilot300'
+            relative='out/bejaia_saket/data/surfaces.ini';surface=root/relative
+            surface.parent.mkdir(parents=True);data.mkdir(parents=True)
+            content=surfaces_text().encode('utf-8');surface.write_bytes(content.replace(b'\n',b'\r\n'))
+            (data/'source_baseline.json').write_text(json.dumps({'files':{relative:hashlib.sha256(content).hexdigest()}}))
+            with patch.multiple(package_pilot,ROOT=root,WORK=work,DATA=data):
+                archive=package_pilot.package_source_overlay()
+            with zipfile.ZipFile(archive) as zipped:
+                self.assertEqual(zipped.read('project/'+relative),surface.read_bytes())
+
+    def test_overlay_requires_main_surface_in_the_packaged_baseline(self):
+        with tempfile.TemporaryDirectory() as folder:
+            work=Path(folder);root=work/'project';data=root/'data/pilot300'
+            surface=root/'out/bejaia_saket/data/surfaces.ini'
+            surface.parent.mkdir(parents=True);data.mkdir(parents=True)
+            surface.write_text(surfaces_text())
+            (data/'source_baseline.json').write_text('{"files":{}}')
+            with patch.multiple(package_pilot,ROOT=root,WORK=work,DATA=data):
+                with self.assertRaisesRegex(ValueError,'Source overlay baseline missing main surfaces.ini'):
+                    package_pilot.package_source_overlay()
+
+
+class PilotConfigTests(unittest.TestCase):
+    source='''[GRASS_FX]
+GRASS_MATERIALS = grass, grass_mountain
+[GRASS_FX_CONFIGURATION_A]
+SHAPE_SIZE = 0.55
+[GRASS_FX_ADJUSTMENT_0]
+MATERIALS = grass, grass_mountain
+USE_MULTILAYER_MASK = 1
+MASK_G = A
+[RAIN_FX]
+SOAKING_MATERIALS = asphalt, roadside_concrete
+SMOOTH_MATERIALS = metal
+ROUGH_MATERIALS = rock
+'''
+    def config(self):
+        result=configparser.ConfigParser();result.read_string(common.pilot_csp_config(self.source,'guard-rail_body_pbr'))
+        return result
+    def test_grass_targets_the_verge_material_without_a_multilayer_mask(self):
+        config=self.config()
+        self.assertEqual(config['GRASS_FX']['GRASS_MATERIALS'],'forest_floor')
+        self.assertNotIn('GRASS_FX_ADJUSTMENT_0',config)
+        self.assertNotIn('GRASS_FX_CONFIGURATION_A',config)
+    def test_rain_selectors_include_pilot_materials_without_losing_existing_ones(self):
+        rain=self.config()['RAIN_FX']
+        self.assertEqual(rain['SOAKING_MATERIALS'],'asphalt, roadside_concrete, rock_moss_set_01')
+        self.assertEqual(rain['SMOOTH_MATERIALS'],'metal, guard-rail_body_pbr')
+        self.assertEqual(rain['ROUGH_MATERIALS'],'rock, forest_floor, landcover')
+
+
+class PilotGeometryTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.temporary=tempfile.TemporaryDirectory()
+        cls.full=source_data()
+        with patch.object(common,'DATA',Path(cls.temporary.name)):
+            cls.data,cls.meta=select_sector(cls.full)
+    @classmethod
+    def tearDownClass(cls):cls.temporary.cleanup()
+    def test_300_meters(self):
+        points=np.column_stack([self.data['xy'],self.data['z']]);self.assertAlmostEqual(np.linalg.norm(np.diff(points,axis=0),axis=1).sum(),300,places=7)
+    def test_contains_actual_summit(self):
+        self.assertGreater(self.meta['summit_inside_pilot_m'],0);self.assertLess(self.meta['summit_inside_pilot_m'],300)
+    def test_native_road_shape_preserved(self):
+        np.testing.assert_array_equal(self.data['xy'],interpolate(self.full['xy'],self.data['source_s3'],self.full['s3']))
+    def test_native_altitudes_preserved(self):
+        np.testing.assert_array_equal(self.data['z'],interpolate(self.full['z'],self.data['source_s3'],self.full['s3']))
+    def test_axis_interpolation(self):
+        v=np.arange(24).reshape(2,4,3)
+        np.testing.assert_array_equal(interpolate(v,1.5,[0,1,2,3],axis=1),(v[:,1]+v[:,2])/2)
+    def test_frame_is_orthonormal(self):
+        for station in (0,12,150,280,300):
+            p,t,n=frame(self.data,station);self.assertAlmostEqual(float(t@n),0);self.assertAlmostEqual(float(t@t),1);self.assertAlmostEqual(float(n@n),1)
+    def test_ground_at_native_verge(self):
+        for side in (0,1):
+            point=self.data['sides'][side,20,2];distance=float(np.linalg.norm(point[:2]-self.data['xy'][20]))
+            np.testing.assert_allclose(ground(self.data,float(self.data['s3'][20]),side,distance),point,atol=1e-7)
+    def test_real_interesting_bend(self):self.assertGreater(self.meta['turn_degrees'],20)
+
+
+class PilotDDSTests(unittest.TestCase):
+    def write_image(self,image,coverage=False):
+        with tempfile.TemporaryDirectory() as folder:
+            path=Path(folder)/'test.dds';dds(image,path,coverage);return path.read_bytes()
+    def test_bc3_full_mip_chain(self):
+        result=inspect_dds(self.write_image(Image.new('RGBA',(32,16),(80,100,50,255))))
+        self.assertEqual((result['format'],result['mips']),( 'DXT5',6))
+    def test_smallest_levels_have_blocks(self):self.assertEqual(inspect_dds(self.write_image(Image.new('RGBA',(4,4),(80,90,50,255))))['mips'],3)
+    def test_alpha_silhouette_retained(self):
+        array=np.zeros((64,64,4),dtype='uint8');array[:,:,:3]=(80,100,50);array[12:52,12:52,3]=255
+        blob=self.write_image(Image.fromarray(array),True);pixels=np.asarray(Image.open(io.BytesIO(blob)))
+        self.assertEqual(int(pixels[0,0,3]),0);self.assertGreater(int(pixels[30,30,3]),240)
+    def test_non_power_of_two_rejected(self):
+        with self.assertRaises(ValueError):self.write_image(Image.new('RGBA',(19,17)))
+
+
+class FoliageBakeTests(unittest.TestCase):
+    def image(self,color):
+        pixels=np.zeros((32,32,4),dtype='uint8');pixels[4:28,4:28,:]=color
+        return Image.fromarray(pixels)
+    def test_white_impostor_rejected(self):
+        with self.assertRaises(ValueError):common.foliage_image_metrics(self.image((255,255,255,255)))
+    def test_empty_impostor_rejected(self):
+        with self.assertRaises(ValueError):common.foliage_image_metrics(Image.new('RGBA',(32,32)))
+    def test_valid_colored_alpha_silhouette(self):
+        metrics=common.foliage_image_metrics(self.image((60,85,35,255)))
+        self.assertEqual(metrics['white_fraction'],0)
+        self.assertGreater(metrics['alpha_coverage'],.1)
+    def test_transparent_white_background_is_not_a_white_tree(self):
+        pixels=np.full((32,32,4),255,dtype='uint8');pixels[:,:,3]=0;pixels[4:28,4:28,:]=(60,85,35,255)
+        self.assertEqual(common.foliage_image_metrics(Image.fromarray(pixels))['white_fraction'],0)
+
+
+class PilotWireTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.textures={'a.dds':b'deterministic texture','n.dds':b'deterministic normal'}
+        cls.part=SimpleNamespace(vertices=[(-1,0,0),(1,0,0),(1,0,2),(-1,0,2)],normals=[(0,-1,0)]*4,uv=[(0,0),(1,0),(1,1),(0,1)],faces=[(0,1,2),(0,2,3)])
+        cls.blob,cls.metrics=mesh_blob([(0,1,cls.part)],cls.textures,1,2)
+    def test_checksum_known_vector(self):self.assertEqual(checksum(b''),0x02cc5d05)
+    def test_coordinate_mapping(self):np.testing.assert_array_equal(vector_ac([[2,3,4]]),[[2,4,-3]])
+    def test_coordinate_mapping_does_not_mutate(self):
+        values=np.array([[2.,3.,4.]]);copy=values.copy();vector_ac(values);np.testing.assert_array_equal(values,copy)
+    def test_round_trip(self):self.assertEqual(read_mesh(self.blob,self.textures),{'vertices':4,'triangles':2})
+    def test_bad_texture_checksum_rejected(self):
+        with self.assertRaises(ValueError):read_mesh(self.blob,{'a.dds':b'bad','n.dds':self.textures['n.dds']})
+    def test_truncated_mesh_rejected(self):
+        with self.assertRaises(ValueError):read_mesh(self.blob[:-8],self.textures)
+
+
+class PilotSceneryTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.temporary=tempfile.TemporaryDirectory()
+        with patch.object(common,'DATA',Path(cls.temporary.name)):
+            cls.data,_=select_sector(source_data())
+        cls.sea=int(np.argmin(cls.data['sides'][:,:,6,2].mean(axis=1)))
+        cls.layout=edge_layout(cls.data,cls.sea)
+    @classmethod
+    def tearDownClass(cls):cls.temporary.cleanup()
+    def test_deterministic_layout(self):
+        self.assertEqual(self.layout,edge_layout(self.data,self.sea))
+    def test_canopies_do_not_encroach_on_shoulder(self):
+        for p in self.layout:
+            half=float(np.interp(p['station'],self.data['s3'],self.data['width']))/2
+            self.assertGreaterEqual(p['offset']-p['width']/2,half+2.49)
+            self.assertLess(p['offset']+p['width']/2,half+40)
+    def test_vista_is_not_filled_by_screens(self):
+        self.assertFalse(any(vista_open(p['station'],300,p['side'],self.sea) for p in self.layout))
+    def test_two_understory_tiers_and_geometry_budget(self):
+        self.assertEqual({p['tier'] for p in self.layout},{0,1})
+        self.assertLess(len(self.layout)*8,3000)
+    def test_native_ground_anchors(self):
+        for p in self.layout:
+            np.testing.assert_array_equal(p['position'],ground(self.data,p['station'],p['side'],p['offset']))
+    def test_belts_cover_horizontally_without_filling_vista(self):
+        for side in (0,1):
+            for tier in (0,1):
+                plants=[p for p in self.layout if p['side']==side and p['tier']==tier]
+                for station in np.arange(8,292,1):
+                    if side==self.sea and 198<station<255:continue
+                    self.assertTrue(any(abs(p['station']-station)<=p['width']/2 for p in plants))
+
+
+if __name__=='__main__':unittest.main()

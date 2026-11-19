@@ -1,0 +1,73 @@
+{
+  "atlas": {
+    "sources": [
+      "PH_shrub_canopy_impostor_0.png",
+      "PH_shrub_canopy_impostor_1.png",
+      "PH_shrub_canopy_impostor_2.png",
+      "PH_shrub_canopy_impostor_3.png"
+    ],
+    "variants": 4,
+    "size": [
+      1024,
+      1024
+    ],
+    "tiles": [
+      {
+        "alpha_coverage": 0.4678192138671875,
+        "white_fraction": 0.0,
+        "rgb_mean": [
+          121.18461137023387,
+          124.84297433053915,
+          79.27470726377247
+        ]
+      },
+      {
+        "alpha_coverage": 0.45156097412109375,
+        "white_fraction": 0.0,
+        "rgb_mean": [
+          121.23414770135334,
+          124.92449355432781,
+          79.28656630679035
+        ]
+      },
+      {
+        "alpha_coverage": 0.433074951171875,
+        "white_fraction": 0.0,
+        "rgb_mean": [
+          121.08675392854626,
+          124.64781375519695,
+          79.25820942851102
+        ]
+      },
+      {
+        "alpha_coverage": 0.4607696533203125,
+        "white_fraction": 0.0,
+        "rgb_mean": [
+          121.0898681988277,
+          124.67257509024076,
+          79.22012120409312
+        ]
+      }
+    ],
+    "source_license": "CC0-1.0",
+    "method": "Full small-leaf shrubs at realistic scale; individual pine impostors form the separate background"
+  },
+  "clumps": 327,
+  "lods": {
+    "near": {
+      "meshes": 16,
+      "triangles": 2616
+    },
+    "far": {
+      "meshes": 16,
+      "triangles": 1308
+    }
+  },
+  "native_slope_preserved": true,
+  "physical_ground_limit_m_from_center": 13.3,
+  "vista_fraction": [
+    0.68,
+    0.83
+  ],
+  "ac_runtime_verified": false
+}

@@ -1,0 +1,31 @@
+{
+  "station_reference": "Active main-route 3D centerline metres; pilot intervals use pilot-local 3D metres",
+  "pilot": {
+    "vista_openings": [
+      {"start_m": 204, "end_m": 249, "side": "sea", "layers": ["edge", "background", "shrub"]},
+      {"start_m": 205, "end_m": 248, "side": "sea", "layers": ["adult"]},
+      {"start_m": 210, "end_m": 244, "side": "sea", "layers": ["sapling"]}
+    ],
+    "hero_width_interval_m": [65, 85],
+    "exclusions": []
+  },
+  "main": {
+    "seed": 24024,
+    "side_smoothing_m": 30,
+    "road_clearance_m": 4,
+    "max_tree_instances_per_100m": 51,
+    "max_tree_instances_total": 8000,
+    "vista_openings": [
+      {"name": "Boulimat coastal opening", "start_m": 10000, "end_m": 10300, "side": "sea"}
+    ],
+    "exclusions": [
+      {"name": "Saket village core: preserve existing town treatment", "start_m": 15100, "end_m": 15542, "side": "both"}
+    ]
+  },
+  "report_sectors": [
+    {"name": "summit", "start_m": 880, "end_m": 1180},
+    {"name": "tightest_hairpin", "start_m": 4163.445076854322, "end_m": 4463.445076854322},
+    {"name": "sea_view", "start_m": 10000, "end_m": 10300},
+    {"name": "saket_approach", "start_m": 14900, "end_m": 15200}
+  ]
+}

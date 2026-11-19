@@ -1,0 +1,16 @@
+{
+  "length_3d_m": 300.0,
+  "active_start_3d_m": 790.0000000000043,
+  "active_end_3d_m": 1090.0000000000043,
+  "summit_3d_m": 1030.0000000000043,
+  "summit_inside_pilot_m": 240.0,
+  "turn_degrees": 61.70497003860459,
+  "native_centerline_samples_preserved": 149,
+  "spawn_in_pilot_m": 12,
+  "start_gate_m": 15,
+  "finish_gate_m": 280,
+  "main_layout_unchanged": true,
+  "tree_species": "Scots pine, NOT Aleppo pine",
+  "runtime_tested": false,
+  "surfaces_sha256": "d7d09ffbcc0a5b266eaa6761d4c95fb60ea8155ba93d6d88389ef87cfeaf7762"
+}

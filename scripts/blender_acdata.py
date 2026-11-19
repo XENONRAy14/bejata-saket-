@@ -75,7 +75,9 @@ def main():
     physical_keys = {re.match(r'^\d+([A-Z]+)',obj.name)[1] for obj in bpy.data.objects if obj.type=='MESH' and re.match(r'^\d+([A-Z]+)',obj.name)}
     config = configparser.ConfigParser()
     config.read(output/'data/surfaces.ini')
-    assert physical_keys == {config[section]['KEY'] for section in config.sections()}
+    surface_keys={config[section]['KEY'] for section in config.sections()}
+    assert 'WALL' not in surface_keys
+    assert physical_keys-{'WALL'} == surface_keys
     scene = bpy.context.scene
     i = int(np.searchsorted(data['s'],data['s'][-1]-18))
     position = np.r_[data['xy'][i],data['z'][i]+2.5]

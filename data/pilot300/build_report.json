@@ -1,0 +1,347 @@
+{
+  "vertices": 462444,
+  "triangles": 396019,
+  "meshes": 284,
+  "max_mesh_vertices": 4182,
+  "kn5_bytes": 64004794,
+  "sha256": "f2e84e86888cb1b53aefee3c62365b2ee98fd815488d868ac910d887f3313ff4",
+  "rail_tiles": 75,
+  "tree_instances": 330,
+  "tree_models": {
+    "PH_pine_sapling_small_a": {
+      "kind": "pine",
+      "file": "ph_pine_sapling_small_a.bin",
+      "lods": [
+        {
+          "triangles": 16,
+          "vertices": 32
+        },
+        {
+          "triangles": 16,
+          "vertices": 32
+        },
+        {
+          "triangles": 16,
+          "vertices": 32
+        }
+      ],
+      "bytes": 752248,
+      "height": 1.3999249935150146,
+      "width": 0.9905999302864075
+    },
+    "PH_pine_04": {
+      "kind": "pine",
+      "file": "ph_pine_04.bin",
+      "lods": [
+        {
+          "triangles": 20000,
+          "vertices": 46581
+        },
+        {
+          "triangles": 9000,
+          "vertices": 16020
+        },
+        {
+          "triangles": 16,
+          "vertices": 32
+        }
+      ],
+      "bytes": 7895471,
+      "height": 17.131404876708984,
+      "width": 9.094856262207031
+    },
+    "PH_pine_bg_04": {
+      "kind": "background",
+      "file": "ph_pine_bg_04.bin",
+      "lods": [
+        {
+          "triangles": 16,
+          "vertices": 32
+        },
+        {
+          "triangles": 16,
+          "vertices": 32
+        },
+        {
+          "triangles": 16,
+          "vertices": 32
+        }
+      ],
+      "bytes": 768080,
+      "height": 17.131404876708984,
+      "width": 9.094856262207031
+    },
+    "PH_pine_mid_04": {
+      "kind": "midstory",
+      "file": "ph_pine_mid_04.bin",
+      "lods": [
+        {
+          "triangles": 9000,
+          "vertices": 16020
+        },
+        {
+          "triangles": 9000,
+          "vertices": 16020
+        },
+        {
+          "triangles": 16,
+          "vertices": 32
+        }
+      ],
+      "bytes": 6963705,
+      "height": 17.131404876708984,
+      "width": 9.094856262207031
+    },
+    "PH_pine_03": {
+      "kind": "pine",
+      "file": "ph_pine_03.bin",
+      "lods": [
+        {
+          "triangles": 20000,
+          "vertices": 46865
+        },
+        {
+          "triangles": 9000,
+          "vertices": 16536
+        },
+        {
+          "triangles": 16,
+          "vertices": 32
+        }
+      ],
+      "bytes": 7743135,
+      "height": 17.66424560546875,
+      "width": 8.880695343017578
+    },
+    "PH_pine_bg_03": {
+      "kind": "background",
+      "file": "ph_pine_bg_03.bin",
+      "lods": [
+        {
+          "triangles": 16,
+          "vertices": 32
+        },
+        {
+          "triangles": 16,
+          "vertices": 32
+        },
+        {
+          "triangles": 16,
+          "vertices": 32
+        }
+      ],
+      "bytes": 667209,
+      "height": 17.66424560546875,
+      "width": 8.880695343017578
+    },
+    "PH_pine_mid_03": {
+      "kind": "midstory",
+      "file": "ph_pine_mid_03.bin",
+      "lods": [
+        {
+          "triangles": 9000,
+          "vertices": 16536
+        },
+        {
+          "triangles": 9000,
+          "vertices": 16536
+        },
+        {
+          "triangles": 16,
+          "vertices": 32
+        }
+      ],
+      "bytes": 6820095,
+      "height": 17.66424560546875,
+      "width": 8.880695343017578
+    },
+    "PH_pine_01": {
+      "kind": "pine",
+      "file": "ph_pine_01.bin",
+      "lods": [
+        {
+          "triangles": 20000,
+          "vertices": 44998
+        },
+        {
+          "triangles": 9000,
+          "vertices": 14936
+        },
+        {
+          "triangles": 16,
+          "vertices": 32
+        }
+      ],
+      "bytes": 7680203,
+      "height": 20.77109718322754,
+      "width": 8.921656608581543
+    },
+    "PH_pine_bg_01": {
+      "kind": "background",
+      "file": "ph_pine_bg_01.bin",
+      "lods": [
+        {
+          "triangles": 16,
+          "vertices": 32
+        },
+        {
+          "triangles": 16,
+          "vertices": 32
+        },
+        {
+          "triangles": 16,
+          "vertices": 32
+        }
+      ],
+      "bytes": 589933,
+      "height": 20.77109718322754,
+      "width": 8.921656608581543
+    },
+    "PH_pine_mid_01": {
+      "kind": "midstory",
+      "file": "ph_pine_mid_01.bin",
+      "lods": [
+        {
+          "triangles": 9000,
+          "vertices": 14936
+        },
+        {
+          "triangles": 9000,
+          "vertices": 14936
+        },
+        {
+          "triangles": 16,
+          "vertices": 32
+        }
+      ],
+      "bytes": 6773544,
+      "height": 20.77109718322754,
+      "width": 8.921656608581543
+    },
+    "PH_shrub_01": {
+      "kind": "shrub",
+      "file": "ph_shrub_01.bin",
+      "lods": [
+        {
+          "triangles": 15912,
+          "vertices": 38331
+        },
+        {
+          "triangles": 2686,
+          "vertices": 6183
+        },
+        {
+          "triangles": 16,
+          "vertices": 32
+        }
+      ],
+      "bytes": 3499772,
+      "height": 1.0196006298065186,
+      "width": 1.0411126613616943
+    },
+    "PH_shrub_02": {
+      "kind": "shrub",
+      "file": "ph_shrub_02.bin",
+      "lods": [
+        {
+          "triangles": 11061,
+          "vertices": 19359
+        },
+        {
+          "triangles": 3595,
+          "vertices": 8860
+        },
+        {
+          "triangles": 16,
+          "vertices": 32
+        }
+      ],
+      "bytes": 3226414,
+      "height": 0.7386258840560913,
+      "width": 0.6609767079353333
+    }
+  },
+  "scenery": {
+    "atlas": {
+      "sources": [
+        "PH_shrub_canopy_impostor_0.png",
+        "PH_shrub_canopy_impostor_1.png",
+        "PH_shrub_canopy_impostor_2.png",
+        "PH_shrub_canopy_impostor_3.png"
+      ],
+      "variants": 4,
+      "size": [
+        1024,
+        1024
+      ],
+      "tiles": [
+        {
+          "alpha_coverage": 0.4678192138671875,
+          "white_fraction": 0.0,
+          "rgb_mean": [
+            121.18461137023387,
+            124.84297433053915,
+            79.27470726377247
+          ]
+        },
+        {
+          "alpha_coverage": 0.45156097412109375,
+          "white_fraction": 0.0,
+          "rgb_mean": [
+            121.23414770135334,
+            124.92449355432781,
+            79.28656630679035
+          ]
+        },
+        {
+          "alpha_coverage": 0.433074951171875,
+          "white_fraction": 0.0,
+          "rgb_mean": [
+            121.08675392854626,
+            124.64781375519695,
+            79.25820942851102
+          ]
+        },
+        {
+          "alpha_coverage": 0.4607696533203125,
+          "white_fraction": 0.0,
+          "rgb_mean": [
+            121.0898681988277,
+            124.67257509024076,
+            79.22012120409312
+          ]
+        }
+      ],
+      "source_license": "CC0-1.0",
+      "method": "Full small-leaf shrubs at realistic scale; individual pine impostors form the separate background"
+    },
+    "clumps": 327,
+    "lods": {
+      "near": {
+        "meshes": 16,
+        "triangles": 2616
+      },
+      "far": {
+        "meshes": 16,
+        "triangles": 1308
+      }
+    },
+    "native_slope_preserved": true,
+    "physical_ground_limit_m_from_center": 13.3,
+    "vista_fraction": [
+      0.68,
+      0.83
+    ],
+    "ac_runtime_verified": false
+  },
+  "road_vertices_match_source": true,
+  "surfaces_unchanged": true,
+  "runtime_tested": false,
+  "warnings": [
+    "No active texture for material 'Dots Stroke' found.\r\n\tUsing default UV scaling for objects without UV maps.",
+    "Unknown logical object 'AC_AB_FINISH_L' might prevent other objects from loading.\r\n\tRename it to '__{obj.name}' if you do not want to export it.",
+    "Unknown logical object 'AC_AB_FINISH_R' might prevent other objects from loading.\r\n\tRename it to '__{obj.name}' if you do not want to export it.",
+    "Unknown logical object 'AC_AB_START_L' might prevent other objects from loading.\r\n\tRename it to '__{obj.name}' if you do not want to export it.",
+    "Unknown logical object 'AC_AB_START_R' might prevent other objects from loading.\r\n\tRename it to '__{obj.name}' if you do not want to export it."
+  ]
+}

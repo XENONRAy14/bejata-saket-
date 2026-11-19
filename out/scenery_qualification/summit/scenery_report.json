@@ -1,0 +1,183 @@
+{
+  "sector": "summit",
+  "placement": {
+    "start_m": 880.0,
+    "end_m": 1180.0,
+    "seed": 4455844121828896665,
+    "tree_instances": 180,
+    "edge_clumps": 2156,
+    "tree_instances_per_100m": 60.0,
+    "sector_tree_limit": 180,
+    "full_route_budget_ceiling": 7926,
+    "total_tree_limit": 8000,
+    "minimum_all_road_leg_clearance_m": 0.7805403780390514,
+    "per_100m": [
+      {
+        "start_m": 880.0,
+        "end_m": 980.0,
+        "tree_instances": 60,
+        "instances_per_100m": 60.0
+      },
+      {
+        "start_m": 980.0,
+        "end_m": 1080.0,
+        "tree_instances": 60,
+        "instances_per_100m": 60.0
+      },
+      {
+        "start_m": 1080.0,
+        "end_m": 1180.0,
+        "tree_instances": 60,
+        "instances_per_100m": 60.0
+      }
+    ],
+    "budget_passed": true,
+    "hedge_preserved": true
+  },
+  "old_tree_instances_removed": 135,
+  "route_budget": {
+    "sea_view": {
+      "start_m": 10000.0,
+      "end_m": 10300.0,
+      "seed": 16605284029199207462,
+      "tree_instances": 53,
+      "edge_clumps": 177,
+      "tree_instances_per_100m": 17.666666666666668,
+      "sector_tree_limit": 153,
+      "full_route_budget_ceiling": 7926,
+      "total_tree_limit": 8000,
+      "minimum_all_road_leg_clearance_m": 4.099684409260243,
+      "per_100m": [
+        {
+          "start_m": 10000.0,
+          "end_m": 10100.0,
+          "tree_instances": 18,
+          "instances_per_100m": 18.0
+        },
+        {
+          "start_m": 10100.0,
+          "end_m": 10200.0,
+          "tree_instances": 18,
+          "instances_per_100m": 18.0
+        },
+        {
+          "start_m": 10200.0,
+          "end_m": 10300.0,
+          "tree_instances": 17,
+          "instances_per_100m": 17.0
+        }
+      ],
+      "budget_passed": true
+    },
+    "sea_view_reserved_saving": 100,
+    "summit_extra_allowance": 27,
+    "full_route_allocated_ceiling": 7853,
+    "actual_whole_route_average_per_100m": 44.075484246640144
+  },
+  "hedge_lock": {
+    "accepted_commit": "c313e15c6990b2498e82301f723c92cb8e179a55",
+    "shrubs": 117,
+    "filler_clumps": 2156,
+    "shrubs_sha256": "18e0d73d61b30d562215250c93521acf69da0ada90de46d39d331e0a86249ba0",
+    "filler_sha256": "1fb76086456a6e8dcb27203409e5fd2f81c511ffff9c5b3d96fafdcb50ba87a9",
+    "archive_sha256": "f7e513f20f59ca3ae95d77751b023c495b562fae149445333c4b01b430f53577"
+  },
+  "grass_verge_m": 0.8,
+  "visual_shrub_clearance_m": 0.45,
+  "other_vegetation_clearance_m": 4,
+  "shrub_cluster_crowns_per_instance": 3,
+  "shrub_cluster_lods": [
+    {
+      "triangles": 47736,
+      "vertices": 114993
+    },
+    {
+      "triangles": 8058,
+      "vertices": 18549
+    },
+    {
+      "triangles": 48,
+      "vertices": 96
+    }
+  ],
+  "tree_layer_counts": {
+    "shrub": 117,
+    "midstory": 29,
+    "background": 0,
+    "pine": 34
+  },
+  "main_tree_instances_retained": 6670,
+  "new_tree_instances": 180,
+  "total_tree_instances": 6850,
+  "legacy_foliage_triangles_removed": 0,
+  "forest_floor_triangles": 3024,
+  "forest_floor_materials": [
+    {
+      "mesh": "1GRASS_002_L",
+      "material": "FOREST_FLOOR_1GRASS_002_L",
+      "mask_pixels": 195228
+    },
+    {
+      "mesh": "1GRASS_002_R",
+      "material": "FOREST_FLOOR_1GRASS_002_R",
+      "mask_pixels": 163514
+    },
+    {
+      "mesh": "1GRASS_LAND_0520_grass",
+      "material": "FOREST_FLOOR_1GRASS_LAND_0520_grass",
+      "mask_pixels": 156632
+    },
+    {
+      "mesh": "1GRASS_LAND_0527_grass",
+      "material": "FOREST_FLOOR_1GRASS_LAND_0527_grass",
+      "mask_pixels": 43844
+    }
+  ],
+  "repaired_medium_lods": {
+    "ph_pine_01.bin": {
+      "vertices": 44998,
+      "triangles": 20000
+    },
+    "ph_pine_03.bin": {
+      "vertices": 46865,
+      "triangles": 20000
+    },
+    "ph_pine_04.bin": {
+      "vertices": 46581,
+      "triangles": 20000
+    },
+    "ph_pine_mid_01.bin": {
+      "vertices": 44998,
+      "triangles": 20000
+    },
+    "ph_pine_mid_03.bin": {
+      "vertices": 46865,
+      "triangles": 20000
+    },
+    "ph_pine_mid_04.bin": {
+      "vertices": 46581,
+      "triangles": 20000
+    },
+    "summit_shrub_cluster.bin": false
+  },
+  "forest_floor_applied": true,
+  "qualification_complete": false,
+  "visual_review_required": true,
+  "forest_floor_blocker": null,
+  "added_meshes": 32,
+  "added_vertices": 51744,
+  "added_triangles": 25872,
+  "total_meshes": 1242,
+  "total_vertices": 1959869,
+  "total_triangles": 990662,
+  "kn5_bytes": 203253879,
+  "physics_lock": {
+    "physical_meshes": 459,
+    "spawn_gate_empties": 17,
+    "guard_visuals": 39,
+    "all_checksums_identical": true,
+    "reference_sha256": "7cceb8c8aeb9ec72b9031d1356b5450b7e1e38c335748964591d84036d13c61f"
+  },
+  "source_blender_assets_required": false,
+  "runtime_tested": false
+}

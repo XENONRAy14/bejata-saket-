@@ -90,7 +90,7 @@ class ACDataTests(unittest.TestCase):
     def test_surface_and_material_configuration(self):
         config = configparser.ConfigParser()
         config.read_string(surfaces_text())
-        self.assertEqual({config[s]['KEY'] for s in config.sections()},{'ROAD','KERB','GRASS','GRAVEL','WALL'})
+        self.assertEqual({config[s]['KEY'] for s in config.sections()},{'ROAD','KERB','GRASS','GRAVEL'})
         self.assertEqual(config['SURFACE_0'].getfloat('FRICTION'),1)
         self.assertEqual(config['SURFACE_1'].getfloat('FRICTION'),.92)
         settings = exporter_settings()
@@ -100,10 +100,18 @@ class ACDataTests(unittest.TestCase):
             self.assertEqual(value['textures']['txDiffuse']['textureName'],name+'.png')
         self.assertTrue(settings['nodes']['*']['castShadows'])
 
+    def test_surfaces_never_declare_wall(self):
+        config = configparser.ConfigParser()
+        config.read_string(surfaces_text())
+        self.assertNotIn('WALL',{section.get('KEY') for section in config.values()})
+
     def test_write_package(self):
         with tempfile.TemporaryDirectory() as folder:
             output = Path(folder)/'bejaia_saket'
             plan = write_files(straight_data(),output)
+            config = configparser.ConfigParser()
+            config.read(output/'data/surfaces.ini')
+            self.assertNotIn('WALL',{section.get('KEY') for section in config.values()})
             ui = json.loads((output/'ui/ui_track.json').read_text(encoding='utf-8'))
             self.assertEqual(ui['name'],'Béjaïa – Saket (RN24)')
             self.assertEqual(ui['pitboxes'],'4')

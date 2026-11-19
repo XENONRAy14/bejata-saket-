@@ -1,0 +1,29 @@
+{
+  "poly_haven": {
+    "license": "CC0-1.0",
+    "sources": [
+      "https://polyhaven.com/license",
+      "https://polyhaven.com/collections/pine_forest",
+      "https://polyhaven.com/a/pine_tree_01",
+      "https://polyhaven.com/a/worn_asphalt"
+    ]
+  },
+  "guard_rail": {
+    "license": "CC0-1.0",
+    "source": "https://grab3d.com/models/city/guard-rail/",
+    "license_source": "https://grab3d.com/glossary/cc0/",
+    "embedded_license": true
+  },
+  "tracktools": {
+    "license": "Royalty Free / individual seat; NOT CC0",
+    "source": "https://meshhouse.gumroad.com/l/tracktools",
+    "redistribute_pack": false
+  },
+  "poly_haven_shrub": {
+    "asset": "searsia_lucida",
+    "source": "https://polyhaven.com/a/searsia_lucida",
+    "license": "CC0-1.0",
+    "license_source": "https://polyhaven.com/license",
+    "botany": "South African source species; visual small-leaf shrub surrogate, not claimed native to Algeria"
+  }
+}

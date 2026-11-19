@@ -13,6 +13,7 @@ from materials import material_spec
 from vegetation import Terrain, blender_triangles
 from foliage import encode_coverage_dds
 from shortening import active_chainage
+from mesh_geometry import rail_stations
 
 
 class Mesh:
@@ -120,22 +121,6 @@ def plan(data,houses,terrain):
             if point is None:continue
             batch(i,'plaster').box(point+[0,0,.4],[.1,.12,.85],tangent)
             batch(i,'marker_red').box(point+np.r_[-tangent*.057,.67],[.018,.09,.12],tangent);counts['reflectors']+=1
-    for chainage in np.arange(20,data['s'][-1]-20,8):
-        i=int(np.searchsorted(data['s'],chainage));tangent=data['tangent'][i]
-        for side in (0,1):
-            drop=data['sides'][side,i,-1,2]-data['z'][i]
-            if drop>=-6 or data['guard'][side,i]:continue
-            point=at(i,side,.15)
-            if point is None:continue
-            endpoints=point[:2]+tangent*np.array([[-3.975],[3.975]]);z,_=terrain.sample(endpoints)
-            if not np.isfinite(z).all():continue
-            batch(i,'metal').slab(np.r_[endpoints[0],z[0]],np.r_[endpoints[1],z[1]],.12,.51,.79)
-            for distance in (-3,1):
-                xy=point[:2]+tangent*distance;z,_=terrain.sample(xy[None])
-                if np.isfinite(z[0]):
-                    batch(i,'metal').box(np.r_[xy,z[0]+.4],[.09,.09,.88],tangent)
-                    batch(i,'marker_red').box(np.r_[xy,z[0]+.82],[.105,.105,.07],tangent)
-            counts['guardrail_m']+=8
     rng=np.random.default_rng(24026)
     for chainage in np.arange(80,data['s'][-1]-40,45):
         i=int(np.searchsorted(data['s'],chainage));side=int(np.argmax(data['sides'][:,i,-1,2]));point=at(i,side,float(rng.uniform(2,12)))
@@ -183,6 +168,10 @@ def plan(data,houses,terrain):
         batch(i,'bark').box(point+[0,0,.55],[3.3,.45,.12],tangent)
         for x in (-1.3,1.3):batch(i,'metal').box(point+np.r_[tangent*x,.28],[.08,.4,.5],tangent)
         board(i,0,3,extra=1.3,width=.45,height=.6);counts['bus_stops']+=1
+    counts['guardrail_m']=sum(
+        float(np.sum(np.diff(data['s']) * (rail_stations(data,side)[:-1] & rail_stations(data,side)[1:])))
+        for side in (0,1)
+    )
     return batches,dict(counts=counts,walls=walls,sign_roots=roots)
 
 

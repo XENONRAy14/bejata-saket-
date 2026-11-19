@@ -1,0 +1,126 @@
+{
+  "summit": {
+    "before": {
+      "coverage": {
+        "left": {
+          "band_pixels": 92482,
+          "foliage_pixels": 23328.856963751103,
+          "foliage_share": 0.25225294612736643,
+          "passed": false,
+          "fixed_barrier_pixels": 15.124446063255025,
+          "foliage_share_excluding_fixed_barriers": 0.25229420615756804
+        },
+        "right": {
+          "band_pixels": 83658,
+          "foliage_pixels": 25405.7305954191,
+          "foliage_share": 0.3036856080161981,
+          "passed": false,
+          "fixed_barrier_pixels": 178.69780312591297,
+          "foliage_share_excluding_fixed_barriers": 0.3043356847365984
+        }
+      },
+      "pale_hillside_pixels": 9160.231570302498,
+      "hillside_roi_pixels": 381213,
+      "pale_hillside_share_of_frame": 0.009939487380970592,
+      "pale_hillside_share_of_roi": 0.02402916891685881,
+      "treated_station_interval_m": [
+        1035.5,
+        1115.5
+      ]
+    },
+    "after": {
+      "coverage": {
+        "left": {
+          "band_pixels": 92482,
+          "foliage_pixels": 63436.359124549235,
+          "foliage_share": 0.6859319556729876,
+          "passed": false,
+          "fixed_barrier_pixels": 13.340314453954958,
+          "foliage_share_excluding_fixed_barriers": 0.6860309140445462
+        },
+        "right": {
+          "band_pixels": 83658,
+          "foliage_pixels": 53789.74934582974,
+          "foliage_share": 0.6429719733418171,
+          "passed": false,
+          "fixed_barrier_pixels": 12.603654464881927,
+          "foliage_share_excluding_fixed_barriers": 0.6430688560985098
+        }
+      },
+      "pale_hillside_pixels": 513.4127452752509,
+      "hillside_roi_pixels": 381213,
+      "pale_hillside_share_of_frame": 0.0005570884822865136,
+      "pale_hillside_share_of_roi": 0.0013467870856325754,
+      "treated_station_interval_m": [
+        1035.5,
+        1115.5
+      ]
+    },
+    "baseline_pale_pixels": 9133.780392156861,
+    "baseline_pale_remaining_pixels": 31.250980392156862,
+    "baseline_pale_occluded_by_foliage_pixels": 8932.388235294115,
+    "baseline_pale_occluded_by_foliage_share": 0.9779508431102985
+  },
+  "_exit_reverse": {
+    "before": {
+      "coverage": {
+        "left": {
+          "band_pixels": 2237,
+          "foliage_pixels": 1967.400463058958,
+          "foliage_share": 0.8794816553683317,
+          "passed": false,
+          "fixed_barrier_pixels": 0.2853153645359072,
+          "foliage_share_excluding_fixed_barriers": 0.8795938420637684
+        },
+        "right": {
+          "band_pixels": 1299,
+          "foliage_pixels": 743.2276116664826,
+          "foliage_share": 0.5721536656400944,
+          "passed": false,
+          "fixed_barrier_pixels": 325.3201467661394,
+          "foliage_share_excluding_fixed_barriers": 0.7633182603070381
+        }
+      },
+      "pale_hillside_pixels": 7312.492593808514,
+      "hillside_roi_pixels": 385411,
+      "pale_hillside_share_of_frame": 0.00793456227626792,
+      "pale_hillside_share_of_roi": 0.01897323271470849,
+      "treated_station_interval_m": [
+        1100.0,
+        1180.0
+      ]
+    },
+    "after": {
+      "coverage": {
+        "left": {
+          "band_pixels": 2237,
+          "foliage_pixels": 1976.5631698167438,
+          "foliage_share": 0.8835776351438283,
+          "passed": false,
+          "fixed_barrier_pixels": 0.2841012566017119,
+          "foliage_share_excluding_fixed_barriers": 0.8836898646480718
+        },
+        "right": {
+          "band_pixels": 1299,
+          "foliage_pixels": 815.3990420705911,
+          "foliage_share": 0.6277128884300163,
+          "passed": false,
+          "fixed_barrier_pixels": 141.29063833641513,
+          "foliage_share_excluding_fixed_barriers": 0.704321023109715
+        }
+      },
+      "pale_hillside_pixels": 7994.2266554067,
+      "hillside_roi_pixels": 385411,
+      "pale_hillside_share_of_frame": 0.008674291075745117,
+      "pale_hillside_share_of_roi": 0.02074208223275075,
+      "treated_station_interval_m": [
+        1100.0,
+        1180.0
+      ]
+    },
+    "baseline_pale_pixels": 7285.988235294118,
+    "baseline_pale_remaining_pixels": 6223.011764705882,
+    "baseline_pale_occluded_by_foliage_pixels": 917.0235294117647,
+    "baseline_pale_occluded_by_foliage_share": 0.12586124212630528
+  }
+}

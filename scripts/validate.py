@@ -71,11 +71,12 @@ def validate(folder):
     def surfaces():
         ini = configparser.ConfigParser();ini.read(folder/'data/surfaces.ini')
         keys = {s['KEY'] for s in ini.values() if 'KEY' in s}
+        require('WALL' not in keys, 'WALL is a built-in collision type, not a declared driving surface')
         require(meshes, 'no meshes')
         for mesh in meshes:
             match = re.fullmatch(r'[1-9][0-9]*([A-Z]+)(?:_.*)?',mesh['name'])
             if match:
-                require(match[1] in keys, f"undefined surface {match[1]} for {mesh['name']}")
+                require(match[1]=='WALL' or match[1] in keys, f"undefined surface {match[1]} for {mesh['name']}")
                 physical.append(mesh)
             else:
                 require(mesh['name'].startswith(('DECOR_','LAND_','DETAIL_')), f"invalid physical/visual mesh name {mesh['name']}")

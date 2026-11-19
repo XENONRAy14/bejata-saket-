@@ -7,6 +7,7 @@ import numpy as np
 from acdata import plan_empties
 from check_kn5 import inspect_kn5
 from shortening import road_distance
+from validate_guardrail_collisions import validate_guardrails
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -34,6 +35,7 @@ def main():
     np.testing.assert_array_equal(actual,np.unique(expected,axis=0),err_msg='Extra/missing/moved road vertices in KN5')
     assert '1WALL_START_END' in nodes and '1WALL_END' in nodes,'missing physical end closure'
     assert 'DECOR_START_LINE' in nodes,'missing visible timing line'
+    guardrail_count = validate_guardrails(parsed, data)['guardrail_sections']
     plan=plan_empties(data)
     for entry in plan['empties']:
         node=nodes[entry['name']];matrix=np.array(node['matrix']).reshape(4,4)
@@ -42,7 +44,7 @@ def main():
         yaw=np.radians(entry['yaw_deg'])
         np.testing.assert_allclose(matrix[2,:3],[np.sin(yaw),0,np.cos(yaw)],atol=1e-6)
     mesh=[n for n in nodes.values() if n['kind']==2]
-    print('SHORTENED_EXPORT_PASS '+json.dumps(dict(spawn_to_summit_3d_m=distance,rear_pad_3d_m=float(d[spawn]),retained_original_samples=len(original),retained_arrays_identical=True,exported_road_vertices_match=True,physical_end_barriers=True,exported_spawn_gate_matrices_match=True,length_3d_m=float(d[-1]),kn5_bytes=parsed['bytes'],vertices=sum(n['vertices'] for n in mesh),triangles=sum(n['triangles'] for n in mesh))))
+    print('SHORTENED_EXPORT_PASS '+json.dumps(dict(spawn_to_summit_3d_m=distance,rear_pad_3d_m=float(d[spawn]),retained_original_samples=len(original),retained_arrays_identical=True,exported_road_vertices_match=True,physical_end_barriers=True,guardrail_colliders=guardrail_count,exported_spawn_gate_matrices_match=True,length_3d_m=float(d[-1]),kn5_bytes=parsed['bytes'],vertices=sum(n['vertices'] for n in mesh),triangles=sum(n['triangles'] for n in mesh))))
 
 
 if __name__=='__main__':main()

@@ -121,7 +121,7 @@ def draw_route(xy,size,padding=10,line_width=2):
 def surfaces_text():
     base = dict(FRICTION='1',DAMPING='0',WAV='',WAV_PITCH='0',FF_EFFECT='NULL',DIRT_ADDITIVE='0',IS_VALID_TRACK='1',BLACK_FLAG_TIME='0',SIN_HEIGHT='0',SIN_LENGTH='0',IS_PITLANE='0',VIBRATION_GAIN='0',VIBRATION_LENGTH='0')
     kerb = dict(base,WAV='kerb.wav',WAV_PITCH='1.3',FF_EFFECT='1',FRICTION='.92',VIBRATION_GAIN='.1',VIBRATION_LENGTH='.2')
-    definitions = [('ROAD',base,'ASPHALT example copied; KEY rename to ROAD is project choice.'),('KERB',kerb,'KERB example copied.'),('GRASS',dict(base,FRICTION='.65',DAMPING='.1',DIRT_ADDITIVE='1',IS_VALID_TRACK='0'),'ASPHALT base; friction .65, damping .1, dirt 1 and validity 0 ASSUMED.'),('GRAVEL',dict(base,FRICTION='.75',DAMPING='.05',DIRT_ADDITIVE='1',IS_VALID_TRACK='0'),'ASPHALT base; friction .75, damping .05, dirt 1 and validity 0 ASSUMED.'),('WALL',base,'ASPHALT base ASSUMED for WALL; collision naming is special, rolling parameters UNVERIFIED.')]
+    definitions = [('ROAD',base,'ASPHALT example copied; KEY rename to ROAD is project choice.'),('KERB',kerb,'KERB example copied.'),('GRASS',dict(base,FRICTION='.65',DAMPING='.1',DIRT_ADDITIVE='1',IS_VALID_TRACK='0'),'ASPHALT base; friction .65, damping .1, dirt 1 and validity 0 ASSUMED.'),('GRAVEL',dict(base,FRICTION='.75',DAMPING='.05',DIRT_ADDITIVE='1',IS_VALID_TRACK='0'),'ASPHALT base; friction .75, damping .05, dirt 1 and validity 0 ASSUMED.')]
     blocks = [f'; Source: {SURFACE_SOURCE}\n; See docs/AC_NOTES.md section 1. Example values, NOT stock defaults.\n; Overrides, sound availability and driving behavior UNVERIFIED in AC.']
     for i,(key,values,note) in enumerate(definitions):
         blocks.append(f'; {note}\n[SURFACE_{i}]\nKEY={key}\n'+'\n'.join(f'{k}={v}' for k,v in values.items()))
@@ -132,7 +132,12 @@ def exporter_settings(names=('asphalt','grass','gravel','rock','metal','kerb')):
     materials = {}
     for name in names:
         materials[name] = dict(shaderName='ksPerPixel',alphaBlendMode='Opaque',alphaTested=False,depthMode='DepthNormal',properties={key:dict(valueA=value) for key,value in dict(ksAmbient=.4,ksDiffuse=.4,ksSpecular=.5 if name=='metal' else .1,ksSpecularEXP=20 if name=='metal' else 10).items()},textures=dict(txDiffuse=dict(textureName=f'{name}.png')))
-    return dict(materials=materials,nodes={'*':dict(lodIn=0,lodOut=10000,castShadows=True,visible=True,renderable=True)})
+    nodes={
+        '*':dict(lodIn=0,lodOut=10000,castShadows=True,visible=True,renderable=True),
+        'DETAIL_GUARD_*':dict(lodIn=0,lodOut=10000,castShadows=True,visible=True,renderable=True),
+        '1WALL_COLLIDER_GUARD_*':dict(lodIn=0,lodOut=10000,castShadows=False,visible=True,renderable=False),
+    }
+    return dict(materials=materials,nodes=nodes)
 
 
 def write_files(data, output=OUTPUT):

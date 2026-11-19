@@ -1,0 +1,23 @@
+{
+  "name": "RN24 Béjaïa–Saket — Summit scenery qualification",
+  "description": "Separate summit scenery qualification build; not the main RN24 installation.",
+  "tags": [
+    "point-to-point",
+    "mountain",
+    "coastal"
+  ],
+  "geotags": [
+    "36.77504324966629",
+    "5.026555990213126"
+  ],
+  "country": "Algeria",
+  "city": "Béjaïa",
+  "length": "15542m",
+  "width": "7.0m-7.0m",
+  "pitboxes": "4",
+  "run": "Summit approach → Saket · point-to-point",
+  "author": "frite",
+  "version": "0.4",
+  "year": 2026,
+  "url": ""
+}

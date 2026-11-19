@@ -1,0 +1,17 @@
+{
+  "name": "Bejaia - Saket / Pilote sommet 300 m",
+  "description": "Prototype graphique isole de 300 m. Pins sylvestres Poly Haven CC0, glissiere Grab3D CC0, asphalte Poly Haven CC0. PAS le circuit principal. Essai AC requis.",
+  "tags": [
+    "road",
+    "point-to-point",
+    "pilot"
+  ],
+  "country": "Algeria",
+  "city": "Bejaia",
+  "author": "Project contributors",
+  "version": "pilot-0.4-treefx-lod",
+  "length": "300 m",
+  "width": "7 m",
+  "pitboxes": "1",
+  "run": "point-to-point"
+}

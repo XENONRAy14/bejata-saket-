@@ -3546,6 +3546,20 @@
       "lodIn": 0,
       "lodOut": 1400,
       "castShadows": false
+    },
+    "DETAIL_GUARD_*": {
+      "lodIn": 0,
+      "lodOut": 10000,
+      "castShadows": true,
+      "visible": true,
+      "renderable": true
+    },
+    "1WALL_COLLIDER_GUARD_*": {
+      "lodIn": 0,
+      "lodOut": 10000,
+      "castShadows": false,
+      "visible": true,
+      "renderable": false
     }
   }
 }

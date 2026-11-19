@@ -1,0 +1,11 @@
+{
+  "commit": "ab150e2aa53fc10668ab5faa2241aafbce060932",
+  "git_history_included": false,
+  "excluded": [
+    "OSM PBF, DEM raster tiles and downloaded research/asset caches; reacquired by scripts/build.py",
+    "previous v1 backup",
+    "virtualenv and exporter/Blender installations"
+  ],
+  "build": "python scripts/build.py all",
+  "notes": "Full editable shortened scene with generated textures and install folder; previews are Blender Cycles, not AC. Source canonical route is retained separately from active route."
+}

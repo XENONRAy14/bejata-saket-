@@ -1,0 +1,254 @@
+{
+  "PH_pine_sapling_small_a": {
+    "kind": "pine",
+    "file": "ph_pine_sapling_small_a.bin",
+    "lods": [
+      {
+        "triangles": 16,
+        "vertices": 32
+      },
+      {
+        "triangles": 16,
+        "vertices": 32
+      },
+      {
+        "triangles": 16,
+        "vertices": 32
+      }
+    ],
+    "bytes": 752248,
+    "height": 1.3999249935150146,
+    "width": 0.9905999302864075
+  },
+  "PH_pine_04": {
+    "kind": "pine",
+    "file": "ph_pine_04.bin",
+    "lods": [
+      {
+        "triangles": 20000,
+        "vertices": 46581
+      },
+      {
+        "triangles": 9000,
+        "vertices": 16020
+      },
+      {
+        "triangles": 16,
+        "vertices": 32
+      }
+    ],
+    "bytes": 7895471,
+    "height": 17.131404876708984,
+    "width": 9.094856262207031
+  },
+  "PH_pine_bg_04": {
+    "kind": "background",
+    "file": "ph_pine_bg_04.bin",
+    "lods": [
+      {
+        "triangles": 16,
+        "vertices": 32
+      },
+      {
+        "triangles": 16,
+        "vertices": 32
+      },
+      {
+        "triangles": 16,
+        "vertices": 32
+      }
+    ],
+    "bytes": 768080,
+    "height": 17.131404876708984,
+    "width": 9.094856262207031
+  },
+  "PH_pine_mid_04": {
+    "kind": "midstory",
+    "file": "ph_pine_mid_04.bin",
+    "lods": [
+      {
+        "triangles": 9000,
+        "vertices": 16020
+      },
+      {
+        "triangles": 9000,
+        "vertices": 16020
+      },
+      {
+        "triangles": 16,
+        "vertices": 32
+      }
+    ],
+    "bytes": 6963705,
+    "height": 17.131404876708984,
+    "width": 9.094856262207031
+  },
+  "PH_pine_03": {
+    "kind": "pine",
+    "file": "ph_pine_03.bin",
+    "lods": [
+      {
+        "triangles": 20000,
+        "vertices": 46865
+      },
+      {
+        "triangles": 9000,
+        "vertices": 16536
+      },
+      {
+        "triangles": 16,
+        "vertices": 32
+      }
+    ],
+    "bytes": 7743135,
+    "height": 17.66424560546875,
+    "width": 8.880695343017578
+  },
+  "PH_pine_bg_03": {
+    "kind": "background",
+    "file": "ph_pine_bg_03.bin",
+    "lods": [
+      {
+        "triangles": 16,
+        "vertices": 32
+      },
+      {
+        "triangles": 16,
+        "vertices": 32
+      },
+      {
+        "triangles": 16,
+        "vertices": 32
+      }
+    ],
+    "bytes": 667209,
+    "height": 17.66424560546875,
+    "width": 8.880695343017578
+  },
+  "PH_pine_mid_03": {
+    "kind": "midstory",
+    "file": "ph_pine_mid_03.bin",
+    "lods": [
+      {
+        "triangles": 9000,
+        "vertices": 16536
+      },
+      {
+        "triangles": 9000,
+        "vertices": 16536
+      },
+      {
+        "triangles": 16,
+        "vertices": 32
+      }
+    ],
+    "bytes": 6820095,
+    "height": 17.66424560546875,
+    "width": 8.880695343017578
+  },
+  "PH_pine_01": {
+    "kind": "pine",
+    "file": "ph_pine_01.bin",
+    "lods": [
+      {
+        "triangles": 20000,
+        "vertices": 44998
+      },
+      {
+        "triangles": 9000,
+        "vertices": 14936
+      },
+      {
+        "triangles": 16,
+        "vertices": 32
+      }
+    ],
+    "bytes": 7680203,
+    "height": 20.77109718322754,
+    "width": 8.921656608581543
+  },
+  "PH_pine_bg_01": {
+    "kind": "background",
+    "file": "ph_pine_bg_01.bin",
+    "lods": [
+      {
+        "triangles": 16,
+        "vertices": 32
+      },
+      {
+        "triangles": 16,
+        "vertices": 32
+      },
+      {
+        "triangles": 16,
+        "vertices": 32
+      }
+    ],
+    "bytes": 589933,
+    "height": 20.77109718322754,
+    "width": 8.921656608581543
+  },
+  "PH_pine_mid_01": {
+    "kind": "midstory",
+    "file": "ph_pine_mid_01.bin",
+    "lods": [
+      {
+        "triangles": 9000,
+        "vertices": 14936
+      },
+      {
+        "triangles": 9000,
+        "vertices": 14936
+      },
+      {
+        "triangles": 16,
+        "vertices": 32
+      }
+    ],
+    "bytes": 6773544,
+    "height": 20.77109718322754,
+    "width": 8.921656608581543
+  },
+  "PH_shrub_01": {
+    "kind": "shrub",
+    "file": "ph_shrub_01.bin",
+    "lods": [
+      {
+        "triangles": 15912,
+        "vertices": 38331
+      },
+      {
+        "triangles": 2686,
+        "vertices": 6183
+      },
+      {
+        "triangles": 16,
+        "vertices": 32
+      }
+    ],
+    "bytes": 3499772,
+    "height": 1.0196006298065186,
+    "width": 1.0411126613616943
+  },
+  "PH_shrub_02": {
+    "kind": "shrub",
+    "file": "ph_shrub_02.bin",
+    "lods": [
+      {
+        "triangles": 11061,
+        "vertices": 19359
+      },
+      {
+        "triangles": 3595,
+        "vertices": 8860
+      },
+      {
+        "triangles": 16,
+        "vertices": 32
+      }
+    ],
+    "bytes": 3226414,
+    "height": 0.7386258840560913,
+    "width": 0.6609767079353333
+  }
+}
