@@ -3,10 +3,42 @@ from collections import Counter
 
 import numpy as np
 
-from mesh_geometry import guardrail_wall, rail_stations, w_beam
+from mesh_geometry import guardrail_wall, rail_collision_section, rail_stations, w_beam
+from validate_guardrail_collisions import validate_faces
 
 
 class GuardrailCollisionGeometryTests(unittest.TestCase):
+    def plane_fixture(self):
+        sides = np.zeros((2, 5, 3, 3))
+        sides[:, :, 2, 0] = np.arange(5)
+        sides[:, :, 2, 1] = np.array([[3], [-3]])
+        sides[:, :, 2, 2] = np.arange(5) * .2
+        return dict(s=np.arange(5), z=np.zeros(5), sides=sides,
+                    normal=np.tile([0., 1.], (5, 1)),
+                    guard=np.tile([True, True, False, True, True], (2, 1)))
+
+    def test_planes_face_road_on_both_sides_and_do_not_bridge_gaps(self):
+        for side, sign in enumerate((-1, 1)):
+            vertices, faces = rail_collision_section(self.plane_fixture(), 0, 4, side)
+            self.assertEqual(len(faces), 2)
+            self.assertEqual(len(vertices), 8)
+            for face in faces:
+                polygon = np.asarray(vertices)[list(face)]
+                self.assertAlmostEqual(float(np.ptp(polygon[:, 0])), 1.)
+                normal = np.cross(polygon[1] - polygon[0], polygon[2] - polygon[0])
+                np.testing.assert_allclose(normal, [0, sign*1.03, 0])
+
+    def test_validate_planes_rejects_flipped_and_overlapping_triangles(self):
+        vertices, faces = rail_collision_section(self.plane_fixture(), 0, 1, 0)
+        x, y, z, w = faces[0]
+        positions = np.asarray(vertices, dtype='<f4')[:, [0, 2, 1]]
+        positions[:, 2] *= -1
+        node = dict(name='test', positions=positions, indices=[[x, y, z], [x, z, w]])
+        self.assertGreater(validate_faces(node, vertices, faces), 0)
+        for bad in ([[z, y, x], [x, z, w]], [[x, y, z], [x, y, w]]):
+            with self.assertRaises(AssertionError):
+                validate_faces(dict(node, indices=bad), vertices, faces)
+
     def test_w_beam_is_a_closed_profile_with_finite_faces(self):
         points = np.array([[0, 0, 2], [4, 0, 2]], dtype=float)
         vertices, faces = w_beam(points, [[0, 1], [0, 1]])

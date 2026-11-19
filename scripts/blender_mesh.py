@@ -8,7 +8,7 @@ import bpy
 from mathutils import Vector
 import numpy as np
 
-from mesh_geometry import guardrail_wall, rail_stations, w_beam
+from mesh_geometry import rail_collision_section, rail_runs, w_beam
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -89,50 +89,38 @@ def collision_uvs(obj):
     return obj
 
 
-def guardrail_meshes(data, a, b, side, chunk, letter, mat):
-    visual_verts, visual_faces = [], []
-    collider_verts, collider_faces = [], []
-    sides, tangent, s = data['sides'], data['tangent'], data['s']
-
-    mask = rail_stations(data, side)
-    active_edges = np.flatnonzero(mask[a:b] & mask[a+1:b+1])
-    if len(active_edges):
-        groups = np.split(active_edges, np.flatnonzero(np.diff(active_edges) > 1) + 1)
-        for edges in groups:
-            indices = a + np.r_[edges[:1], edges + 1]
-            points, normals = sides[side, indices, 2], data['normal'][indices]
-            outward = normals if side == 0 else -normals
-            vertices, faces = w_beam(points, outward)
-            offset = len(visual_verts)
-            visual_verts.extend(vertices)
-            visual_faces.extend(tuple(offset + index for index in face) for face in faces)
-            for i in indices[:-1]:
-                if i != indices[0] and int(s[i]/4) == int(s[i-1]/4):
-                    continue
-                n = data['normal'][i] * (1 if side == 0 else -1)
-                center = sides[side,i,2] + np.r_[n*.10,0]
-                axis = np.r_[tangent[i]*.065,0]
-                add_box(visual_verts, visual_faces, center-axis, center+axis, .11, -.08, .81)
-            vertices, faces = guardrail_wall(points, normals, .18, -.08, .95)
-            offset = len(collider_verts)
-            collider_verts.extend(vertices)
-            collider_faces.extend(
-                tuple(offset + index for index in face) for face in faces
-            )
-
-    visual = object_mesh(
-        f'DETAIL_GUARD_{chunk:03d}_{letter}', visual_verts, visual_faces, mat
-    )
+def guardrail_collider(data, a, b, side, chunk, letter, mat):
+    vertices, faces = rail_collision_section(data, a, b, side)
     collider = object_mesh(
-        f'1WALL_COLLIDER_GUARD_{chunk:03d}_{letter}',
-        collider_verts,
-        collider_faces,
-        mat,
+        f'1WALL_COLLIDER_GUARD_{chunk:03d}_{letter}', vertices, faces, mat
     )
     if collider:
         collider.hide_render = True
         collision_uvs(collider)
-    return visual, collider
+    return collider
+
+
+def guardrail_meshes(data, a, b, side, chunk, letter, mat):
+    visual_verts, visual_faces = [], []
+    sides, tangent, s = data['sides'], data['tangent'], data['s']
+    for indices in rail_runs(data, a, b, side):
+        points, normals = sides[side, indices, 2], data['normal'][indices]
+        outward = normals if side == 0 else -normals
+        vertices, faces = w_beam(points, outward)
+        offset = len(visual_verts)
+        visual_verts.extend(vertices)
+        visual_faces.extend(tuple(offset + index for index in face) for face in faces)
+        for i in indices[:-1]:
+            if i != indices[0] and int(s[i]/4) == int(s[i-1]/4):
+                continue
+            n = data['normal'][i] * (1 if side == 0 else -1)
+            center = sides[side,i,2] + np.r_[n*.10,0]
+            axis = np.r_[tangent[i]*.065,0]
+            add_box(visual_verts, visual_faces, center-axis, center+axis, .11, -.08, .81)
+    visual = object_mesh(
+        f'DETAIL_GUARD_{chunk:03d}_{letter}', visual_verts, visual_faces, mat
+    )
+    return visual, guardrail_collider(data, a, b, side, chunk, letter, mat)
 
 
 def camera(name, position, target, ortho=None):

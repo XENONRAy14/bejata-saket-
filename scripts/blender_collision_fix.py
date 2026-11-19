@@ -1,4 +1,4 @@
-"""Rebuild only full-route guardrails and invisible collision walls in the existing art scene."""
+"""Replace only full-route guardrail colliders in the existing art scene."""
 import configparser
 import hashlib
 import importlib
@@ -16,14 +16,14 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 WORK = ROOT.parent
 sys.path.insert(0, str(ROOT / 'scripts'))
-from blender_mesh import guardrail_meshes
+from blender_mesh import guardrail_collider
 
 
 def main():
     data = np.load(ROOT / 'data/centerline.npz')
     previous = [
         obj for obj in bpy.data.objects
-        if obj.type == 'MESH' and obj.name.startswith(('1WALL_GUARD_', 'DETAIL_GUARD_'))
+        if obj.type == 'MESH' and obj.name.startswith('DETAIL_GUARD_')
     ]
     if not previous:
         raise RuntimeError('Expected original guardrail meshes in the saved development scene')
@@ -32,9 +32,7 @@ def main():
         raise RuntimeError('Original guardrail material is missing')
 
     for obj in list(bpy.data.objects):
-        if obj.type == 'MESH' and obj.name.startswith((
-            '1WALL_GUARD_', 'DETAIL_GUARD_', '1WALL_COLLIDER_GUARD_',
-        )):
+        if obj.type == 'MESH' and obj.name.startswith('1WALL_COLLIDER_GUARD_'):
             bpy.data.objects.remove(obj, do_unlink=True)
 
     s = data['s']
@@ -43,7 +41,7 @@ def main():
     ]).tolist()
     for chunk, (a, b) in enumerate(zip(chunk_ends, chunk_ends[1:])):
         for side, letter in enumerate(('L', 'R')):
-            guardrail_meshes(data, a, b, side, chunk, letter, material)
+            guardrail_collider(data, a, b, side, chunk, letter, material)
 
     visuals = {
         obj.name for obj in bpy.data.objects
@@ -129,6 +127,7 @@ def main():
         'collision_guard_sections': len(colliders),
         'collision_visible': True,
         'collision_renderable': False,
+        'collision_shape': 'single-sided vertical strips facing the road',
         'collision_height_m': .95 - (-.08),
         'sha256': hashlib.sha256(output.read_bytes()).hexdigest(),
     }

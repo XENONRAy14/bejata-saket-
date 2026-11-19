@@ -1,4 +1,4 @@
-"""Pure geometry for watertight, simple Assetto Corsa barrier collision meshes."""
+"""Pure geometry for Assetto Corsa barriers."""
 import numpy as np
 
 
@@ -6,6 +6,36 @@ def rail_stations(data, side):
     """One selection for physics and art, including the old roadside drop criterion."""
     drop = data['sides'][side, :, -1, 2] - data['z']
     return data['guard'][side] | ((drop < -6) & (data['s'] >= 20) & (data['s'] <= data['s'][-1]-20))
+
+
+def rail_runs(data, a, b, side):
+    mask = rail_stations(data, side)
+    edges = np.flatnonzero(mask[a:b] & mask[a+1:b+1])
+    if len(edges):
+        for run in np.split(edges, np.flatnonzero(np.diff(edges) > 1) + 1):
+            yield a + np.r_[run[:1], run + 1]
+
+
+def rail_collision_section(data, a, b, side):
+    """One vertical face per rail edge, wound toward the center of the road."""
+    vertices, faces = [], []
+    for indices in rail_runs(data, a, b, side):
+        # Retain the road-facing boundary and height of the previous collider.
+        line = data['sides'][side, indices, 2].copy()
+        normals = data['normal'][indices]
+        inward = (-1 if side == 0 else 1) * normals / np.linalg.norm(normals, axis=1)[:, None]
+        line[:, :2] += .09 * inward
+        offset = len(vertices)
+        vertices.extend([*point[:2], point[2] + h] for point in line for h in (-.08, .95))
+        for i, (start, end) in enumerate(zip(line, line[1:])):
+            j = offset + i * 2
+            face = (j, j+2, j+3, j+1)
+            dx, dy = end[:2] - start[:2]
+            dot = np.dot([dy, -dx], inward[i] + inward[i+1])
+            if not np.isfinite(dot) or abs(dot) <= 1e-10:
+                raise ValueError('Rail face has no well-defined road-facing normal')
+            faces.append(face if dot > 0 else face[::-1])
+    return vertices, faces
 
 
 def w_beam(points, outward):
