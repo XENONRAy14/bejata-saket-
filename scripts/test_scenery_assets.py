@@ -1,17 +1,44 @@
 from types import SimpleNamespace
 import io
 import struct
+import tempfile
 import unittest
+import zipfile
+from pathlib import Path
 
 import numpy as np
 from PIL import Image
 
-from scenery_assets import card_lod_groups, dds_blob, wire_groups
+from scenery_assets import canopy_atlas, card_lod_groups, dds_blob, foliage_tint, litter_texture, shrub_cluster, wire_groups
 from pilot_common import resize_channels
 from treefx_wire import mesh_blob, read_mesh
 
 
 class CardLodTests(unittest.TestCase):
+    def test_three_crown_cluster_preserves_source_triangles_and_group_limits(self):
+        source=Path(__file__).resolve().parents[1]/'out/bejaia_saket_pilot300/extension/trees/ph_shrub_01.bin'
+        with tempfile.TemporaryDirectory() as directory:
+            path=Path(directory)/'cluster.bin';spec=shrub_cluster(source,path)
+            self.assertEqual(len(spec['clearance_spheres']),3)
+            with zipfile.ZipFile(path) as archive,zipfile.ZipFile(source) as original:
+                for lod in range(3):
+                    _,groups=wire_groups(archive.read(f'LOD{lod}.mesh'));_,old=wire_groups(original.read(f'LOD{lod}.mesh'))
+                    self.assertEqual(sum(len(p.faces) for _,_,p in groups),3*sum(len(p.faces) for _,_,p in old))
+                    self.assertTrue(all(len(p.vertices)<65536 for _,_,p in groups))
+            self.assertLessEqual(spec['lods'][1]['triangles'],9003)
+
+    def test_tinted_foliage_preserves_cutout_and_litter_is_dark_and_varied(self):
+        source=Image.new('RGBA',(128,128),(160,140,100,37))
+        tinted=np.asarray(foliage_tint(source));self.assertTrue((tinted[:,:,3]==37).all())
+        self.assertTrue((tinted[:,:,:3]<np.asarray(source)[:,:,:3]).all())
+        litter=np.asarray(litter_texture(source));self.assertLess(litter[:,:,:3].mean(),100);self.assertGreater(litter[:,:,1].std(),2)
+        np.testing.assert_array_equal(litter,litter_texture(source))
+        with self.assertRaises(ValueError):foliage_tint(source,[1,float('nan'),1])
+        with self.assertRaises(ValueError):canopy_atlas([])
+        with self.assertRaises(ValueError):canopy_atlas([Image.new('RGBA',(16,16))])
+        atlas=canopy_atlas([Image.new('RGBA',(64,64),(100,130,70,255))])
+        self.assertEqual(atlas.size,(1024,1024));self.assertTrue(np.asarray(atlas)[:,:,3].any())
+
     def test_weight_resize_retains_rgb_when_fourth_weight_is_zero(self):
         image=Image.new('RGBA',(16,16),(20,60,175,0))
         resized=resize_channels(image,(7,7),Image.Resampling.BICUBIC)

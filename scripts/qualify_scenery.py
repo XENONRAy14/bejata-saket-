@@ -2,6 +2,7 @@
 import configparser
 import hashlib
 import io
+from itertools import product
 import json
 from pathlib import Path
 import shutil
@@ -13,7 +14,7 @@ from scipy.spatial import cKDTree
 
 from scenery_placement import edge_batches, load_zones, plan_sector
 from scenery_kn5 import assign_material, clone_material, mesh, nodes, parse_tree, read, string, subset, uint, validate_lock, write
-from scenery_assets import dds_blob, edge_atlas, ground_mask, repair_pine_archive
+from scenery_assets import back_pine_atlas, dds_blob, edge_atlas, foliage_tint, ground_mask, litter_texture, repair_pine_archive, shrub_cluster
 from pilot_common import resize_channels
 from treefx_wire import vector_ac
 
@@ -36,12 +37,14 @@ def make_installable(output):
     path.write_text(json.dumps(metadata,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
 
-def station_selector(data,s0,s1):
+def station_selector(data,s0,s1,verge=None):
     index=cKDTree(data['xy'])
     def select(ac_points):
         points=np.asarray(ac_points)
         distance,nearest=index.query(points[:,[0,2]]*[1,-1])
-        return (data['s3'][nearest]>=s0)&(data['s3'][nearest]<s1)&(distance<=80+float(data['width'].max())/2)
+        selected=(data['s3'][nearest]>=s0)&(data['s3'][nearest]<s1)&(distance<=80+float(data['width'].max())/2)
+        if verge is not None:selected&=distance>=data['width'][nearest]/2+verge
+        return selected
     return select
 
 
@@ -89,7 +92,10 @@ def forest_ground(base,pilot,select):
         if weights.max()>255:raise ValueError('Unnormalised original terrain mask')
         weights[mask]=[0,0,255,0]
         name='FOREST_FLOOR_'+node['name'];texture=name+'_mask.dds';add_texture(base,texture,Image.fromarray(weights.astype('uint8')),data=True)
-        material=clone_material(old,name,dict(txMask=texture,txDetailB=floor['textures']['txDiffuse'],txNormalB=floor['textures']['txNormal']))
+        if not any(t['name']=='SUMMIT_pine_litter.dds' for t in base['textures']):
+            source=next(t['blob'] for t in base['textures'] if t['name']==floor['textures']['txDiffuse'])
+            add_texture(base,'SUMMIT_pine_litter.dds',litter_texture(Image.open(io.BytesIO(source)).convert('RGBA')))
+        material=clone_material(old,name,dict(txMask=texture,txDetailB='SUMMIT_pine_litter.dds',txNormalB=floor['textures']['txNormal']))
         assign_material(node,len(base['materials']));base['materials'].append(material)
         materials.append(dict(mesh=node['name'],material=name,mask_pixels=int(mask.sum())));count+=int(selected.sum())
     return count,materials
@@ -106,21 +112,25 @@ def qualify(sector='summit',output=None):
     s0,s1=spec['start_m'],spec['end_m']
     with np.load(ROOT/'data/centerline.npz') as datafile:data=dict(datafile)
     models=json.loads((ROOT/'data/pilot300/treefx_models.json').read_text())
-    zones=dict(config['main'],edge_spacings_m=[3.6,5],edge_offsets_m=[16,21],edge_widths_m=[[2.5,3.5],[3,4]],edge_heights_m=[[1.4,2],[1.8,2.5]],tree_layers=[
-        dict(kind='shrub',spacing=6.8,offset=[9.5,10.5],height_m=[2.8,3.5],width_m=[6.4,6.8],color=[.55,.70,.50]),
-        dict(kind='midstory',spacing=15,offset=[16.8,18.3],height_m=[32,36],width_m=[14,16],bury_fraction=.48),
-        dict(kind='background',spacing=23.5,offset=[45,52],height_m=[30,36],width_m=[29,33],bury_fraction=.48)])
-    dense_models={name:spec for name,spec in models.items() if name!='PH_shrub_02'}
+    zones=dict(config['main'],enforce_per_100m_budget=True,road_clearance_by_layer_m=dict(shrub=.45),
+        edge_spacings_m=[.45,.7,.9],edge_offsets_m=[4.1,5.2,8.5],edge_widths_m=[[4,5],[4,5],[14,18]],edge_heights_m=[[2.2,2.8],[2.5,3.2],[12,15]],tree_layers=[
+        dict(kind='shrub',spacing=4.9,offset=[2.1,2.3],height_m=[2.6,3],width_m=[6.5,7],bury_fraction=.15,anchor_road_edge=True,align_to_road=True,color=[.55,.70,.50]),
+        dict(kind='midstory',spacing=33,offset=[16.8,18.3],height_m=[32,36],width_m=[14,16],bury_fraction=.48),
+        dict(kind='background',spacing=36,offset=[45,52],height_m=[30,36],width_m=[29,33],bury_fraction=.48)])
+    cluster=ROOT/'out/scenery_cache/summit_shrub_cluster.bin'
+    if 'PH_shrub_01' in models:models['PH_shrub_cluster_01']=shrub_cluster(ROOT/'out/bejaia_saket_pilot300/extension/trees/ph_shrub_01.bin',cluster)
+    dense_models={name:dict(spec) for name,spec in models.items() if name not in ('PH_shrub_01','PH_shrub_02')}
     layout=plan_sector(data,dense_models,s0,s1,zones=zones);select=station_selector(data,s0,s1)
     base=read(baseline);pilot=read(ROOT/'out/bejaia_saket_pilot300/bejaia_saket_pilot300.kn5')
     original_nodes={node['name']:node['raw'] for node in nodes(base)}
     materials=import_materials(base,pilot,('forest_edge',))
     if layout['edges']:
-        image=edge_atlas(ROOT/'out/bejaia_saket_pilot300/extension/trees/ph_pine_01.bin',pilot)
-        pixels=np.asarray(image).copy();pixels[:,:,:3]=np.uint8(np.clip(pixels[:,:,:3].astype(float)*[.43,.55,.37],0,255))
-        add_texture(base,'SUMMIT_forest_edge.dds',Image.fromarray(pixels),coverage=True)
+        image=foliage_tint(edge_atlas(ROOT/'out/bejaia_saket_pilot300/extension/trees/ph_pine_01.bin',pilot))
+        add_texture(base,'SUMMIT_forest_edge.dds',image,coverage=True)
         index=materials['forest_edge'];base['materials'][index]=clone_material(base['materials'][index],'forest_edge',dict(txDiffuse='SUMMIT_forest_edge.dds'))
-    floor_triangles,floor_materials=forest_ground(base,pilot,select);legacy_triangles=0
+        add_texture(base,'SUMMIT_back_pines.dds',back_pine_atlas(ROOT/'out/bejaia_saket_pilot300/extension/trees/ph_pine_bg_01.bin'),coverage=True)
+        materials['back_pines']=len(base['materials']);base['materials'].append(clone_material(base['materials'][index],'back_pines',dict(txDiffuse='SUMMIT_back_pines.dds')))
+    floor_triangles,floor_materials=forest_ground(base,pilot,station_selector(data,s0,s1,verge=.8));legacy_triangles=0
     def modify(parent):
         nonlocal legacy_triangles
         children=[]
@@ -137,16 +147,18 @@ def qualify(sector='summit',output=None):
             legacy_triangles+=int(mask.sum())
         parent['children']=children
     modify(base['root'])
-    for distant in (False,True):
-        for (chunk,side),(vertices,quads,uv,normals) in edge_batches(data,layout['edges'],distant=distant).items():
+    for kind,distant in product(('forest_edge','back_pines'),(False,True)):
+        plants=[p for p in layout['edges'] if (p['tier']==2)==(kind=='back_pines')]
+        for (chunk,side),(vertices,quads,uv,normals) in edge_batches(data,plants,distant=distant).items():
             values=np.zeros((len(vertices),11),dtype='<f4');values[:,:3]=vector_ac(vertices);values[:,3:6]=vector_ac(normals)
             values[:,6:8]=np.asarray(uv)*[1,-1]
             tangents=np.cross(values[:,3:6],[0,1,0]);tangents/=np.linalg.norm(tangents,axis=1)[:,None];values[:,8:11]=tangents
             faces=[triangle for a,b,c,d in quads for triangle in ((a,b,c),(a,c,d))]
-            node=mesh(f"SCENERY_{'FAR' if distant else 'NEAR'}_EDGE_{chunk}_{side}",values,faces,materials['forest_edge'])
+            name=f"SCENERY_{'FAR' if distant else 'NEAR'}_{kind.upper()}_{chunk}_{side}"
+            node=mesh(name,values,faces,materials[kind])
             tail=bytearray(node['tail'])
             struct.pack_into('<2f',tail,4,110 if distant else 0,350 if distant else 110)
-            node=mesh(node['name'],values,faces,materials['forest_edge'],flags=bytes([not distant,True,False]),tail=bytes(tail))
+            node=mesh(node['name'],values,faces,materials[kind],flags=bytes([not distant,True,False]),tail=bytes(tail))
             base['root']['children'].append(node)
     # Preserve every unrelated original record, not only the physical subset.
     current={node['name']:node['raw'] for node in nodes(base)}
@@ -169,7 +181,7 @@ def qualify(sector='summit',output=None):
     folder=output/'extension/trees';(folder/'trees.txt').write_text('\n'.join(lines)+'\n')
     repaired={}
     for name in sorted({models[plant['model']]['file'] for plant in layout['trees']}):
-        repaired[name]=repair_pine_archive(ROOT/'out/bejaia_saket_pilot300/extension/trees'/name,folder/name)
+        repaired[name]=repair_pine_archive(cluster if name==cluster.name else ROOT/'out/bejaia_saket_pilot300/extension/trees'/name,folder/name)
     used={parse_tree(line)['model'] for line in lines}
     for archive in folder.glob('*.bin'):
         if archive.name not in used:archive.unlink()
@@ -182,6 +194,8 @@ def qualify(sector='summit',output=None):
     added=[n for n in nodes(base) if n['name'].startswith('SCENERY_')]
     meshes=[n for n in nodes(base) if n['kind']==2]
     report=dict(sector=sector,placement=layout['report'],old_tree_instances_removed=removed,
+        grass_verge_m=.8,visual_shrub_clearance_m=.45,other_vegetation_clearance_m=4,
+        shrub_cluster_crowns_per_instance=3,shrub_cluster_lods=models.get('PH_shrub_cluster_01',{}).get('lods'),
         tree_layer_counts={kind:sum(models[p['model']]['kind']==kind for p in layout['trees']) for kind in ('shrub','midstory','background','pine')},
         main_tree_instances_retained=len(kept),new_tree_instances=len(layout['trees']),total_tree_instances=len(lines),
         legacy_foliage_triangles_removed=legacy_triangles,forest_floor_triangles=floor_triangles,

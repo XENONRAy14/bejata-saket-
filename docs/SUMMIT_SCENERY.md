@@ -17,6 +17,11 @@ It also writes `before_exit_reverse.png` / `after_exit_reverse.png` at 1230 m.
 That driver-height camera looks back into the treatment: a forward-facing camera
 there would look away from the sector, which ends at 1180 m.
 It approximates KN5 multilayer materials and TreeFX LODs, not CSP runtime shaders.
+The renderer accepts `--reference <track-directory>` after Blender's `--` to
+compare against a prior candidate instead of the main baseline. The saved
+density-pass BEFORE is the previous qualified candidate (KN5 SHA-256
+`1cdeb89c86322f8166024aff3193b6fa18647f2b31a26d742baf634e8e5cee2c`),
+retained locally at `/home/ubuntu/summit_density_baseline`.
 The install copy retains the complete route; only summit 880–1180 m is treated.
 The separate `summit` track folder includes `models.ini` referencing its KN5 and
 a distinct qualification UI name. Install it as `content/tracks/summit`, not over
@@ -33,19 +38,26 @@ This creates `out/install_ready/bejaia_saket_summit/` and
 basename, folder ID and `models.ini` agree. UI metadata is distinct, and the ZIP
 contains `content/tracks/bejaia_saket_summit/`. Preview caches/images are excluded;
 credits and licenses are included. This remains a visually incomplete candidate.
+Install-ready outputs and intermediate `out/scenery_cache/` archives are ignored
+by Git; rebuild them rather than committing the large install ZIP.
 
 ## Implementation and lock
 
 `qualify_scenery.py` removes existing TreeFX placements in the sector and any
 legacy foliage triangles there and adds shared-atlas edge batches and TreeFX
 placements. The foreground now uses cached three-dimensional Searsia radial
-clusters, not atlas planes. Darkened atlas filler starts 16/21 m beyond the road
-edge, behind the shrubs, with smoothed upright normals and orthogonal tangents.
+clusters, not atlas planes. Atlas filler starts 4.1/5.2 m beyond the road
+edge, behind the shrubs; a third, darker pine-canopy silhouette row starts at
+8.5 m. Cards use smoothed upright normals and orthogonal tangents.
 No pilot rail modules are imported. Forest-floor reassignment uses existing
 physical `1GRASS*` geometry, without new ground overlays or UV changes.
 The lateral corridor is 80 m plus half the maximum road width; selection uses
 nearest active-route centreline stations. Trees are footprint-clearance checked
 against every road leg by the shared planner.
+For this pass, visual-only shrubs have a 0.45 m clearance target instead of the
+previous 4 m setback; other vegetation remains at 4 m. The achieved minimum is
+0.780540 m. Each shrub cluster's three rotated crown spheres are checked against
+all road legs; no orientation-blind bounding-circle clearance is substituted.
 
 `scenery_kn5.py` preserves untouched KN5 records verbatim and parent transforms.
 Only the material assignment and material records of `1GRASS*` are exempt from
@@ -66,20 +78,63 @@ painting another part of the road. The original duplicate grass channel is
 merged into its identical channel outside the floor mask; no extra ground
 triangles, positions, indices, names, flags or UVs are introduced.
 
-The budget is reallocated to 86 dense `PH_shrub_01` clusters, 40 midstory pines
-and 26 background silhouettes: 152 TreeFX instances, below 153, plus 282 rear
-atlas clumps. Each cached Searsia model already contains three radial branches.
-The sparser `PH_shrub_02` is not used. Physical shrub dimensions are 2.8–3.5 m
-high and 6.4–6.8 m wide. Taller pines and buried crown bases form the mid/back
-rows. Horizontal footprint clearance is checked against every road leg.
+The budget is 117 road-aligned three-crown Searsia clusters, 18 midstory pines
+and 15 background pines: 150 TreeFX instances, plus 2,812 rear atlas clumps.
+Per-100 m counts are hard-limited: 50 / 51 / 49. Whole-route count is 6,820.
+`summit_shrub_cluster.bin` contains three complete cached `PH_shrub_01` crowns
+(351 source crowns total, not 117 unchanged prototypes). No global mesh collapse
+is applied. Cluster dimensions are 2.6–3 m high and 6.5–7 m long, anchored at
+road-edge height with buried bases; `PH_shrub_02` is not used. LOD triangle counts
+are 47,736 / 8,058 / 48, at 12 / 75 / 900 m. Individual mesh groups remain below
+65,536 vertices. This is more geometry per instance, not a free performance gain.
 
-The cached prototypes have no vertex-colour layers. TreeFX packed vertex
-colours, geometry, normals, textures and shading settings are preserved from
-the pilot; shading brightness is 1, with the same sphere/boost normal settings.
+The cached prototypes have no vertex-colour layers. The clustered archive
+copies whole source triangles, normals, UVs, textures and shading settings;
+shading brightness is 1, with the same sphere/boost normal settings.
 Visible leaf texture samples are warmer/brighter than the pines. An exported
 per-instance `color=0.55,0.70,0.50` tint makes the shrubs a darker natural green.
 The preview now reads and applies this same TreeFX colour, not a render-only
-grade. Atlas filler has its own subdued texture grade; alpha is unchanged.
+grade. Filler textures receive the same linear-light 0.55/0.70/0.50 tint;
+the distant silhouette texture is darker. Alpha is unchanged. The floor diffuse
+is graded brown-green with seeded coarse/fine variation. A nominal 0.8 m verge
+is excluded from forest-floor selection; no ground overlay is introduced.
+
+## Saved pixel measurements: target not met
+
+Evidence is in `out/scenery_measurements/summit_density/`: four beauty images,
+`*_ids.png`, `*_left_band.png`, `*_right_band.png`, `*_bands_overlay.png`,
+`*_foliage.png`, `*_terrain.png`, `*_fixed_barriers.png`, `*_hillside_roi.png`,
+`*_pale_hillside.png`, per-view JSON and `visual_measurements.json`.
+The renderer writes the same outputs alongside its normal previews on rebuild.
+Texture caches are isolated per label and addressed by content hashes so a
+previous candidate/rebuild cannot supply stale same-named textures to the view.
+
+Bands project road-edge heights 0.3–1.8 m over the first 80 m of treated road in
+the camera frustum: 1035.5–1115.5 m forward and 1100–1180 m reverse. Left/right
+mean route sides, not screen sides. Blue overlay is route-left; magenta is
+route-right. Band denominators are identical before/after and include visible
+fixed obstacles and terrain; they are not restricted to successful foliage.
+Cutout-aware emission IDs use green for vegetation foliage/impostor silhouettes,
+red for grass/rock terrain, blue for protected guard/wall visuals, black for
+other objects/background. Known bark textures are excluded. Pixel shares use
+linearized emission-channel coverage, preserving antialias contributions.
+
+| Camera | Route-left before → after | Route-right before → after |
+| --- | --- | --- |
+| 1030 m forward | 25.23% → 68.59% | 30.37% → 64.30% |
+| 1230 m reverse | 87.95% → 88.36% | 57.22% → 62.77% |
+
+None reaches the requested 90%. In the reverse route-right band, fixed
+guard/wall coverage is 10.88%, putting even theoretical raw foliage coverage
+below 90%; excluding those obstacles still only yields 70.43%, not acceptance.
+
+Pale hillside uses the fixed image region above the projected bands, terrain
+IDs, RGB mean >0.38 and HSV saturation <0.32. Terrain antialias coverage is
+fractional, not discarded at object boundaries. Visible pale-terrain share of
+the complete frame is 0.99395% → 0.05571% forward and 0.79346% → 0.86743%
+reverse. Increased foliage occludes 97.80% of baseline pale-pixel coverage in
+the forward region, but only 12.59% in reverse. These are explicitly scoped
+image regions, not a claim that every visible cliff is hidden.
 
 Terrain masks are four independent weights, not opacity images. Resizing,
 DXT5 colour-block encoding and mip generation preserve RGB even when the fourth
@@ -101,7 +156,8 @@ validated 9,003-triangle medium-LOD cap and does not use this higher-cost repair
 Pilot output archives are not overwritten. Repaired medium LODs have
 12,896–13,698 triangles; this costs more than the broken old medium LOD.
 No FPS improvement is claimed. Preview LOD selection uses each archive's real
-DISTANCE intervals (including shrubs 20/75/900 and midstory 28/110/900).
+DISTANCE intervals (native shrubs 20/75/900, new clusters 12/75/900 and midstory
+28/110/900).
 
 ## Cached assets and limitations
 
@@ -120,10 +176,10 @@ The following raw inputs were absent under `/home/ubuntu/repos/assets`:
 The report deliberately retains `qualification_complete: false` and
 `visual_review_required: true`; passing geometry/budget checks is not art
 acceptance. Matched summit and reverse exit renders accompany this pass.
-Critical inspection after three composition attempts still finds exposed pale
-hillside at 1030 m and individual open shrub forms rather than a fully closed
-hedge. The pale foreground atlas wall is gone and the 3D shrubs are darker, but
-the closed forest-wall target is **not achieved**. Do not roll this pass out
+Critical inspection after three composition attempts finds a denser volumetric
+front row but visibly planar rear silhouettes and exposed rock toward the bend.
+Measured low-band coverage remains below target. The closed forest-wall target
+is **not achieved**. Do not roll this pass out
 route-wide. The installable copy is a qualification candidate, not accepted art.
 
 The previews are Cycles approximations, not in-game acceptance. Native AC

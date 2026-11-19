@@ -6,6 +6,7 @@ data/dem/*.tif
 out/exporter_smoke/
 out/road.png
 out/install_ready/
+out/scenery_cache/
 out/bejaia_saket/*.partial
 blend/*.blend*
 blend/*.kn5*

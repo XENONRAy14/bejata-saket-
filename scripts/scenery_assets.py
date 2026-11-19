@@ -1,4 +1,5 @@
 """Cached CC0 asset preparation without rebaking or collapsing foliage cards."""
+import configparser
 import io
 from pathlib import Path
 from types import SimpleNamespace
@@ -11,6 +12,83 @@ from PIL import Image
 from scenery_kn5 import Reader
 from treefx_wire import mesh_blob, read_mesh
 from pilot_common import dds
+
+
+def foliage_tint(image,tint=(.55,.70,.50)):
+    tint=np.asarray(tint,float)
+    if tint.shape!=(3,) or not np.isfinite(tint).all() or (tint<0).any():raise ValueError('Invalid foliage tint')
+    pixels=np.array(image.convert('RGBA'));rgb=pixels[:,:,:3]/255
+    linear=np.where(rgb<=.04045,rgb/12.92,((rgb+.055)/1.055)**2.4)*tint
+    rgb=np.where(linear<=.0031308,linear*12.92,1.055*np.maximum(linear,0)**(1/2.4)-.055)
+    pixels[:,:,:3]=np.uint8(np.clip(np.rint(rgb*255),0,255))
+    return Image.fromarray(pixels)
+
+
+def litter_texture(image,seed=24031):
+    pixels=np.array(foliage_tint(image,(.28,.30,.16)));rng=np.random.default_rng(seed)
+    coarse=np.asarray(Image.fromarray(np.uint8(rng.uniform(0,255,(8,8)))).resize(image.size,Image.Resampling.BICUBIC))/255-.5
+    fine=np.asarray(Image.fromarray(np.uint8(rng.uniform(0,255,(64,64)))).resize(image.size,Image.Resampling.BICUBIC))/255-.5
+    patch=coarse*.65+fine*.22
+    pixels[:,:,:3]=np.uint8(np.clip(pixels[:,:,:3]*(1+patch[:,:,None])*np.stack([1-patch*.15,1+patch*.15,np.ones_like(patch)],axis=2),0,255))
+    return Image.fromarray(pixels)
+
+
+def canopy_atlas(images,seed=24032):
+    sources=[]
+    for image in images:
+        image=image.convert('RGBA');box=image.getchannel('A').getbbox()
+        if box:
+            image=image.crop(box);sources.append(image.crop((0,0,image.width,max(1,int(image.height*.62)))))
+    if not sources:raise ValueError('No cached pine canopies')
+    rng=np.random.default_rng(seed);atlas=Image.new('RGBA',(1024,1024))
+    for variant in range(4):
+        tile=Image.new('RGBA',(512,512))
+        for y in (180,280,390,500,610):
+            for x in (-80,60,200,340,480,620):
+                source=sources[int(rng.integers(len(sources)))].copy();size=int(rng.integers(240,350))
+                source.thumbnail((size,size));tile.alpha_composite(source,(x-size//2+int(rng.integers(-25,26)),y-size//2+int(rng.integers(-25,26))))
+        atlas.alpha_composite(tile,((variant%2)*512,(variant//2)*512))
+    return foliage_tint(atlas,(.12,.20,.10))
+
+
+def back_pine_atlas(path):
+    with zipfile.ZipFile(path) as archive:
+        return canopy_atlas([Image.open(io.BytesIO(archive.read(name))).convert('RGBA') for name in archive.namelist() if '_impostor_' in name and name.endswith('.dds')])
+
+
+def archive_radius(path):
+    with zipfile.ZipFile(path) as archive:
+        config=configparser.ConfigParser();config.read_string(archive.read('tree.ini').decode())
+        width=config.getfloat('BASIC','WIDTH');radius=0.
+        for section in config:
+            if not section.startswith('LOD_'):continue
+            _,groups=wire_groups(archive.read(config[section]['MODEL']))
+            radius=max(radius,max(np.linalg.norm(np.asarray(part.vertices)[:,:2],axis=1).max()*width/2 for _,_,part in groups))
+    return float(radius)
+
+
+def shrub_cluster(source,destination):
+    centers=(-1.8,0.,1.8);metrics=[];source_radius=archive_radius(source)
+    with zipfile.ZipFile(source) as archive:
+        config=configparser.ConfigParser();config.optionxform=str;config.read_string(archive.read('tree.ini').decode())
+        height=config.getfloat('BASIC','HEIGHT')*2;width=config.getfloat('BASIC','WIDTH');radius=max(abs(x) for x in centers)+source_radius*2
+        config['BASIC']['HEIGHT']=str(height);config['BASIC']['WIDTH']=str(radius*2);config['LOD_0']['DISTANCE']='12'
+        payloads={name:archive.read(name) for name in archive.namelist() if name.endswith('.dds')}
+        for lod in range(3):
+            names,original=wire_groups(archive.read(config[f'LOD_{lod}']['MODEL']));groups=[]
+            textures={name:payloads[name] for name in names}
+            for x in centers:
+                for diffuse,normal,part in original:
+                    positions=np.asarray(part.vertices)*[width,width,height]+[x,0,0]
+                    groups.append((diffuse,normal,SimpleNamespace(vertices=positions.tolist(),normals=part.normals,uv=part.uv,faces=part.faces)))
+            payload,metric=mesh_blob(groups,textures,radius,height);assert read_mesh(payload,textures)==metric
+            payloads[config[f'LOD_{lod}']['MODEL']]=payload;metrics.append(metric)
+        stream=io.StringIO();config.write(stream);payloads['tree.ini']=stream.getvalue().encode('utf-8')
+    destination=Path(destination);destination.parent.mkdir(parents=True,exist_ok=True)
+    with zipfile.ZipFile(destination,'w',zipfile.ZIP_DEFLATED) as archive:
+        for name,payload in payloads.items():archive.writestr(zipfile.ZipInfo(name,(2020,1,1,0,0,0)),payload,compress_type=zipfile.ZIP_DEFLATED)
+    return dict(kind='shrub',file=destination.name,height=height,width=radius*2,bytes=destination.stat().st_size,lods=metrics,
+        clearance_spheres=[[x,0,source_radius*2] for x in centers],source_crowns=3)
 
 
 def card_lod_groups(groups,names):

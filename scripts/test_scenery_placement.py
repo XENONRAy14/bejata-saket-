@@ -8,7 +8,7 @@ import numpy as np
 
 from scenery_placement import (RoadClearance, edge_batches, edge_layout, load_zones,
     main_tree_layout, pilot_tree_layout, plan_sector, plan_sectors, sea_sides,
-    sector_seed, tree_radius, vista_open, zone_contains)
+    sector_seed, tree_footprints, tree_radius, vista_open, zone_contains)
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -116,6 +116,26 @@ class SectorTests(unittest.TestCase):
         self.assertFalse(plan_sector(self.data,self.models,0,300,zones=self.zones)['trees'])
         self.zones['tree_layers'][0]['height_m']=[0,1]
         with self.assertRaises(ValueError):main_tree_layout(self.data,self.models,0,300,self.zones)
+
+    def test_optional_stratified_budget_and_visual_layer_clearance(self):
+        self.zones.update(enforce_per_100m_budget=True,tree_layers=[dict(kind='shrub',spacing=1,offset=[4.5,4.8],height_m=[3,3.6],width_m=[7.3,7.6])],road_clearance_by_layer_m=dict(shrub=.45))
+        models=copy.deepcopy(self.models)
+        for model in models.values():
+            if model['kind']=='shrub':model['footprint_radius_m']=model['width']*.5312
+        result=plan_sector(self.data,models,0,300,zones=self.zones)
+        self.assertTrue(result['trees']);self.assertTrue(all(p['tree_instances']<=51 for p in result['report']['per_100m']))
+        self.assertGreaterEqual(result['report']['minimum_all_road_leg_clearance_m'],.45)
+        self.zones['exclusions']=[dict(start_m=0,end_m=400,side='both')]
+        self.assertFalse(plan_sector(self.data,models,0,300,zones=self.zones)['trees'])
+        self.zones['road_clearance_by_layer_m']['shrub']=-1
+        with self.assertRaises(ValueError):plan_sector(self.data,models,0,300,zones=self.zones)
+
+    def test_compound_clearance_rotates_each_crown_and_stays_off_every_road(self):
+        models=dict(cluster=dict(width=6,height=2,clearance_spheres=[[-1.8,0,1.1],[0,0,1.1],[1.8,0,1.1]]))
+        plant=dict(model='cluster',position=[20,6,0],angle=np.pi/2,scale=1,width=1)
+        footprints=tree_footprints(plant,models)
+        np.testing.assert_allclose(footprints[0][0],[20,4.2,0]);self.assertEqual(footprints[0][1],1.1)
+        self.assertFalse(all(RoadClearance(self.data).allows(p,r,.45) for p,r in footprints))
 
     def test_local_sides_are_smoothed_and_can_switch(self):
         self.data['sides'][0,:100,-1,2]=10

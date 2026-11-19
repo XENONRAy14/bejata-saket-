@@ -1,0 +1,28 @@
+{
+  "coverage": {
+    "left": {
+      "band_pixels": 92482,
+      "foliage_pixels": 63436.359124549235,
+      "foliage_share": 0.6859319556729876,
+      "passed": false,
+      "fixed_barrier_pixels": 13.340314453954958,
+      "foliage_share_excluding_fixed_barriers": 0.6860309140445462
+    },
+    "right": {
+      "band_pixels": 83658,
+      "foliage_pixels": 53789.74934582974,
+      "foliage_share": 0.6429719733418171,
+      "passed": false,
+      "fixed_barrier_pixels": 12.603654464881927,
+      "foliage_share_excluding_fixed_barriers": 0.6430688560985098
+    }
+  },
+  "pale_hillside_pixels": 513.4127452752509,
+  "hillside_roi_pixels": 381213,
+  "pale_hillside_share_of_frame": 0.0005570884822865136,
+  "pale_hillside_share_of_roi": 0.0013467870856325754,
+  "treated_station_interval_m": [
+    1035.5,
+    1115.5
+  ]
+}

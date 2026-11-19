@@ -200,7 +200,19 @@ class RoadClearance:
 
 
 def tree_radius(plant,models):
-    return models[plant['model']]['width']/2*math.sqrt(2)*plant['scale']*plant['width']
+    model=models[plant['model']]
+    return model.get('footprint_radius_m',model['width']/2*math.sqrt(2))*plant['scale']*plant['width']
+
+
+def tree_footprints(plant,models):
+    model=models[plant['model']];spheres=model.get('clearance_spheres')
+    if spheres is None:return [(plant['position'],tree_radius(plant,models))]
+    angle=plant['angle'];rotation=np.array([[math.cos(angle),-math.sin(angle)],[math.sin(angle),math.cos(angle)]])
+    scale=plant['scale']*plant['width'];result=[]
+    for x,y,radius in spheres:
+        point=np.asarray(plant['position'],float).copy();point[:2]+=rotation@np.array([x,y])*scale
+        result.append((point,radius*scale))
+    return result
 
 
 def main_tree_layout(data,models,s0,s1,zones):
@@ -231,9 +243,12 @@ def main_tree_layout(data,models,s0,s1,zones):
                 half=float(np.interp(station,data['s3'],data['width']))/2
                 offset=half+float(rng.uniform(*offset_range))
                 point=ground(data,station,side,offset);point[2]-=.12
+                if layer.get('anchor_road_edge'):point[2]=ground(data,station,side,half)[2]-.12
                 if layer.get('bury_fraction'):point[2]-=float(models[species]['height'])*scale*layer['bury_fraction']
                 plants.append(dict(model=species,position=point.tolist(),angle=float(rng.uniform(0,2*np.pi)),
                     scale=scale,width=broad,station=station,side=side,offset=offset))
+                if layer.get('align_to_road'):
+                    _,tangent,_=frame(data,station);plants[-1]['angle']=float(math.atan2(tangent[1],tangent[0]))
                 if 'color' in layer:plants[-1]['color']=list(layer['color'])
     return plants
 
@@ -245,23 +260,33 @@ def plan_sector(data,models,s0,s1,*,zones=None):
     density=float(zones.get('max_tree_instances_per_100m',51));total_limit=int(zones.get('max_tree_instances_total',8000))
     if not np.isfinite([clearance,density]).all() or clearance<0 or not 0<density<=51 or not 0<total_limit<=8000:
         raise ValueError('Invalid clearance or tree budget')
+    if any(not np.isfinite(value) or value<0 for value in zones.get('road_clearance_by_layer_m',{}).values()):
+        raise ValueError('Invalid layer clearance')
     length=float(data['s3'][-1]-data['s3'][0]);density=min(density,total_limit*100/length)
     limit=int(math.floor((s1-s0)*density/100))
     road=RoadClearance(data);sea=sea_sides(data,zones.get('side_smoothing_m',30))
     def allowed(plant,radius,layer):
+        footprints=tree_footprints(plant,models) if 'model' in plant else [(plant['position'],radius)]
         return (not zone_contains(plant['station'],plant['side'],sea(plant['station']),zones,'exclusions',layer,radius)
-                and road.allows(plant['position'],radius,clearance))
+                and all(road.allows(point,bound,zones.get('road_clearance_by_layer_m',{}).get(layer,clearance)) for point,bound in footprints))
     candidates=main_tree_layout(data,models,s0,s1,zones)
     trees=[p for p in candidates if allowed(p,tree_radius(p,models),models[p['model']]['kind'])]
     if len(trees)>limit:
         rng=np.random.default_rng(sector_seed(s0,zones.get('seed',24024),'budget'))
         trees=[trees[i] for i in sorted(rng.choice(len(trees),limit,replace=False))]
+    if zones.get('enforce_per_100m_budget'):
+        rng=np.random.default_rng(sector_seed(s0,zones.get('seed',24024),'bin_budget'));selected=[]
+        for start in np.arange(s0,s1,100):
+            end=min(float(start+100),s1);indices=[i for i,p in enumerate(trees) if start<=p['station']<end]
+            cap=int(math.floor((end-start)*density/100))
+            selected.extend(indices if len(indices)<=cap else rng.choice(indices,cap,replace=False).tolist())
+        trees=[trees[i] for i in sorted(selected)]
     edges=[p for p in edge_layout(data,s0=s0,s1=s1,zones=zones) if allowed(p,p['width']/2,'edge')]
     per100=[]
     for start in np.arange(s0,s1,100):
         end=min(float(start+100),s1);count=int(sum(start<=p['station']<end for p in trees))
         per100.append(dict(start_m=float(start),end_m=end,tree_instances=count,instances_per_100m=count*100/(end-start)))
-    minimum=min([road.clearance(p['position'],tree_radius(p,models)) for p in trees]+[road.clearance(p['position'],p['width']/2) for p in edges],default=None)
+    minimum=min([road.clearance(point,radius) for p in trees for point,radius in tree_footprints(p,models)]+[road.clearance(p['position'],p['width']/2) for p in edges],default=None)
     report=dict(start_m=s0,end_m=s1,seed=sector_seed(s0,zones.get('seed',24024)),tree_instances=len(trees),
         edge_clumps=len(edges),tree_instances_per_100m=len(trees)*100/(s1-s0),sector_tree_limit=limit,
         full_route_budget_ceiling=int(math.floor(length*density/100)),total_tree_limit=total_limit,
