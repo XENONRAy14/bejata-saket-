@@ -77,9 +77,9 @@ def main():
     }
     surfaces = configparser.ConfigParser()
     surfaces.read(ROOT / 'out/bejaia_saket/data/surfaces.ini', encoding='utf-8')
-    assert physical_keys == {
-        surfaces[section]['KEY'] for section in surfaces.sections()
-    }, 'Exported physical mesh prefixes must match surfaces.ini'
+    surface_keys = {surfaces[section]['KEY'] for section in surfaces.sections()}
+    assert 'WALL' not in surface_keys, 'WALL is a built-in collision type'
+    assert physical_keys - {'WALL'} == surface_keys, 'Exported driving surface prefixes must match surfaces.ini'
 
     source = Path(os.environ.get(
         'AC_ADDON_SOURCE', str(Path.home() / 'tools/blender-assetto-corsa-tools'),

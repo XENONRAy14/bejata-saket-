@@ -7,13 +7,13 @@
     "blend/bejaia_saket.blend": "395e5cb1091c615f5244453d2f8f019aaa4627c970ffad67c371071c84369492",
     "blend/settings.json": "44dbfa73c213252ed388386e77736271e7115046759bd71b9520b2b3b9c31416",
     "out/bejaia_saket/bejaia_saket.kn5": "7cceb8c8aeb9ec72b9031d1356b5450b7e1e38c335748964591d84036d13c61f",
-    "out/bejaia_saket/data/surfaces.ini": "55d3ddc817522d85ddf5f3b39571bc0eb8f25ea41e6ebd5028cbd8070bdccbd5",
+    "out/bejaia_saket/data/surfaces.ini": "d7d09ffbcc0a5b266eaa6761d4c95fb60ea8155ba93d6d88389ef87cfeaf7762",
     "scripts/blender_mesh.py": "016a2efa24b93a4dd60190009a047b0f876c9e0c65fada0e6c496763351c9379",
     "scripts/blender_materials.py": "1f7a2654d10777ad8f133010ebe648c5a6314f3ebc1945aa0f787b713eb1328c",
     "scripts/geometry.py": "42760a470b99e8f3bef492955a7efeeff27eacd9362040fa6d6c2b609de6a021",
     "scripts/mesh_geometry.py": "4cff955bb982a2be46ce0c0f946941e912a2188ea7e1018c299279e4a6cf1076",
-    "scripts/blender_collision_fix.py": "ab76c7bf7a174218caaef3ebab06a30f70e035c1ad8a3cdf59e5ea3ea08c91e7",
-    "scripts/acdata.py": "4fe7238f26a2c8bc69d405c2e4df5abe01ee6e1a53deb1a7b6b5090f79c4e338",
+    "scripts/blender_collision_fix.py": "d259f8b205c2a8b68f9aee812e5cc158387edacd407a5efcdf393ed04c034c1b",
+    "scripts/acdata.py": "788efed2e6f0e5f1863a6aa8eef034ba1ced8d3f56ea153dacb8df078f4c7dc2",
     "scripts/validate_shortened.py": "fc752d12b1e8acd06257b7ce671dd5f5d618670fce26400a3afb77708722c581",
     "data/kn5_export_info.json": "1e988657fcf7fbd22efe8f53eef18cdaa07154cb449a133d0ef3da21ae5ab6f0"
   }

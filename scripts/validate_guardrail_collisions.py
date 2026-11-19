@@ -95,7 +95,8 @@ def validate_guardrails(parsed, source):
         if (match := re.match(r'^\d+([A-Z]+)', node['name']))
     }
     surface_keys = {config[section]['KEY'] for section in config.sections()}
-    assert physical_keys == surface_keys, (sorted(physical_keys), sorted(surface_keys))
+    assert 'WALL' not in surface_keys, 'WALL is a built-in collision type'
+    assert physical_keys - {'WALL'} == surface_keys, (sorted(physical_keys), sorted(surface_keys))
 
     return {
         'kn5_bytes': parsed['bytes'],

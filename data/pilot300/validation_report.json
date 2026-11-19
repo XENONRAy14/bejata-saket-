@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "checks": 763,
+  "checks": 764,
   "check_names": [
     "Main source unchanged: data/centerline.npz",
     "Main source unchanged: data/shortening_info.json",
@@ -23,6 +23,7 @@
     "Source road values preserved: width",
     "Terrain and physical cross-sections preserved",
     "Physics coefficients: surfaces.ini byte-identical",
+    "WALL uses built-in collision handling, not a declared driving surface",
     "KN5 matches its build SHA256",
     "All KN5 textures are embedded DDS with complete mip chains",
     "All KN5 meshes respect 16-bit vertex indices",

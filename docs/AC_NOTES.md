@@ -12,6 +12,7 @@ Every bracketed reference below resolves to a URL or a code inspection. Exporter
 | H | [Hagn exporter page](https://site.hagn.io/assettocorsa/blender-kn5-exporter), older Blender exporter; links to the maintained fork. |
 | S | Hagn's actual [sampletrack.zip](https://drive.google.com/uc?export=download&id=1z4qb3Pk3_jMIPvX1NvqUbCHA5q-kgqjh), found through its [embedded Drive folder](https://drive.google.com/embeddedfolderview?id=11Z3a-eEpCM70_AluyTLpPH6c7ohcmB8p). Downloaded to `~/tools/hagn-sampletrack.zip`; inspected ZIP contents directly, not run in AC. Paths below are inside this archive. |
 | HS | [Hagn surfaces.ini](https://site.hagn.io/assettocorsa/modding/tracks/data/surfaces-ini) |
+| WC | [Big problem with walls](https://assettocorsamods.net/threads/big-problem-with-walls.2061/), reported fix using stock surfaces.ini without a WALL declaration. |
 | HT | [Hagn track.kn5 logical objects](https://site.hagn.io/assettocorsa/modding/tracks/track-kn5) |
 | HU | [Hagn ui_track.json](https://site.hagn.io/assettocorsa/modding/tracks/ui/ui_track-json) |
 | HM | [Hagn map.ini](https://site.hagn.io/assettocorsa/modding/tracks/data/map-ini) |
@@ -27,15 +28,15 @@ Every bracketed reference below resolves to a URL or a code inspection. Exporter
 
 - [ ] Use names such as `1ROAD`, `2ROAD_x`, `1GRASS_003`: positive numeric prefix enables physical rolling surfaces; the surface keyword maps to `KEY=ROAD`, `KEY=GRASS`, etc. Suffixes do not change the surface. The number is **not** the `[SURFACE_n]` index; uniqueness or additional numeric meaning is not established (Hagn explicitly says unclear). [G §1A; HT]
 - [ ] Do not mix two surface keywords in one name (`1GRASS_road_blah`, etc.). [G #2, item 4]
-- [ ] Confirmed documented built-in rolling keys: **ROAD, GRASS, KERB, SAND**, defined in AC `system/data/surfaces.ini`. **GRAVEL is not established as built-in**: guide demonstrates it as a custom surface. `WALL` is a special collision keyword, not a confirmed standard rolling-surface parameter set. [G §1A; HS]
+- [ ] Confirmed documented built-in rolling keys: **ROAD, GRASS, KERB, SAND**, defined in AC `system/data/surfaces.ini`. **GRAVEL is not established as built-in**: guide demonstrates it as a custom surface. `WALL` is a built-in special collision type: **never declare `KEY=WALL` in surfaces.ini**. Declaring it as a rolling surface can make collision walls traversable. The generator emits only ROAD/KERB/GRASS/GRAVEL; the pilot copies that file. Keep `1WALL_*` collision mesh names unchanged. [G §1A; HS; WC]
 - [ ] `WALL` anywhere in a mesh name makes a collision obstacle, even without a digit; use `1WALL`, `2WALL`, etc. for consistency. Naming the collision mesh, not setting a material shader or `IS_VALID_TRACK`, is the documented trigger. [G §1A; HS]
-- **Glissières Béjaïa–Saket :** le candidat utilise une seule bande verticale par section, faces tournées vers la route, à la place du volume fermé. C’est le correctif rapporté pour une [traversée de mur sur Lausitzring](https://assettocorsamods.net/threads/wall-collision-issue.1490/). Les drapeaux KN5, les glissières visibles et `surfaces.ini` sont conservés pour isoler la géométrie. Le contrôle KN5 vérifie la couverture et le sens de chaque triangle ; il ne constitue pas un test moteur.
+- **Glissières Béjaïa–Saket :** le candidat utilise une seule bande verticale par section, faces tournées vers la route, à la place du volume fermé. C’est le correctif rapporté pour une [traversée de mur sur Lausitzring](https://assettocorsamods.net/threads/wall-collision-issue.1490/). Les drapeaux KN5 et les glissières visibles sont conservés ; la déclaration `KEY=WALL` est supprimée de `surfaces.ini` sans modifier les coefficients des surfaces de roulement. Le contrôle KN5 vérifie la couverture et le sens de chaque triangle ; il ne constitue pas un test moteur.
 - [ ] Track-local `data/surfaces.ini` is **not required when using default surfaces**; add custom surfaces (including a pit-lane surface) when needed. No need to duplicate all system defaults. Exact override/merge precedence if repeating built-in keys is **UNVERIFIED**. [G #7/#9, §folder structure]
 - [ ] Pit-lane recipe: custom `KEY=PITS-ZONE`, mesh `1PITS-ZONE`, `IS_PITLANE=1`; spawn empties alone do not define the pit-lane rolling surface. [G #3]
 
 ### Surface parameters — sourced examples, NOT a dump of stock defaults
 
-The following values are the **ASPHALT/KERB examples** in HS and `S:mytrack/data/surfaces.ini`. Exact installed Kunos defaults for ROAD/GRASS/KERB/SAND and any WALL/GRAVEL parameter set are **UNVERIFIED**: no Windows AC system file was available here. Do not label the ASPHALT sample as stock ROAD. [HS; S]
+The following values are the **ASPHALT/KERB examples** in HS and `S:mytrack/data/surfaces.ini`. Exact installed Kunos defaults for ROAD/GRASS/KERB/SAND and any GRAVEL parameter set are **UNVERIFIED**: no Windows AC system file was available here. WALL has no track-local rolling-surface definition. Do not label the ASPHALT sample as stock ROAD. [HS; S]
 
 | Parameter | Meaning / uncertainty | ASPHALT / KERB example |
 |---|---|---|

@@ -53,6 +53,24 @@ class ValidationTests(unittest.TestCase):
         self.assertTrue(passed,output)
         self.assertIn('VALIDATION_PASS checks=18 passed=18',output)
 
+    def test_wall_colliders_do_not_need_a_declared_surface(self):
+        parsed=scene()
+        parsed['nodes'].append(dict(parsed['nodes'][-1],name='1WALL_fixture'))
+        passed,output=self.run_check(parsed)
+        self.assertTrue(passed,output)
+
+    def test_declared_wall_surface_is_rejected(self):
+        (self.folder/'data/surfaces.ini').write_text('[SURFACE_0]\nKEY=ROAD\n[SURFACE_1]\nKEY=WALL\n')
+        passed,output=self.run_check(scene())
+        self.assertFalse(passed)
+        self.assertIn('FAIL mesh_names_and_surfaces: WALL is a built-in collision type',output)
+
+    def test_empty_surface_file_rejects_undefined_road(self):
+        (self.folder/'data/surfaces.ini').write_text('')
+        passed,output=self.run_check(scene())
+        self.assertFalse(passed)
+        self.assertIn('FAIL mesh_names_and_surfaces: undefined surface ROAD',output)
+
     def test_roadside_rejects_road_overlap(self):
         parsed=scene();detail=dict(parsed['nodes'][-1],name='DETAIL_fixture',lod_in=0,lod_out=1400)
         parsed['nodes'].append(detail)

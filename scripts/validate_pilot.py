@@ -130,6 +130,8 @@ def validate(require_previews=True):
     check(np.array_equal(data['sides'],expected_sides),'Terrain and physical cross-sections preserved')
     source_surface=ROOT/'out/bejaia_saket/data/surfaces.ini'
     check(source_surface.read_bytes()==(OUT/'data/surfaces.ini').read_bytes(),'Physics coefficients: surfaces.ini byte-identical')
+    surface_keys={section['KEY'] for section in parser(source_surface).values() if 'KEY' in section}
+    check('WALL' not in surface_keys,'WALL uses built-in collision handling, not a declared driving surface')
     path=OUT/'bejaia_saket_pilot300.kn5'
     report=inspect_kn5(path,geometry='all')
     with path.open('rb') as stream:check(sha(stream)==build['sha256'],'KN5 matches its build SHA256')
