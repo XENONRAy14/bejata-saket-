@@ -73,6 +73,7 @@ class QualificationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);source=root/'out/bejaia_saket';pilot=root/'out/bejaia_saket_pilot300'
             (source/'extension/trees').mkdir(parents=True);pilot.mkdir(parents=True)
+            (source/'ui').mkdir();(source/'ui/ui_track.json').write_text('{}')
             (root/'data/pilot300').mkdir(parents=True)
             baseline=source/'bejaia_saket.kn5';write(baseline,model());original=baseline.read_bytes()
             prototype=model();prototype['materials'][0]['raw']=string('forest_edge')+string('ksPerPixelAT')+b'\x00\x00'+uint(0)*3
@@ -89,6 +90,8 @@ class QualificationTests(unittest.TestCase):
                 report=json.loads((output/'scenery_report.json').read_text())
                 self.assertFalse(report['qualification_complete']);self.assertFalse(report['forest_floor_applied'])
                 self.assertTrue(report['physics_lock']['all_checksums_identical'])
+                self.assertIn('FILE=bejaia_saket.kn5',(output/'models.ini').read_text())
+                self.assertIn('qualification',json.loads((output/'ui/ui_track.json').read_text())['name'])
                 self.assertEqual((output/'PILOT_ASSET_CREDITS.md').read_bytes(),b'credit\n')
                 self.assertEqual((output/'extension/ext_config.ini').read_bytes(),(source/'extension/ext_config.ini').read_bytes())
                 self.assertEqual(baseline.read_bytes(),original)

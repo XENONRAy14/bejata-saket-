@@ -15,6 +15,9 @@ render uses the configured Blender binary and writes `before.png` / `after.png`
 at 1030 m, 1.25 m above the road, with the same camera and lighting.
 It approximates KN5 multilayer materials and TreeFX LODs, not CSP runtime shaders.
 The install copy retains the complete route; only summit 880–1180 m is treated.
+The separate `summit` track folder includes `models.ini` referencing its KN5 and
+a distinct qualification UI name. Install it as `content/tracks/summit`, not over
+the main `bejaia_saket` folder.
 
 ## Implementation and lock
 

@@ -23,6 +23,14 @@ def tree_line(plant,models):
         f"angle={-np.degrees(plant['angle']):.9g}; size={plant['scale']:.9g}; width={plant['width']:.9g}; color=1, 1, 1")
 
 
+def make_installable(output):
+    (output/'models.ini').write_text('[MODEL_0]\nFILE=bejaia_saket.kn5\nPOSITION=0,0,0\nROTATION=0,0,0\n')
+    path=output/'ui/ui_track.json';metadata=json.loads(path.read_text())
+    metadata['name']='RN24 Béjaïa–Saket — Summit scenery qualification'
+    metadata['description']='Separate summit scenery qualification build; not the main RN24 installation.'
+    path.write_text(json.dumps(metadata,ensure_ascii=False,indent=2)+'\n')
+
+
 def station_selector(data,s0,s1):
     index=cKDTree(data['xy'])
     def select(ac_points):
@@ -113,6 +121,7 @@ def qualify(sector='summit',output=None):
     lines=kept+[tree_line(plant,models) for plant in layout['trees']]
     if len(lines)>8000:raise ValueError('Combined TreeFX count exceeds 8000')
     shutil.copytree(source,output)
+    make_installable(output)
     (output/'PILOT_ASSET_CREDITS.md').write_text((ROOT/'out/bejaia_saket_pilot300/CREDITS.md').read_text())
     (output/'PILOT_ASSET_LICENSES.json').write_text((ROOT/'out/bejaia_saket_pilot300/LICENSES.json').read_text())
     write(output/'bejaia_saket.kn5',base)

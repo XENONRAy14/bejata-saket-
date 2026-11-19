@@ -1,6 +1,6 @@
 {
-  "name": "RN24 summit approach – Saket",
-  "description": "Shortened RN24: spawn exactly 1000m of 3D road before the graded summit, then the main descent toward Saket. Includes a 30m rear grid pad. Copernicus DSM-derived, not surveyed. © OpenStreetMap contributors; see CREDITS.md.",
+  "name": "RN24 Béjaïa–Saket — Summit scenery qualification",
+  "description": "Separate summit scenery qualification build; not the main RN24 installation.",
   "tags": [
     "point-to-point",
     "mountain",
