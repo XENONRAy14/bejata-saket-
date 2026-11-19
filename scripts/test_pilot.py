@@ -36,6 +36,11 @@ class SourceBaselineTests(unittest.TestCase):
                 lf=validate_pilot.source_baseline_hash('scene.blend')
         self.assertNotEqual(crlf,lf)
 
+    def test_archive_text_hash_uses_the_same_line_ending_normalization(self):
+        lf=validate_pilot.source_baseline_digest('settings.json',io.BytesIO(b'{\n}\n'))
+        crlf=validate_pilot.source_baseline_digest('settings.json',io.BytesIO(b'{\r\n}\r\n'))
+        self.assertEqual(lf,crlf)
+
 
 class PilotConfigTests(unittest.TestCase):
     source='''[GRASS_FX]

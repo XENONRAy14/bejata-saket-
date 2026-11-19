@@ -28,12 +28,16 @@ def sha(stream):
 TEXT_SOURCE_SUFFIXES={'.ini','.json','.py'}
 
 
-def source_baseline_hash(relative):
-    path=ROOT/relative
-    if path.suffix.lower() in TEXT_SOURCE_SUFFIXES:
-        content=path.read_bytes().replace(b'\r\n',b'\n').replace(b'\r',b'\n')
+def source_baseline_digest(relative,stream):
+    if Path(relative).suffix.lower() in TEXT_SOURCE_SUFFIXES:
+        content=stream.read().replace(b'\r\n',b'\n').replace(b'\r',b'\n')
         return hashlib.sha256(content).hexdigest()
-    with path.open('rb') as stream:return sha(stream)
+    return sha(stream)
+
+
+def source_baseline_hash(relative):
+    with (ROOT/relative).open('rb') as stream:
+        return source_baseline_digest(relative,stream)
 
 
 SOURCE_BASELINE_PATHS = [
@@ -71,8 +75,8 @@ def baseline():
     with zipfile.ZipFile(archive) as original:
         for relative in paths:
             name=next(n for n in original.namelist() if n==relative or n.endswith('/'+relative))
-            with original.open(name) as stream:hashes[relative]=sha(stream)
-            with (ROOT/relative).open('rb') as stream:assert sha(stream)==hashes[relative],('Source changed',relative)
+            with original.open(name) as stream:hashes[relative]=source_baseline_digest(relative,stream)
+            with (ROOT/relative).open('rb') as stream:assert source_baseline_digest(relative,stream)==hashes[relative],('Source changed',relative)
     result=dict(origin='Original src3 ZIP verified byte-for-byte',snapshot_commit=json.loads((ROOT/'PROJECT_SNAPSHOT.json').read_text())['commit'],files=hashes)
     dump(path,result)
     return result
