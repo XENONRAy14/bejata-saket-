@@ -1,10 +1,29 @@
 import configparser
 import unittest
+from pathlib import Path
+import tempfile
 
-from scenery_preview_common import tree_lod
+from scenery_preview_common import resolve_model, tree_lod
 
 
 class PreviewLodTests(unittest.TestCase):
+    def test_reference_model_resolves_manifest_folder_and_legacy_names(self):
+        with tempfile.TemporaryDirectory() as directory:
+            track=Path(directory);folder_model=track/(track.name+'.kn5');folder_model.touch()
+            self.assertEqual(resolve_model(track),folder_model)
+            model=track/'custom.kn5';model.touch();manifest=track/'models.ini'
+            manifest.write_text('[MODEL_0]\nFILE=custom.kn5\n',encoding='utf-8')
+            self.assertEqual(resolve_model(track),model)
+            manifest.write_text('[OTHER]\nFILE=custom.kn5\n')
+            with self.assertRaises(ValueError):resolve_model(track)
+            manifest.write_text('[MODEL_0]\nFILE=../outside.kn5\n')
+            with self.assertRaises(ValueError):resolve_model(track)
+            manifest.write_text('[MODEL_0]\nFILE=missing.kn5\n')
+            with self.assertRaises(FileNotFoundError):resolve_model(track)
+            manifest.unlink();folder_model.unlink()
+            with self.assertRaises(FileNotFoundError):resolve_model(track)
+            legacy=track/'bejaia_saket.kn5';legacy.touch();self.assertEqual(resolve_model(track),legacy)
+
     def config(self,distances):
         config=configparser.ConfigParser()
         for i,distance in enumerate(distances):config[f'LOD_{i}']={'DISTANCE':str(distance)}

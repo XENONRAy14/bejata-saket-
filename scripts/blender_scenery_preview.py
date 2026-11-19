@@ -16,7 +16,7 @@ from PIL import Image
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'scripts'))
 from pilot_common import frame, ground
 from scenery_kn5 import Reader, nodes, parse_tree, read
-from scenery_preview_common import tree_lod
+from scenery_preview_common import resolve_model, tree_lod
 from scenery_metrics import save_measurement, compare_views, polygon_mask
 from bpy_extras.object_utils import world_to_camera_view
 
@@ -171,7 +171,7 @@ def measurement(scene,output,label,data,station,reverse):
 def render(track,output,label,data,station,reverse=False,measure=False,beauty=True):
     bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
     folder=output/'preview_cache'/label;folder.mkdir(parents=True,exist_ok=True)
-    model=read(track/'bejaia_saket.kn5');textures={t['name']:t['blob'] for t in model['textures']}
+    model=read(resolve_model(track));textures={t['name']:t['blob'] for t in model['textures']}
     mats=[]
     for entry in model['materials']:
         texture=entry['textures'].get('txDiffuse')
