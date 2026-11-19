@@ -22,6 +22,18 @@ The separate `summit` track folder includes `models.ini` referencing its KN5 and
 a distinct qualification UI name. Install it as `content/tracks/summit`, not over
 the main `bejaia_saket` folder.
 
+For a clean runtime-only install folder plus ZIP, after qualification:
+
+```sh
+.venv/bin/python scripts/package_scenery.py
+```
+
+This creates `out/install_ready/bejaia_saket_summit/` and
+`out/install_ready/bejaia_saket_summit.zip`, refusing existing outputs. The KN5
+basename, folder ID and `models.ini` agree. UI metadata is distinct, and the ZIP
+contains `content/tracks/bejaia_saket_summit/`. Preview caches/images are excluded;
+credits and licenses are included. This remains a visually incomplete candidate.
+
 ## Implementation and lock
 
 `qualify_scenery.py` removes existing TreeFX placements in the sector and any
