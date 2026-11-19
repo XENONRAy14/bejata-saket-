@@ -69,7 +69,7 @@ def compare_views(output):
         new=np.asarray(Image.open(output/(after+'_pale_hillside.png')))/255
         foliage=np.asarray(Image.open(output/(after+'_foliage.png')))/255
         previous_foliage=np.asarray(Image.open(output/(before+'_foliage.png')))/255
-        hidden=np.minimum(old,np.maximum(0,foliage-previous_foliage))
+        hidden=np.minimum(np.maximum(0,old-new),np.maximum(0,foliage-previous_foliage))
         result[suffix or 'summit']=dict(before=a,after=b,baseline_pale_pixels=float(old.sum()),
             baseline_pale_remaining_pixels=float(np.minimum(old,new).sum()),baseline_pale_occluded_by_foliage_pixels=float(hidden.sum()),
             baseline_pale_occluded_by_foliage_share=float(hidden.sum()/max(1,old.sum())))

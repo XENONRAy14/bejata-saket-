@@ -54,5 +54,20 @@ class SceneryMetricsTests(unittest.TestCase):
             Image.new('L',(16,16)).save(output/'after_left_band.png')
             with self.assertRaises(ValueError):compare_views(output)
 
+    def test_foliage_growth_cannot_hide_unchanged_pale_coverage(self):
+        beauty,ids,bands=self.fixture()
+        with tempfile.TemporaryDirectory() as directory:
+            output=Path(directory)
+            for suffix in ('','_exit_reverse'):
+                save_measurement(output,'before'+suffix,beauty,ids,bands,(100,180))
+                after=ids.copy();after[:8]=[255,255,0]
+                save_measurement(output,'after'+suffix,beauty,after,bands,(100,180))
+            self.assertEqual(compare_views(output)['summit']['baseline_pale_occluded_by_foliage_pixels'],0)
+            for suffix in ('','_exit_reverse'):
+                after[:8]=[188,255,0]
+                save_measurement(output,'after'+suffix,beauty,after,bands,(100,180))
+            report=compare_views(output)['summit']
+            self.assertLessEqual(report['baseline_pale_occluded_by_foliage_pixels'],report['baseline_pale_pixels']-report['baseline_pale_remaining_pixels'])
+
 
 if __name__=='__main__':unittest.main()
