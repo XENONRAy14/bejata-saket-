@@ -1,6 +1,8 @@
 """Compile the CC0 pine prototypes to the project's documented TreeFX wire format."""
 import io
+import copy
 import json
+from pathlib import Path
 import struct
 from types import SimpleNamespace
 import zipfile
@@ -52,7 +54,9 @@ def groups_for_mesh(mesh,specs,texture_names,double_sided=False):
     return groups
 
 
-def impostors(proto,specs,height):
+def impostors(proto,specs,height,*,cache_dir=DATA,texture_dir=TEX):
+    cache_dir=Path(cache_dir);texture_dir=Path(texture_dir)
+    cache_dir.mkdir(parents=True,exist_ok=True);texture_dir.mkdir(parents=True,exist_ok=True)
     scene=bpy.data.scenes.new('__IMPOSTOR_BAKE')
     scene.render.engine='CYCLES';scene.cycles.samples=12;scene.cycles.use_denoising=False;scene.cycles.transparent_max_bounces=256
     scene.render.resolution_x=512;scene.render.resolution_y=1024;scene.render.resolution_percentage=100
@@ -69,7 +73,7 @@ def impostors(proto,specs,height):
         if original is None:
             links.new(emission.outputs[0],output.inputs[0]);return material
         spec=specs[original.name];texture=nodes.new('ShaderNodeTexImage')
-        texture.image=bpy.data.images.load(str(TEX/spec['textures']['txDiffuse']['textureName']),check_existing=True)
+        texture.image=bpy.data.images.load(str(texture_dir/spec['textures']['txDiffuse']['textureName']),check_existing=True)
         links.new(texture.outputs['Color'],emission.inputs['Color'])
         if spec['preview']['kind']=='foliage':
             threshold=nodes.new('ShaderNodeMath');threshold.operation='GREATER_THAN';threshold.inputs[1].default_value=.3
@@ -89,11 +93,11 @@ def impostors(proto,specs,height):
         camera_data.ortho_scale=span
         camera_obj.location=(math.sin(angle)*50,-math.cos(angle)*50,height/2)
         camera_obj.rotation_euler=(Vector((0,0,height/2))-camera_obj.location).to_track_quat('-Z','Y').to_euler()
-        path=DATA/f'{proto.name}_impostor_{view}.png';scene.render.filepath=str(path)
+        path=cache_dir/f'{proto.name}_impostor_{view}.png';scene.render.filepath=str(path)
         bpy.ops.render.render(write_still=True,scene=scene.name)
         with Image.open(path) as image:
             foliage_image_metrics(image)
-            name=dds(image.copy(),TEX/f'{proto.name}_impostor_{view}.dds',coverage=True)
+            name=dds(image.copy(),texture_dir/f'{proto.name}_impostor_{view}.dds',coverage=True)
         half=span/4
         low=height/2-span/2;high=height/2+span/2
         points=[-right*half+[0,0,low],right*half+[0,0,low],right*half+[0,0,high],-right*half+[0,0,high]]
@@ -119,8 +123,9 @@ def reduce_card_views(mesh):
     bm.to_mesh(mesh);bm.free();mesh.update()
 
 
-def compile_models(prototypes,specs):
-    folder=OUT/'extension/trees';folder.mkdir(parents=True,exist_ok=True)
+def compile_models(prototypes,specs,*,output_dir=OUT/'extension/trees',cache_dir=DATA,texture_dir=TEX):
+    folder=Path(output_dir);cache_dir=Path(cache_dir);texture_dir=Path(texture_dir)
+    folder.mkdir(parents=True,exist_ok=True);cache_dir.mkdir(parents=True,exist_ok=True)
     models={};background_previews=[]
     for proto in prototypes:
         if not proto.name.startswith(('PH_pine_0','PH_pine_sapling','PH_shrub_')):continue
@@ -135,10 +140,10 @@ def compile_models(prototypes,specs):
             for slot in ('txDiffuse','txNormal'):
                 name=specs[material.name]['textures'][slot]['textureName']
                 if name not in texture_names:texture_names.append(name)
-        far_groups,far_names=impostors(proto,specs,height)
+        far_groups,far_names=impostors(proto,specs,height,cache_dir=cache_dir,texture_dir=texture_dir)
         texture_names.extend(far_names)
         if 'flat_normal.dds' not in texture_names:texture_names.append('flat_normal.dds')
-        textures={name:(TEX/name).read_bytes() for name in texture_names}
+        textures={name:(texture_dir/name).read_bytes() for name in texture_names}
         config=f'[BASIC]\nHEIGHT={height:.9g}\nWIDTH={radius*2:.9g}\n[SHADING]\nSPECULAR=1\nSUBSCATTERING=1\nREFLECTIVITY=1\nBRIGHTNESS=1\nUSE_AO_CHANNEL=0\n[NORMALS]\nBOOST=0.9\nSPHERE=1\n[LEAVES]\nMULT=20\nOFFSET=0\n[FAKE_SHADOW]\nSIZE=1\nOPACITY=1\n'
         payloads=dict(textures);lod_metrics=[]
         shrub=source_name.startswith('PH_shrub_')
@@ -202,7 +207,9 @@ def compile_models(prototypes,specs):
                 material_name=f'{background_name}_card_{view}'
                 spec=dict(shaderName='ksPerPixelAT',alphaBlendMode='Opaque',alphaTested=True,depthMode='DepthNormal',properties=properties(ksAmbient=.4,ksDiffuse=.6,ksSpecular=0),textures=dict(txDiffuse=dict(textureName=texture)),preview=dict(kind='foliage',roughness=1))
                 specs[material_name]=spec
-                material=bpy.data.materials.new(material_name);material_nodes(material,spec);materials.append(material)
+                material=bpy.data.materials.new(material_name);preview=copy.deepcopy(spec)
+                for entry in preview['textures'].values():entry['textureName']=str(texture_dir.resolve()/entry['textureName'])
+                material_nodes(material,preview);materials.append(material)
             background=object_mesh(background_name,vertices,faces,materials[0],uv)
             for material in materials[1:]:background.data.materials.append(material)
             for face,index in zip(background.data.polygons,face_materials):face.material_index=index
@@ -225,5 +232,5 @@ def compile_models(prototypes,specs):
             background_previews.append(medium_preview)
             models[medium_name]=dict(kind='midstory',file=medium_file,lods=[lod_metrics[1],lod_metrics[1],lod_metrics[2]],bytes=(folder/medium_file).stat().st_size,height=height,width=radius*2)
     prototypes.extend(background_previews)
-    dump(DATA/'treefx_models.json',models)
+    dump(cache_dir/'treefx_models.json',models)
     return models

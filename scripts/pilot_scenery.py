@@ -1,41 +1,14 @@
 """Deterministic, layered roadside scenery made only from the project's CC0 sources."""
-import math
+from pathlib import Path
 
-from pilot_common import DATA, Image, np, frame, ground, foliage_image_metrics
-
-
-def vista_open(station, length, side, sea_side):
-    return side == sea_side and .68 * length < station < .83 * length
+from pilot_common import DATA, Image, np, foliage_image_metrics
+from scenery_placement import edge_layout, vista_open
 
 
-def edge_layout(data, sea_side):
-    rng = np.random.default_rng(24025)
-    length = float(data['s3'][-1])
-    result = []
-    for side in (0, 1):
-        for tier, spacing in enumerate((2.8, 4.2)):
-            for station in np.arange(3, length - 2, spacing):
-                station = float(np.clip(station + rng.uniform(-.3, .3), 2, length - 2))
-                if vista_open(station, length, side, sea_side):
-                    continue
-                width = float(rng.uniform(*((3.5,4.5),(4.8,6.0))[tier]))
-                height = float(rng.uniform(*((1.4,1.9),(2.5,3.3))[tier]))
-                half_road = float(np.interp(station, data['s3'], data['width'])) / 2
-                offset = half_road + (2.5, 6.3)[tier] + width / 2
-                _, tangent, _ = frame(data, station)
-                result.append(dict(
-                    station=station, side=side, tier=tier, offset=offset,
-                    position=ground(data, station, side, offset).tolist(),
-                    width=width, height=height,
-                    angle=math.atan2(tangent[1], tangent[0]) + float(rng.uniform(-.17, .17)),
-                    variant=int(rng.integers(4)),
-                ))
-    return result
-
-
-def forest_edge_atlas():
-    pines = sorted(DATA.glob('PH_pine_0*_impostor_0.png'))
-    shrubs = sorted(DATA.glob('PH_shrub_canopy_impostor_*.png'))
+def forest_edge_atlas(*,cache_dir=DATA,output_path=None):
+    cache_dir=Path(cache_dir)
+    pines = sorted(cache_dir.glob('PH_pine_0*_impostor_0.png'))
+    shrubs = sorted(cache_dir.glob('PH_shrub_canopy_impostor_*.png'))
     if len(pines)<3 or len(shrubs)!=4:
         raise ValueError('Build the CC0 pine and shrub impostors before the forest-edge atlas')
     def crop(path, crown=False):
@@ -69,7 +42,8 @@ def forest_edge_atlas():
         tile=Image.fromarray(pixels)
         metrics.append(foliage_image_metrics(tile))
         atlas.paste(tile,((variant%2)*512,(variant//2)*512))
-    path=DATA/'forest_edge_atlas.png';atlas.save(path)
+    path=Path(output_path) if output_path is not None else cache_dir/'forest_edge_atlas.png'
+    path.parent.mkdir(parents=True,exist_ok=True);atlas.save(path)
     return path,dict(sources=[p.name for p in shrubs],variants=4,size=[1024,1024],
                     tiles=metrics,source_license='CC0-1.0',
                     method='Full small-leaf shrubs at realistic scale; individual pine impostors form the separate background')

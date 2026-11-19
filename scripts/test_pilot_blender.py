@@ -1,5 +1,7 @@
 """Regression test against Blender's real polygon/material-slot behaviour."""
 from pathlib import Path
+import json
+import tempfile
 import sys,unittest
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 import bpy
@@ -63,7 +65,17 @@ class CardLodTests(unittest.TestCase):
         self.assertEqual(len(mesh.uv_layers.active.data),4)
         bpy.data.meshes.remove(mesh)
 
-suite=unittest.TestSuite([unittest.defaultTestLoader.loadTestsFromTestCase(MaterialSlotRegressionTests),unittest.defaultTestLoader.loadTestsFromTestCase(CardLodTests),unittest.defaultTestLoader.loadTestsFromTestCase(GuardrailStageTests)])
+class OutputDirectoryTests(unittest.TestCase):
+    def test_tree_compiler_uses_explicit_output_and_cache(self):
+        from pilot_treefx import compile_models
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            models=compile_models([],{},output_dir=root/'trees',cache_dir=root/'cache',texture_dir=root/'textures')
+            self.assertEqual(models,{})
+            self.assertTrue((root/'trees').is_dir())
+            self.assertEqual(json.loads((root/'cache/treefx_models.json').read_text()),{})
+
+suite=unittest.TestSuite([unittest.defaultTestLoader.loadTestsFromTestCase(MaterialSlotRegressionTests),unittest.defaultTestLoader.loadTestsFromTestCase(CardLodTests),unittest.defaultTestLoader.loadTestsFromTestCase(GuardrailStageTests),unittest.defaultTestLoader.loadTestsFromTestCase(OutputDirectoryTests)])
 result=unittest.TextTestRunner(verbosity=2).run(suite)
 if not result.wasSuccessful():raise RuntimeError('Blender material-slot regression')
 print('PILOT_BLENDER_REGRESSION_OK',result.testsRun)

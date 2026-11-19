@@ -176,19 +176,20 @@ def image_pixels(image_or_path,mode='RGB',size=1024):
 def properties(**values):return {key:dict(valueA=float(value)) for key,value in values.items()}
 
 
-def pbr_material(name,diffuse,normal=None,roughness=None,alpha=None,metal=False,foliage=False):
+def pbr_material(name,diffuse,normal=None,roughness=None,alpha=None,metal=False,foliage=False,*,texture_dir=TEX):
+    texture_dir=Path(texture_dir);texture_dir.mkdir(parents=True,exist_ok=True)
     stem='PH_'+''.join(c if c.isalnum() else '_' for c in name)
     color=image_pixels(diffuse,'RGBA')
     rough=image_pixels(roughness,'L') if roughness is not None else Image.new('L',color.size,155)
     if alpha is not None:color.putalpha(image_pixels(alpha,'L'))
-    diffuse_name=dds(color,TEX/(stem+'_diff.dds'),coverage=foliage)
+    diffuse_name=dds(color,texture_dir/(stem+'_diff.dds'),coverage=foliage)
     if normal is not None:
         array=np.asarray(image_pixels(normal,'RGB')).copy();array[:,:,1]=255-array[:,:,1]
-        normal_name=dds(Image.fromarray(array),TEX/(stem+'_normal.dds'))
+        normal_name=dds(Image.fromarray(array),texture_dir/(stem+'_normal.dds'))
     else:normal_name='flat_normal.dds'
     r=np.asarray(rough,dtype=np.float32)/255;gloss=1-r
     packed=np.stack([(.35 if metal else .12)*gloss+.04,.12+.8*gloss**2,(.55 if metal else .08)*gloss+.025],axis=2)
-    maps_name=dds(Image.fromarray(np.uint8(np.clip(packed*255,0,255))),TEX/(stem+'_maps.dds'))
+    maps_name=dds(Image.fromarray(np.uint8(np.clip(packed*255,0,255))),texture_dir/(stem+'_maps.dds'))
     textures=dict(txDiffuse=dict(textureName=diffuse_name),txNormal=dict(textureName=normal_name),txMaps=dict(textureName=maps_name),txDetail=dict(textureName='white.dds'))
     spec=dict(shaderName='ksPerPixelMultiMap',alphaBlendMode='Opaque',alphaTested=False,depthMode='DepthNormal',properties=properties(ksAmbient=.4,ksDiffuse=.6,ksSpecular=.5 if metal else .12,ksSpecularEXP=65 if metal else 24,fresnelC=.12 if metal else .015,fresnelEXP=5,fresnelMaxLevel=.6 if metal else .12,isAdditive=0,useDetail=0,detailUVMultiplier=1),textures=textures,preview=dict(kind='simple',tile_m=1,roughness=float(r.mean())))
     if foliage:

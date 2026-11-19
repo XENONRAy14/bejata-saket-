@@ -22,6 +22,7 @@ from check_kn5 import inspect_kn5
 from pilot_treefx import compile_models, impostors
 from pilot_shrubs import load_shrubs
 from pilot_scenery import edge_layout, forest_edge_atlas, vista_open
+from scenery_placement import edge_batches, pilot_tree_layout, plan_sector, RoadClearance, sea_sides, load_zones, zone_contains
 
 
 def shade_foliage(material):
@@ -158,15 +159,20 @@ def terrain_detail(data,prototypes,info,mountain_side):
     return wall
 
 
-def forest_edges(data, info, sea_side):
-    atlas, atlas_metrics = forest_edge_atlas()
-    spec = pbr_material('forest_edge', atlas, foliage=True)
+def forest_edges(data, info, sea_side=None,*,cache_dir=DATA,texture_dir=TEX,s0=None,s1=None,zones=None):
+    cache_dir=Path(cache_dir);cache_dir.mkdir(parents=True,exist_ok=True)
+    pilot=s0 is None and s1 is None and sea_side is not None
+    profile=load_zones()['pilot' if pilot else 'main'] if zones is None else zones
+    atlas, atlas_metrics = forest_edge_atlas(cache_dir=cache_dir)
+    spec = pbr_material('forest_edge', atlas, foliage=True,texture_dir=texture_dir)
     spec['textures'] = {'txDiffuse': spec['textures']['txDiffuse']}
     spec['alphaBlendMode'] = 'Opaque'
     spec['properties']['ksSpecular']['valueA'] = 0
     info['materials']['forest_edge'] = spec
     material = bpy.data.materials.new('forest_edge')
-    material_nodes(material, spec)
+    preview=copy.deepcopy(spec)
+    for entry in preview['textures'].values():entry['textureName']=str(Path(texture_dir).resolve()/entry['textureName'])
+    material_nodes(material, preview)
     shade_foliage(material)
     nodes = material.node_tree.nodes
     links = material.node_tree.links
@@ -179,40 +185,16 @@ def forest_edges(data, info, sea_side):
     links.new(surface, backface.inputs[1])
     links.new(transparent.outputs[0], backface.inputs[2])
     links.new(backface.outputs[0], output.inputs['Surface'])
-    layout = edge_layout(data, sea_side)
+    if pilot:
+        layout = edge_layout(data,sea_side,zones=profile)
+    else:
+        layout = edge_layout(data,sea_side,s0=s0,s1=s1,zones=profile)
+        road=RoadClearance(data);sea=sea_sides(data,profile.get('side_smoothing_m',30))
+        layout=[p for p in layout if road.allows(p['position'],p['width']/2,profile.get('road_clearance_m',4))
+                and not zone_contains(p['station'],p['side'],sea(p['station']),profile,'exclusions','edge',p['width']/2)]
     totals = {}
     for distant in (False, True):
-        groups = {}
-        for plant in layout:
-            key = (int(plant['station'] // 40), plant['side'])
-            vertices, faces, uvs, normals = groups.setdefault(key, ([], [], [], []))
-            _, tangent, left = frame(data, plant['station'])
-            outward = left * (1 if plant['side'] == 0 else -1)
-            col, row = plant['variant'] % 2, plant['variant'] // 2
-            tile_uv = [((col + u) / 2, 1 - (row + v) / 2)
-                       for u, v in ((.002,.998),(.998,.998),(.998,.002),(.002,.002))]
-            for plane in range(1 if distant else 2):
-                angle = plant['angle'] + plane * math.pi / 2
-                right = np.array([math.cos(angle), math.sin(angle), 0.])
-                endpoints = []
-                for sign in (-1, 1):
-                    delta = right * plant['width'] / 2 * sign
-                    station = float(np.clip(plant['station'] + delta @ tangent, 0, data['s3'][-1]))
-                    offset = float(plant['offset'] + delta @ outward)
-                    point = ground(data, station, plant['side'], offset)
-                    point[2] -= .3
-                    endpoints.append(point)
-                points = [endpoints[0], endpoints[1],
-                          endpoints[1] + [0,0,plant['height']],
-                          endpoints[0] + [0,0,plant['height']]]
-                horizontal = np.cross(right, [0,0,1])
-                for sign in (1, -1):
-                    offset = len(vertices)
-                    vertices.extend(points)
-                    faces.append(tuple(offset + i for i in ((0,1,2,3) if sign == 1 else (3,2,1,0))))
-                    uvs.extend(tile_uv)
-                    normal = horizontal * sign * .6 + [0,0,.8]
-                    normals.extend([normal] * 4)
+        groups = edge_batches(data,layout,distant=distant)
         prefix = 'LOD_EDGE' if distant else 'DETAIL_EDGE'
         triangles = 0
         for (chunk, side), (vertices, faces, uvs, normals) in groups.items():
@@ -225,71 +207,25 @@ def forest_edges(data, info, sea_side):
         totals['far' if distant else 'near'] = dict(meshes=len(groups), triangles=triangles)
     result = dict(atlas=atlas_metrics, clumps=len(layout), lods=totals,
                   native_slope_preserved=True, physical_ground_limit_m_from_center=13.3,
-                  vista_fraction=[.68,.83], ac_runtime_verified=False)
-    dump(DATA/'edge_layout.json', layout)
-    dump(DATA/'scenery_report.json', result)
+                  vista_openings=profile['vista_openings'], ac_runtime_verified=False)
+    dump(cache_dir/'edge_layout.json', layout)
+    dump(cache_dir/'scenery_report.json', result)
     return result
 
 
-def scatter_trees(data,models,sea_side):
-    rng=np.random.default_rng(24024);plants=[]
-    kinds=[name for name in models if name.startswith('PH_pine_0')]
-    for side in (0,1):
-        for row,spacing in ((0,9.5),(1,16),(2,9.5)):
-            for station in np.arange(8,295,spacing):
-                station=float(np.clip(station+rng.uniform(-1.3,1.3),4,296))
-                if side==sea_side and 205<station<248:continue
-                if row==2 and side==sea_side:continue
-                width=float(np.interp(station,data['s3'],data['width']))
-                offset=width/2+(5.3 if row==0 else 13 if row==1 else 27)+float(rng.uniform(0,2.5))
-                point=ground(data,station,side,offset);point[2]-=.12
-                species=kinds[int(rng.integers(len(kinds)))];scale=float(rng.uniform(.68,.96))
-                broad=float(rng.uniform(1.35,1.6) if row==0 else rng.uniform(1.08,1.25))
-                if row==0 and 65<station<85:broad=1.5
-                plants.append(dict(model=species,position=point.tolist(),angle=float(rng.uniform(0,2*np.pi)),scale=scale,width=broad,station=station,side=side,offset=offset))
-        for station in np.arange(8,295,10.5):
-            if side==sea_side and 210<station<244:continue
-            width=float(np.interp(station,data['s3'],data['width']))
-            offset=width/2+float(rng.uniform(3,6.5))
-            point=ground(data,float(station),side,offset);point[2]-=.08
-            plants.append(dict(model='PH_pine_sapling_small_a',position=point.tolist(),angle=float(rng.uniform(0,2*np.pi)),scale=float(rng.uniform(1.1,1.9)),width=1.2,station=float(station),side=side,offset=offset))
-    middle=[name for name in models if name.startswith('PH_pine_mid_')]
-    mountain=1-sea_side
-    groups=((28,mountain),(50,mountain),(74,mountain),(89,sea_side),(103,mountain),(117,sea_side),(133,mountain),(149,sea_side),(163,mountain),(178,sea_side),(190,mountain),(257,mountain),(272,sea_side),(286,mountain))
-    for station,side in groups:
-        for delta in (-2.4,2.4):
-            s=float(station+delta)
-            species=middle[int(rng.integers(len(middle)))]
-            scale=float(rng.uniform(6,8))/models[species]['height']
-            half=float(np.interp(s,data['s3'],data['width']))/2
-            offset=half+float(rng.uniform(5.5,8.5))
-            point=ground(data,s,side,offset);point[2]-=.12
-            plants.append(dict(model=species,position=point.tolist(),angle=float(rng.uniform(0,2*np.pi)),scale=scale,width=1.35,station=s,side=side,offset=offset))
-    backgrounds=[name for name in models if name.startswith('PH_pine_bg_')]
-    for side in (0,1):
-        for station in np.arange(5,297,7):
-            if vista_open(station,300,side,sea_side):continue
-            species=backgrounds[int(rng.integers(len(backgrounds)))];scale=float(rng.uniform(.72,1.0))
-            half=float(np.interp(station,data['s3'],data['width']))/2
-            offset=half+float(rng.uniform(34,38))
-            point=ground(data,float(station),side,offset);point[2]-=.15
-            plants.append(dict(model=species,position=point.tolist(),angle=float(rng.uniform(0,2*np.pi)),scale=scale,width=1.15,station=float(station),side=side,offset=offset))
-    shrubs=[name for name in models if name.startswith('PH_shrub_')]
-    for side in (0,1):
-        for station in np.arange(6,296,11):
-            if vista_open(station,300,side,sea_side):continue
-            species=shrubs[int(rng.integers(len(shrubs)))];scale=float(rng.uniform(1.15,1.55));broad=float(rng.uniform(1.05,1.3))
-            half=float(np.interp(station,data['s3'],data['width']))/2
-            radius=models[species]['width']/2*math.sqrt(2)*scale*broad
-            offset=half+2.5+radius
-            point=ground(data,float(station),side,offset);point[2]-=.05
-            plants.append(dict(model=species,position=point.tolist(),angle=float(rng.uniform(0,2*np.pi)),scale=scale,width=broad,station=float(station),side=side,offset=offset))
+def scatter_trees(data,models,sea_side=None,*,output_dir=OUT,cache_dir=DATA,s0=None,s1=None,zones=None):
+    output_dir=Path(output_dir);cache_dir=Path(cache_dir)
+    (output_dir/'extension/trees').mkdir(parents=True,exist_ok=True);cache_dir.mkdir(parents=True,exist_ok=True)
+    if s0 is None and s1 is None and sea_side is not None:
+        plants=pilot_tree_layout(data,models,sea_side,zones=zones)
+    else:
+        plants=plan_sector(data,models,s0,s1,zones=zones)['trees']
     lines=[]
     for plant in plants:
         x,y,z=plant['position'];angle=-math.degrees(plant['angle'])
         lines.append(f"tree: {models[plant['model']]['file']}; pos={x:.9g}, {z:.9g}, {-y:.9g}; angle={angle:.9g}; size={plant['scale']:.9g}; width={plant['width']:.9g}; color=1, 1, 1")
-    (OUT/'extension/trees/trees.txt').write_text('\n'.join(lines)+'\n',encoding='utf-8')
-    dump(DATA/'plants.json',plants)
+    (output_dir/'extension/trees/trees.txt').write_text('\n'.join(lines)+'\n',encoding='utf-8')
+    dump(cache_dir/'plants.json',plants)
     return plants
 
 
