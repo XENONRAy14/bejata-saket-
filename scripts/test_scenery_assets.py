@@ -5,16 +5,34 @@ import tempfile
 import unittest
 import zipfile
 from pathlib import Path
+import configparser
 
 import numpy as np
 from PIL import Image
 
-from scenery_assets import canopy_atlas, card_lod_groups, dds_blob, foliage_tint, litter_texture, shrub_cluster, wire_groups
+from scenery_assets import canopy_atlas, card_lod_groups, dds_blob, foliage_tint, litter_texture, repair_pine_archive, shrub_cluster, wire_groups
+from scenery_preview_common import tree_lod
 from pilot_common import resize_channels
 from treefx_wire import mesh_blob, read_mesh
 
 
 class CardLodTests(unittest.TestCase):
+    def test_qualification_pines_keep_volume_until_150m(self):
+        root=Path(__file__).resolve().parents[1]/'out/bejaia_saket_pilot300/extension/trees'
+        with tempfile.TemporaryDirectory() as directory:
+            target=Path(directory)/'pine.bin'
+            for name in ('ph_pine_01.bin','ph_pine_mid_01.bin'):
+                repair_pine_archive(root/name,target,impostor_distance=150)
+                with zipfile.ZipFile(target) as archive:
+                    config=configparser.ConfigParser();config.read_string(archive.read('tree.ini').decode())
+                    for distance in (0,27.99,28,149.99,150):
+                        lod=tree_lod(config,distance);_,groups=wire_groups(archive.read(config[f'LOD_{lod}']['MODEL']))
+                        triangles=sum(len(p.faces) for _,_,p in groups)
+                        if distance<150:self.assertEqual(triangles,20000)
+                        else:self.assertEqual(triangles,16)
+            for distance in (149,float('nan')):
+                with self.assertRaises(ValueError):repair_pine_archive(root/'ph_pine_01.bin',target,impostor_distance=distance)
+
     def test_three_crown_cluster_preserves_source_triangles_and_group_limits(self):
         source=Path(__file__).resolve().parents[1]/'out/bejaia_saket_pilot300/extension/trees/ph_shrub_01.bin'
         with tempfile.TemporaryDirectory() as directory:

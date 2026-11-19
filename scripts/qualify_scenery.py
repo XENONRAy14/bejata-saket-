@@ -14,7 +14,8 @@ from scipy.spatial import cKDTree
 
 from scenery_placement import edge_batches, load_zones, plan_sector
 from scenery_kn5 import assign_material, clone_material, mesh, nodes, parse_tree, read, string, subset, uint, validate_lock, write
-from scenery_assets import back_pine_atlas, dds_blob, edge_atlas, foliage_tint, ground_mask, litter_texture, repair_pine_archive, shrub_cluster
+from scenery_assets import dds_blob, edge_atlas, foliage_tint, ground_mask, litter_texture, repair_pine_archive, shrub_cluster
+from summit_scenery import hedge_signature, natural_summit
 from pilot_common import resize_channels
 from treefx_wire import vector_ac
 
@@ -120,7 +121,14 @@ def qualify(sector='summit',output=None):
     cluster=ROOT/'out/scenery_cache/summit_shrub_cluster.bin'
     if 'PH_shrub_01' in models:models['PH_shrub_cluster_01']=shrub_cluster(ROOT/'out/bejaia_saket_pilot300/extension/trees/ph_shrub_01.bin',cluster)
     dense_models={name:dict(spec) for name,spec in models.items() if name not in ('PH_shrub_01','PH_shrub_02')}
-    layout=plan_sector(data,dense_models,s0,s1,zones=zones);select=station_selector(data,s0,s1)
+    accepted=plan_sector(data,dense_models,s0,s1,zones=zones)
+    hedge_lock={}
+    if accepted['trees']:
+        hedge_lock=json.loads((ROOT/'data/summit_hedge_lock.json').read_text())
+        signature=hedge_signature(accepted)
+        if any(hedge_lock[key]!=value for key,value in signature.items()) or hashlib.sha256(cluster.read_bytes()).hexdigest()!=hedge_lock['archive_sha256']:
+            raise ValueError('Accepted Searsia hedge changed; requalification required')
+    layout=natural_summit(data,dense_models,accepted,config['main']);select=station_selector(data,s0,s1)
     base=read(baseline);pilot=read(ROOT/'out/bejaia_saket_pilot300/bejaia_saket_pilot300.kn5')
     original_nodes={node['name']:node['raw'] for node in nodes(base)}
     materials=import_materials(base,pilot,('forest_edge',))
@@ -128,8 +136,6 @@ def qualify(sector='summit',output=None):
         image=foliage_tint(edge_atlas(ROOT/'out/bejaia_saket_pilot300/extension/trees/ph_pine_01.bin',pilot))
         add_texture(base,'SUMMIT_forest_edge.dds',image,coverage=True)
         index=materials['forest_edge'];base['materials'][index]=clone_material(base['materials'][index],'forest_edge',dict(txDiffuse='SUMMIT_forest_edge.dds'))
-        add_texture(base,'SUMMIT_back_pines.dds',back_pine_atlas(ROOT/'out/bejaia_saket_pilot300/extension/trees/ph_pine_bg_01.bin'),coverage=True)
-        materials['back_pines']=len(base['materials']);base['materials'].append(clone_material(base['materials'][index],'back_pines',dict(txDiffuse='SUMMIT_back_pines.dds')))
     floor_triangles,floor_materials=forest_ground(base,pilot,station_selector(data,s0,s1,verge=.8));legacy_triangles=0
     def modify(parent):
         nonlocal legacy_triangles
@@ -147,8 +153,8 @@ def qualify(sector='summit',output=None):
             legacy_triangles+=int(mask.sum())
         parent['children']=children
     modify(base['root'])
-    for kind,distant in product(('forest_edge','back_pines'),(False,True)):
-        plants=[p for p in layout['edges'] if (p['tier']==2)==(kind=='back_pines')]
+    for kind,distant in product(('forest_edge',),(False,True)):
+        plants=layout['edges']
         for (chunk,side),(vertices,quads,uv,normals) in edge_batches(data,plants,distant=distant).items():
             values=np.zeros((len(vertices),11),dtype='<f4');values[:,:3]=vector_ac(vertices);values[:,3:6]=vector_ac(normals)
             values[:,6:8]=np.asarray(uv)*[1,-1]
@@ -173,6 +179,17 @@ def qualify(sector='summit',output=None):
         else:kept.append(line)
     lines=kept+[tree_line(plant,models) for plant in layout['trees']]
     if len(lines)>8000:raise ValueError('Combined TreeFX count exceeds 8000')
+    budget={}
+    if layout['trees']:
+        sea=next(s for s in config['report_sectors'] if s['name']=='sea_view')
+        original_models={name:spec for name,spec in models.items() if name!='PH_shrub_cluster_01'}
+        sea_report=plan_sector(data,original_models,sea['start_m'],sea['end_m'],zones=config['main'])['report']
+        saved=sea_report['sector_tree_limit']-sea_report['tree_instances']
+        extra=layout['report']['sector_tree_limit']-accepted['report']['sector_tree_limit']
+        ceiling=accepted['report']['full_route_budget_ceiling']+extra-saved
+        if ceiling>8000:raise ValueError('Local density exceeds whole-route allocation')
+        budget=dict(sea_view=sea_report,sea_view_reserved_saving=saved,summit_extra_allowance=extra,full_route_allocated_ceiling=ceiling,
+            actual_whole_route_average_per_100m=len(lines)*100/float(data['s3'][-1]-data['s3'][0]))
     shutil.copytree(source,output)
     make_installable(output)
     (output/'PILOT_ASSET_CREDITS.md').write_text((ROOT/'out/bejaia_saket_pilot300/CREDITS.md').read_text())
@@ -181,7 +198,8 @@ def qualify(sector='summit',output=None):
     folder=output/'extension/trees';(folder/'trees.txt').write_text('\n'.join(lines)+'\n')
     repaired={}
     for name in sorted({models[plant['model']]['file'] for plant in layout['trees']}):
-        repaired[name]=repair_pine_archive(cluster if name==cluster.name else ROOT/'out/bejaia_saket_pilot300/extension/trees'/name,folder/name)
+        repaired[name]=repair_pine_archive(cluster if name==cluster.name else ROOT/'out/bejaia_saket_pilot300/extension/trees'/name,folder/name,
+            impostor_distance=150 if name.startswith(('ph_pine_0','ph_pine_mid_')) else None)
     used={parse_tree(line)['model'] for line in lines}
     for archive in folder.glob('*.bin'):
         if archive.name not in used:archive.unlink()
@@ -193,7 +211,7 @@ def qualify(sector='summit',output=None):
     physics=validate_lock(baseline,output/'bejaia_saket.kn5')
     added=[n for n in nodes(base) if n['name'].startswith('SCENERY_')]
     meshes=[n for n in nodes(base) if n['kind']==2]
-    report=dict(sector=sector,placement=layout['report'],old_tree_instances_removed=removed,
+    report=dict(sector=sector,placement=layout['report'],old_tree_instances_removed=removed,route_budget=budget,hedge_lock=hedge_lock,
         grass_verge_m=.8,visual_shrub_clearance_m=.45,other_vegetation_clearance_m=4,
         shrub_cluster_crowns_per_instance=3,shrub_cluster_lods=models.get('PH_shrub_cluster_01',{}).get('lods'),
         tree_layer_counts={kind:sum(models[p['model']]['kind']==kind for p in layout['trees']) for kind in ('shrub','midstory','background','pine')},

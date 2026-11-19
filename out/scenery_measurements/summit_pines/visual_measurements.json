@@ -1,0 +1,126 @@
+{
+  "summit": {
+    "before": {
+      "coverage": {
+        "left": {
+          "band_pixels": 92482,
+          "foliage_pixels": 63918.0,
+          "foliage_share": 0.6911398974935663,
+          "passed": false,
+          "fixed_barrier_pixels": 0.0,
+          "foliage_share_excluding_fixed_barriers": 0.6911398974935663
+        },
+        "right": {
+          "band_pixels": 83658,
+          "foliage_pixels": 54292.0,
+          "foliage_share": 0.6489755910970858,
+          "passed": false,
+          "fixed_barrier_pixels": 0.0,
+          "foliage_share_excluding_fixed_barriers": 0.6489755910970858
+        }
+      },
+      "pale_hillside_pixels": 483.0,
+      "hillside_roi_pixels": 381213,
+      "pale_hillside_share_of_frame": 0.0005240885416666666,
+      "pale_hillside_share_of_roi": 0.0012670082080096954,
+      "treated_station_interval_m": [
+        1035.5,
+        1115.5
+      ]
+    },
+    "after": {
+      "coverage": {
+        "left": {
+          "band_pixels": 92482,
+          "foliage_pixels": 56031.0,
+          "foliage_share": 0.6058584373175321,
+          "passed": false,
+          "fixed_barrier_pixels": 0.0,
+          "foliage_share_excluding_fixed_barriers": 0.6058584373175321
+        },
+        "right": {
+          "band_pixels": 83658,
+          "foliage_pixels": 47723.0,
+          "foliage_share": 0.5704535131129121,
+          "passed": false,
+          "fixed_barrier_pixels": 0.0,
+          "foliage_share_excluding_fixed_barriers": 0.5704535131129121
+        }
+      },
+      "pale_hillside_pixels": 8740.0,
+      "hillside_roi_pixels": 381213,
+      "pale_hillside_share_of_frame": 0.009483506944444444,
+      "pale_hillside_share_of_roi": 0.02292681519255639,
+      "treated_station_interval_m": [
+        1035.5,
+        1115.5
+      ]
+    },
+    "baseline_pale_pixels": 483.0,
+    "baseline_pale_remaining_pixels": 78.0,
+    "baseline_pale_occluded_by_foliage_pixels": 307.0,
+    "baseline_pale_occluded_by_foliage_share": 0.6356107660455487
+  },
+  "_exit_reverse": {
+    "before": {
+      "coverage": {
+        "left": {
+          "band_pixels": 2237,
+          "foliage_pixels": 1971.0,
+          "foliage_share": 0.8810907465355386,
+          "passed": false,
+          "fixed_barrier_pixels": 0.0,
+          "foliage_share_excluding_fixed_barriers": 0.8810907465355386
+        },
+        "right": {
+          "band_pixels": 1299,
+          "foliage_pixels": 808.0,
+          "foliage_share": 0.6220169361046959,
+          "passed": false,
+          "fixed_barrier_pixels": 152.0,
+          "foliage_share_excluding_fixed_barriers": 0.7044463818657367
+        }
+      },
+      "pale_hillside_pixels": 8095.0,
+      "hillside_roi_pixels": 385411,
+      "pale_hillside_share_of_frame": 0.008783637152777777,
+      "pale_hillside_share_of_roi": 0.021003552052224768,
+      "treated_station_interval_m": [
+        1100.0,
+        1180.0
+      ]
+    },
+    "after": {
+      "coverage": {
+        "left": {
+          "band_pixels": 2237,
+          "foliage_pixels": 1919.0,
+          "foliage_share": 0.8578453285650425,
+          "passed": false,
+          "fixed_barrier_pixels": 0.0,
+          "foliage_share_excluding_fixed_barriers": 0.8578453285650425
+        },
+        "right": {
+          "band_pixels": 1299,
+          "foliage_pixels": 787.0,
+          "foliage_share": 0.6058506543494996,
+          "passed": false,
+          "fixed_barrier_pixels": 152.0,
+          "foliage_share_excluding_fixed_barriers": 0.6861377506538797
+        }
+      },
+      "pale_hillside_pixels": 5221.0,
+      "hillside_roi_pixels": 385411,
+      "pale_hillside_share_of_frame": 0.0056651475694444444,
+      "pale_hillside_share_of_roi": 0.01354657754968073,
+      "treated_station_interval_m": [
+        1100.0,
+        1180.0
+      ]
+    },
+    "baseline_pale_pixels": 8095.0,
+    "baseline_pale_remaining_pixels": 4222.0,
+    "baseline_pale_occluded_by_foliage_pixels": 810.0,
+    "baseline_pale_occluded_by_foliage_share": 0.10006176652254478
+  }
+}

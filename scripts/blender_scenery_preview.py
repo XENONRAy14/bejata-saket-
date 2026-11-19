@@ -212,6 +212,7 @@ def render(track,output,label,data,station,reverse=False,measure=False,beauty=Tr
         obj.color=(*plant['color'],1)
         obj.location=plant['position'];obj.rotation_euler.z=plant['angle'];obj.scale=(plant['scale']*plant['width'],plant['scale']*plant['width'],plant['scale']);tree_count+=1
     scene=bpy.context.scene;scene.render.engine='CYCLES';scene.cycles.samples=16;scene.cycles.use_denoising=True
+    scene.cycles.pixel_filter_type='BLACKMAN_HARRIS';scene.render.filter_size=1.5;scene.render.dither_intensity=1
     scene.cycles.transparent_max_bounces=512;scene.render.threads_mode='FIXED';scene.render.threads=8
     scene.world.use_nodes=True;scene.world.node_tree.nodes.get('Background').inputs[0].default_value=(.55,.68,.85,1)
     scene.world.node_tree.nodes.get('Background').inputs['Strength'].default_value=.45

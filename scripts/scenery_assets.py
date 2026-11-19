@@ -119,7 +119,8 @@ def wire_groups(blob):
     return names,groups
 
 
-def repair_pine_archive(source,destination):
+def repair_pine_archive(source,destination,impostor_distance=None):
+    if impostor_distance is not None and (not np.isfinite(impostor_distance) or impostor_distance<150):raise ValueError('Pine impostors must start at 150 m or farther')
     source=Path(source)
     if not source.stem.startswith(('ph_pine_0','ph_pine_mid_')):
         destination.write_bytes(source.read_bytes());return False
@@ -128,10 +129,16 @@ def repair_pine_archive(source,destination):
         near=archive.read('LOD0.mesh');names,groups=wire_groups(near)
         textures={name:archive.read(name) for name in names}
     read_mesh(near,textures)
-    medium,metrics=mesh_blob(card_lod_groups(groups,names),textures,1,1)
+    medium,metrics=(near,read_mesh(near,textures)) if impostor_distance is not None else mesh_blob(card_lod_groups(groups,names),textures,1,1)
     assert read_mesh(medium,textures)==metrics
     with zipfile.ZipFile(source) as archive,zipfile.ZipFile(destination,'w',zipfile.ZIP_DEFLATED) as output:
-        for entry in archive.infolist():output.writestr(entry,medium if entry.filename=='LOD1.mesh' else archive.read(entry.filename))
+        for entry in archive.infolist():
+            payload=medium if entry.filename=='LOD1.mesh' else archive.read(entry.filename)
+            if entry.filename=='tree.ini' and impostor_distance is not None:
+                config=configparser.ConfigParser();config.optionxform=str;config.read_string(payload.decode())
+                config['LOD_1']['DISTANCE']=str(impostor_distance)
+                stream=io.StringIO();config.write(stream);payload=stream.getvalue().encode('utf-8')
+            output.writestr(entry,payload)
     return metrics
 
 
