@@ -10,6 +10,29 @@ from pilot_common import ROOT,WORK,DATA,OUT,PREVIEW,Image
 from PIL import ImageDraw,ImageFont
 
 
+def source_overlay_paths():
+    paths=set((ROOT/'scripts').glob('*.py'))
+    paths.update(DATA.glob('*impostor_*.png'));paths.add(DATA/'forest_edge_atlas.png')
+    paths.update(DATA.glob('*.json'));paths.update(DATA.glob('*.npz'));paths.update((ROOT/'textures/v2').glob('*.dds'))
+    paths.update((ROOT/'blend/pilot300.blend',DATA/'prototypes.blend',ROOT/'PROJECT_SNAPSHOT.json',ROOT/'docs/PILOT300.md',WORK/'bake_pine_cards.py',WORK/'optimize_pines.py',WORK/'fetch_cc0_shrubs.py',WORK/'asset_licenses.json'))
+    paths.add(ROOT/'out/bejaia_saket/data/surfaces.ini')
+    return paths
+
+
+def package_source_overlay():
+    surface=ROOT/'out/bejaia_saket/data/surfaces.ini'
+    if not surface.is_file():raise FileNotFoundError(surface)
+    source=ROOT/'out/bejaia_saket_pilot300_sources.zip'
+    with zipfile.ZipFile(source,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as archive:
+        for path in sorted(source_overlay_paths()):
+            if path.is_file():
+                member=Path('project')/path.relative_to(ROOT) if path.is_relative_to(ROOT) else path.relative_to(WORK)
+                archive.write(path,member.as_posix())
+    with zipfile.ZipFile(source) as archive:
+        if archive.testzip() is not None:raise ValueError('Source ZIP failed CRC')
+    return source
+
+
 def main():
     result=json.loads((DATA/'validation_report.json').read_text())
     if not result['passed'] or result['runtime_ac_tested']:raise ValueError('Expected a passing STATIC report, not an invented runtime result')
@@ -117,16 +140,7 @@ Aucun essai moteur AC, Pure, RainFX, GrassFX, collisions, chrono ou performances
     with zipfile.ZipFile(mod) as archive:
         if archive.testzip() is not None:raise ValueError('Mod ZIP failed CRC')
         if not all(name.startswith(OUT.name+'/') for name in archive.namelist()):raise ValueError('Unexpected package root')
-    source=ROOT/'out/bejaia_saket_pilot300_sources.zip'
-    paths=set((ROOT/'scripts').glob('*.py'))
-    paths.update(DATA.glob('*impostor_*.png'));paths.add(DATA/'forest_edge_atlas.png')
-    paths.update((DATA).glob('*.json'));paths.update(DATA.glob('*.npz'));paths.update((ROOT/'textures/v2').glob('*.dds'))
-    paths.update((ROOT/'blend/pilot300.blend',DATA/'prototypes.blend',ROOT/'PROJECT_SNAPSHOT.json',doc,WORK/'bake_pine_cards.py',WORK/'optimize_pines.py',WORK/'fetch_cc0_shrubs.py',WORK/'asset_licenses.json'))
-    with zipfile.ZipFile(source,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as archive:
-        for path in sorted(paths):
-            if path.is_file():archive.write(path,path.relative_to(WORK).as_posix())
-    with zipfile.ZipFile(source) as archive:
-        if archive.testzip() is not None:raise ValueError('Source ZIP failed CRC')
+    source=package_source_overlay()
     print('PILOT_PACKAGES_OK',json.dumps(dict(mod_bytes=mod.stat().st_size,source_overlay_bytes=source.stat().st_size,unit_tests=tests)))
 
 

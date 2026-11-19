@@ -1,11 +1,14 @@
 import io
 import configparser
+import hashlib
+import json
 from pathlib import Path
 import struct
 import tempfile
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
+import zipfile
 
 import pilot_common as common
 from pilot_common import np,Image,dds,source_data,select_sector,interpolate,frame,ground
@@ -13,6 +16,8 @@ from check_kn5 import inspect_dds
 from treefx_wire import checksum,vector_ac,mesh_blob,read_mesh
 from pilot_scenery import edge_layout, vista_open
 import validate_pilot
+import package_pilot
+from acdata import surfaces_text
 
 
 class SourceBaselineTests(unittest.TestCase):
@@ -40,6 +45,37 @@ class SourceBaselineTests(unittest.TestCase):
         lf=validate_pilot.source_baseline_digest('settings.json',io.BytesIO(b'{\n}\n'))
         crlf=validate_pilot.source_baseline_digest('settings.json',io.BytesIO(b'{\r\n}\r\n'))
         self.assertEqual(lf,crlf)
+
+
+class SourceOverlayTests(unittest.TestCase):
+    def test_overlay_refreshes_stale_main_surface_and_its_baseline(self):
+        with tempfile.TemporaryDirectory() as folder:
+            work=Path(folder);root=work/'renamed-project';data=root/'data/pilot300'
+            surface=root/'out/bejaia_saket/data/surfaces.ini'
+            surface.parent.mkdir(parents=True);data.mkdir(parents=True)
+            content=surfaces_text().encode('utf-8');surface.write_bytes(content)
+            baseline={'files':{'out/bejaia_saket/data/surfaces.ini':hashlib.sha256(content).hexdigest()}}
+            (data/'source_baseline.json').write_text(json.dumps(baseline))
+            with patch.multiple(package_pilot,ROOT=root,WORK=work,DATA=data):
+                archive=package_pilot.package_source_overlay()
+            destination=work/'existing-worktree'
+            stale=destination/'project/out/bejaia_saket/data/surfaces.ini'
+            stale.parent.mkdir(parents=True)
+            stale.write_text('[SURFACE_4]\nKEY=WALL\n')
+            with zipfile.ZipFile(archive) as zipped:
+                self.assertIn('project/out/bejaia_saket/data/surfaces.ini',zipped.namelist())
+                zipped.extractall(destination)
+            self.assertEqual(stale.read_bytes(),content)
+            config=configparser.ConfigParser();config.read(stale)
+            self.assertNotIn('WALL',{section.get('KEY') for section in config.values()})
+            extracted=json.loads((destination/'project/data/pilot300/source_baseline.json').read_text())
+            self.assertEqual(extracted['files']['out/bejaia_saket/data/surfaces.ini'],hashlib.sha256(stale.read_bytes()).hexdigest())
+
+    def test_missing_main_surface_cannot_produce_an_incomplete_overlay(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)
+            with patch.multiple(package_pilot,ROOT=root,WORK=root.parent,DATA=root/'data/pilot300'):
+                with self.assertRaises(FileNotFoundError):package_pilot.package_source_overlay()
 
 
 class PilotConfigTests(unittest.TestCase):
