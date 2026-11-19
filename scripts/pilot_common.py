@@ -1,5 +1,6 @@
 """Shared data and PBR preparation for the isolated summit pilot (Blender 3.6)."""
 from pathlib import Path
+import configparser
 import hashlib
 import io
 import json
@@ -18,6 +19,24 @@ sys.path[:0]=[str(WORK/'tools/pydeps'),str(WORK/'tools/addons'),str(ROOT/'script
 import numpy as np
 from PIL import Image, ImageDraw
 from check_kn5 import inspect_dds
+
+
+def pilot_csp_config(source,guard_material):
+    config=configparser.ConfigParser(interpolation=None)
+    config.optionxform=str
+    config.read_string(source)
+    config['GRASS_FX']['GRASS_MATERIALS']='forest_floor'
+    for section in ('GRASS_FX_ADJUSTMENT_0','GRASS_FX_CONFIGURATION_A'):
+        config.remove_section(section)
+    for key,extra in (
+        ('SOAKING_MATERIALS',['rock_moss_set_01']),
+        ('SMOOTH_MATERIALS',[guard_material]),
+        ('ROUGH_MATERIALS',['forest_floor','landcover']),
+    ):
+        names=[name.strip() for name in config['RAIN_FX'].get(key,'').split(',') if name.strip()]
+        config['RAIN_FX'][key]=', '.join(dict.fromkeys(names+extra))
+    output=io.StringIO();config.write(output)
+    return '; Pilot-specific selectors derived from the main CSP config; see docs/CSP_NOTES.md.\n'+output.getvalue().rstrip()+'\n'
 
 
 def dump(path,value):

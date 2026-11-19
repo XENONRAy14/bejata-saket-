@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "checks": 737,
+  "checks": 739,
   "check_names": [
     "Main source unchanged: data/centerline.npz",
     "Main source unchanged: data/shortening_info.json",
@@ -708,6 +708,8 @@
     "AC models.ini points to the pilot KN5, not the main layout",
     "Mini-map generated at valid real scale",
     "Replay camera uses the documented complete template",
+    "GrassFX targets the exported L verge material",
+    "GrassFX targets the exported R verge material",
     "Redistribution credits present; TrackTools is excluded",
     "No LFS pointer: map.png",
     "No LFS pointer: bejaia_saket_pilot300.kn5",

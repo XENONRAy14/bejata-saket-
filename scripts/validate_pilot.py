@@ -197,6 +197,10 @@ def validate(require_previews=True):
     check(parser(OUT/'data/map.ini').getfloat('PARAMETERS','SCALE_FACTOR')>0 and (OUT/'map.png').is_file(),'Mini-map generated at valid real scale')
     camera=parser(OUT/'data/cameras.ini')
     check(camera.getint('HEADER','CAMERA_COUNT')==1 and camera['CAMERA_0'].getfloat('MIN_FOV')>0,'Replay camera uses the documented complete template')
+    grass_names={name.strip() for name in parser(OUT/'extension/ext_config.ini')['GRASS_FX']['GRASS_MATERIALS'].split(',')}
+    for letter in ('L','R'):
+        material=report['materials'][nodes['1GRASS_000_'+letter]['material']]['name']
+        check(material in grass_names,'GrassFX targets the exported '+letter+' verge material')
     check((OUT/'CREDITS.md').is_file() and 'tracktools' not in json.loads((OUT/'LICENSES.json').read_text()),'Redistribution credits present; TrackTools is excluded')
     for candidate in OUT.rglob('*'):
         if candidate.is_file():

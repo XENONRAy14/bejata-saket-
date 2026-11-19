@@ -1,4 +1,5 @@
 import io
+import configparser
 from pathlib import Path
 import struct
 import tempfile
@@ -11,6 +12,35 @@ from pilot_common import np,Image,dds,source_data,select_sector,interpolate,fram
 from check_kn5 import inspect_dds
 from treefx_wire import checksum,vector_ac,mesh_blob,read_mesh
 from pilot_scenery import edge_layout, vista_open
+
+
+class PilotConfigTests(unittest.TestCase):
+    source='''[GRASS_FX]
+GRASS_MATERIALS = grass, grass_mountain
+[GRASS_FX_CONFIGURATION_A]
+SHAPE_SIZE = 0.55
+[GRASS_FX_ADJUSTMENT_0]
+MATERIALS = grass, grass_mountain
+USE_MULTILAYER_MASK = 1
+MASK_G = A
+[RAIN_FX]
+SOAKING_MATERIALS = asphalt, roadside_concrete
+SMOOTH_MATERIALS = metal
+ROUGH_MATERIALS = rock
+'''
+    def config(self):
+        result=configparser.ConfigParser();result.read_string(common.pilot_csp_config(self.source,'guard-rail_body_pbr'))
+        return result
+    def test_grass_targets_the_verge_material_without_a_multilayer_mask(self):
+        config=self.config()
+        self.assertEqual(config['GRASS_FX']['GRASS_MATERIALS'],'forest_floor')
+        self.assertNotIn('GRASS_FX_ADJUSTMENT_0',config)
+        self.assertNotIn('GRASS_FX_CONFIGURATION_A',config)
+    def test_rain_selectors_include_pilot_materials_without_losing_existing_ones(self):
+        rain=self.config()['RAIN_FX']
+        self.assertEqual(rain['SOAKING_MATERIALS'],'asphalt, roadside_concrete, rock_moss_set_01')
+        self.assertEqual(rain['SMOOTH_MATERIALS'],'metal, guard-rail_body_pbr')
+        self.assertEqual(rain['ROUGH_MATERIALS'],'rock, forest_floor, landcover')
 
 
 class PilotGeometryTests(unittest.TestCase):
