@@ -53,6 +53,27 @@ class PilotPreservationTests(unittest.TestCase):
             self.assertEqual(len(batches),16)
             self.assertEqual(sum(len(v[1])*2 for v in batches.values()),triangles)
 
+    def test_pilot_exclusions_filter_trees_and_edges_without_reshuffling(self):
+        zones=copy.deepcopy(load_zones()['pilot'])
+        zones['exclusions']=[dict(start_m=40,end_m=80,side='both')]
+        trees=pilot_tree_layout(self.data,self.models,self.sea,zones=zones)
+        edges=edge_layout(self.data,self.sea,zones=zones)
+        self.assertLess(len(trees),330);self.assertLess(len(edges),327)
+        for layout in (trees,edges):
+            for plant in layout:
+                radius=tree_radius(plant,self.models) if 'model' in plant else plant['width']/2
+                self.assertFalse(zone_contains(plant['station'],plant['side'],self.sea,zones,'exclusions','edge',radius))
+        original_trees=pilot_tree_layout(self.data,self.models,self.sea)
+        original_edges=edge_layout(self.data,self.sea)
+        self.assertTrue(all(plant in original_trees for plant in trees))
+        self.assertTrue(all(plant in original_edges for plant in edges))
+
+    def test_pilot_exclusions_respect_layer_and_side(self):
+        zones=copy.deepcopy(load_zones()['pilot'])
+        zones['exclusions']=[dict(start_m=-100,end_m=500,side=self.sea,layers=['edge'])]
+        self.assertTrue(all(p['side']!=self.sea for p in edge_layout(self.data,self.sea,zones=zones)))
+        self.assertEqual(pilot_tree_layout(self.data,self.models,self.sea,zones=zones),pilot_tree_layout(self.data,self.models,self.sea))
+
 
 class SectorTests(unittest.TestCase):
     @classmethod

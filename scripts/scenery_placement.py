@@ -88,7 +88,8 @@ def edge_layout(data,sea_side=None,*,s0=None,s1=None,zones=None,seed=None):
                 result.append(dict(station=station,side=side,tier=tier,offset=offset,
                     position=ground(data,station,side,offset).tolist(),width=width,height=height,
                     angle=math.atan2(tangent[1],tangent[0])+float(rng.uniform(-.17,.17)),variant=int(rng.integers(4))))
-    return result
+    return [plant for plant in result if not zone_contains(plant['station'],plant['side'],sea(plant['station']),
+            zones,'exclusions','edge',plant['width']/2)]
 
 
 def edge_batches(data,layout,*,distant=False,chunk_m=40):
@@ -171,7 +172,11 @@ def pilot_tree_layout(data,models,sea_side,*,zones=None):
             offset=half+2.5+radius
             point=ground(data,float(station),side,offset);point[2]-=.05
             plants.append(dict(model=species,position=point.tolist(),angle=float(rng.uniform(0,2*np.pi)),scale=scale,width=broad,station=float(station),side=side,offset=offset))
-    return plants
+    def excluded(plant):
+        layer='sapling' if 'sapling' in plant['model'] else models[plant['model']]['kind']
+        if layer=='pine':layer='adult'
+        return zone_contains(plant['station'],plant['side'],sea_side,zones,'exclusions',layer,tree_radius(plant,models))
+    return [plant for plant in plants if not excluded(plant)]
 
 
 class RoadClearance:
