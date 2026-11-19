@@ -3558,7 +3558,7 @@
       "lodIn": 0,
       "lodOut": 10000,
       "castShadows": false,
-      "visible": false,
+      "visible": true,
       "renderable": false
     }
   }

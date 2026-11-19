@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "checks": 739,
+  "checks": 763,
   "check_names": [
     "Main source unchanged: data/centerline.npz",
     "Main source unchanged: data/shortening_info.json",
@@ -29,7 +29,7 @@
     "UVs, normals and tangents are finite",
     "All KN5 vertex normals are unit-length",
     "Exported road vertices exactly match the source",
-    "One simplified rail collider is hidden from rendering",
+    "One simplified rail collider stays physics-visible but non-renderable",
     "Pilot rail collider continuously covers the full guardrail span",
     "Pilot has physical boundary closures",
     "Professional guardrail tiles exported",
@@ -85,6 +85,8 @@
     "TreeFX LOD distances increase: PH_pine_sapling_small_a",
     "Distant TreeFX impostor is only 16 triangles: PH_pine_sapling_small_a",
     "Near and medium TreeFX meshes respect performance budgets: PH_pine_sapling_small_a",
+    "Far TreeFX silhouettes stay near the source model scale: PH_pine_sapling_small_a",
+    "TreeFX keeps final impostors visible beyond the pilot corridor: PH_pine_sapling_small_a",
     "TreeFX ZIP CRC: PH_pine_04",
     "TreeFX archive has safe relative names: PH_pine_04",
     "Foliage alpha and real color preserved: PH_PH_pine_twig_02_card_diff.dds",
@@ -104,6 +106,8 @@
     "TreeFX LOD distances increase: PH_pine_04",
     "Distant TreeFX impostor is only 16 triangles: PH_pine_04",
     "Near and medium TreeFX meshes respect performance budgets: PH_pine_04",
+    "Far TreeFX silhouettes stay near the source model scale: PH_pine_04",
+    "TreeFX keeps final impostors visible beyond the pilot corridor: PH_pine_04",
     "TreeFX ZIP CRC: PH_pine_bg_04",
     "TreeFX archive has safe relative names: PH_pine_bg_04",
     "Foliage alpha and real color preserved: PH_pine_04_impostor_0.dds",
@@ -121,8 +125,10 @@
     "TreeFX LOD distances increase: PH_pine_bg_04",
     "Distant TreeFX impostor is only 16 triangles: PH_pine_bg_04",
     "Near and medium TreeFX meshes respect performance budgets: PH_pine_bg_04",
+    "Far TreeFX silhouettes stay near the source model scale: PH_pine_bg_04",
     "Background trees have only 16 triangles at every distance: PH_pine_bg_04",
-    "Background tree distances: PH_pine_bg_04",
+    "Background impostors remain cheap at distance: PH_pine_bg_04",
+    "TreeFX keeps final impostors visible beyond the pilot corridor: PH_pine_bg_04",
     "TreeFX ZIP CRC: PH_pine_mid_04",
     "TreeFX archive has safe relative names: PH_pine_mid_04",
     "Foliage alpha and real color preserved: PH_PH_pine_twig_02_card_diff.dds",
@@ -160,7 +166,9 @@
     "TreeFX LOD distances increase: PH_pine_mid_04",
     "Distant TreeFX impostor is only 16 triangles: PH_pine_mid_04",
     "Near and medium TreeFX meshes respect performance budgets: PH_pine_mid_04",
-    "Midstory reuses the lighter pine representation: PH_pine_mid_04",
+    "Far TreeFX silhouettes stay near the source model scale: PH_pine_mid_04",
+    "Midstory uses the lighter pine representation and long cull range: PH_pine_mid_04",
+    "TreeFX keeps final impostors visible beyond the pilot corridor: PH_pine_mid_04",
     "TreeFX ZIP CRC: PH_pine_03",
     "TreeFX archive has safe relative names: PH_pine_03",
     "Foliage alpha and real color preserved: PH_PH_pine_twig_02_card_diff.dds",
@@ -192,6 +200,8 @@
     "TreeFX LOD distances increase: PH_pine_03",
     "Distant TreeFX impostor is only 16 triangles: PH_pine_03",
     "Near and medium TreeFX meshes respect performance budgets: PH_pine_03",
+    "Far TreeFX silhouettes stay near the source model scale: PH_pine_03",
+    "TreeFX keeps final impostors visible beyond the pilot corridor: PH_pine_03",
     "TreeFX ZIP CRC: PH_pine_bg_03",
     "TreeFX archive has safe relative names: PH_pine_bg_03",
     "Foliage alpha and real color preserved: PH_pine_03_impostor_0.dds",
@@ -209,8 +219,10 @@
     "TreeFX LOD distances increase: PH_pine_bg_03",
     "Distant TreeFX impostor is only 16 triangles: PH_pine_bg_03",
     "Near and medium TreeFX meshes respect performance budgets: PH_pine_bg_03",
+    "Far TreeFX silhouettes stay near the source model scale: PH_pine_bg_03",
     "Background trees have only 16 triangles at every distance: PH_pine_bg_03",
-    "Background tree distances: PH_pine_bg_03",
+    "Background impostors remain cheap at distance: PH_pine_bg_03",
+    "TreeFX keeps final impostors visible beyond the pilot corridor: PH_pine_bg_03",
     "TreeFX ZIP CRC: PH_pine_mid_03",
     "TreeFX archive has safe relative names: PH_pine_mid_03",
     "Foliage alpha and real color preserved: PH_PH_pine_twig_02_card_diff.dds",
@@ -248,7 +260,9 @@
     "TreeFX LOD distances increase: PH_pine_mid_03",
     "Distant TreeFX impostor is only 16 triangles: PH_pine_mid_03",
     "Near and medium TreeFX meshes respect performance budgets: PH_pine_mid_03",
-    "Midstory reuses the lighter pine representation: PH_pine_mid_03",
+    "Far TreeFX silhouettes stay near the source model scale: PH_pine_mid_03",
+    "Midstory uses the lighter pine representation and long cull range: PH_pine_mid_03",
+    "TreeFX keeps final impostors visible beyond the pilot corridor: PH_pine_mid_03",
     "TreeFX ZIP CRC: PH_pine_01",
     "TreeFX archive has safe relative names: PH_pine_01",
     "Foliage alpha and real color preserved: PH_PH_pine_twig_02_card_diff.dds",
@@ -280,6 +294,8 @@
     "TreeFX LOD distances increase: PH_pine_01",
     "Distant TreeFX impostor is only 16 triangles: PH_pine_01",
     "Near and medium TreeFX meshes respect performance budgets: PH_pine_01",
+    "Far TreeFX silhouettes stay near the source model scale: PH_pine_01",
+    "TreeFX keeps final impostors visible beyond the pilot corridor: PH_pine_01",
     "TreeFX ZIP CRC: PH_pine_bg_01",
     "TreeFX archive has safe relative names: PH_pine_bg_01",
     "Foliage alpha and real color preserved: PH_pine_01_impostor_0.dds",
@@ -297,8 +313,10 @@
     "TreeFX LOD distances increase: PH_pine_bg_01",
     "Distant TreeFX impostor is only 16 triangles: PH_pine_bg_01",
     "Near and medium TreeFX meshes respect performance budgets: PH_pine_bg_01",
+    "Far TreeFX silhouettes stay near the source model scale: PH_pine_bg_01",
     "Background trees have only 16 triangles at every distance: PH_pine_bg_01",
-    "Background tree distances: PH_pine_bg_01",
+    "Background impostors remain cheap at distance: PH_pine_bg_01",
+    "TreeFX keeps final impostors visible beyond the pilot corridor: PH_pine_bg_01",
     "TreeFX ZIP CRC: PH_pine_mid_01",
     "TreeFX archive has safe relative names: PH_pine_mid_01",
     "Foliage alpha and real color preserved: PH_PH_pine_twig_02_card_diff.dds",
@@ -336,7 +354,9 @@
     "TreeFX LOD distances increase: PH_pine_mid_01",
     "Distant TreeFX impostor is only 16 triangles: PH_pine_mid_01",
     "Near and medium TreeFX meshes respect performance budgets: PH_pine_mid_01",
-    "Midstory reuses the lighter pine representation: PH_pine_mid_01",
+    "Far TreeFX silhouettes stay near the source model scale: PH_pine_mid_01",
+    "Midstory uses the lighter pine representation and long cull range: PH_pine_mid_01",
+    "TreeFX keeps final impostors visible beyond the pilot corridor: PH_pine_mid_01",
     "TreeFX ZIP CRC: PH_shrub_01",
     "TreeFX archive has safe relative names: PH_shrub_01",
     "Foliage alpha and real color preserved: PH_shrub_01_impostor_0.dds",
@@ -350,8 +370,10 @@
     "TreeFX LOD distances increase: PH_shrub_01",
     "Distant TreeFX impostor is only 16 triangles: PH_shrub_01",
     "Near and medium TreeFX meshes respect performance budgets: PH_shrub_01",
+    "Far TreeFX silhouettes stay near the source model scale: PH_shrub_01",
     "Two-sided shrub meshes meet their stricter budgets: PH_shrub_01",
-    "Shrubs use short LOD transitions: PH_shrub_01",
+    "Shrubs avoid near culling and abrupt billboard thresholds: PH_shrub_01",
+    "TreeFX keeps final impostors visible beyond the pilot corridor: PH_shrub_01",
     "TreeFX ZIP CRC: PH_shrub_02",
     "TreeFX archive has safe relative names: PH_shrub_02",
     "Shared tree texture consistent: PH_searsia_lucida_diff.dds",
@@ -369,8 +391,10 @@
     "TreeFX LOD distances increase: PH_shrub_02",
     "Distant TreeFX impostor is only 16 triangles: PH_shrub_02",
     "Near and medium TreeFX meshes respect performance budgets: PH_shrub_02",
+    "Far TreeFX silhouettes stay near the source model scale: PH_shrub_02",
     "Two-sided shrub meshes meet their stricter budgets: PH_shrub_02",
-    "Shrubs use short LOD transitions: PH_shrub_02",
+    "Shrubs avoid near culling and abrupt billboard thresholds: PH_shrub_02",
+    "TreeFX keeps final impostors visible beyond the pilot corridor: PH_shrub_02",
     "All tree placements reference generated models",
     "Tree instance model exists",
     "Tree instance model exists",
@@ -766,9 +790,17 @@
         }
       ],
       "distances": [
-        22.0,
-        75.0,
-        320.0
+        28.0,
+        100.0,
+        900.0
+      ],
+      "far_size_ratio_min": [
+        0.781,
+        0.926
+      ],
+      "far_size_ratio_max": [
+        0.915,
+        1.156
       ]
     },
     "PH_pine_04": {
@@ -787,9 +819,17 @@
         }
       ],
       "distances": [
-        22.0,
-        75.0,
-        320.0
+        28.0,
+        100.0,
+        900.0
+      ],
+      "far_size_ratio_min": [
+        0.893,
+        0.994
+      ],
+      "far_size_ratio_max": [
+        0.945,
+        1.026
       ]
     },
     "PH_pine_bg_04": {
@@ -808,9 +848,17 @@
         }
       ],
       "distances": [
-        40.0,
-        110.0,
-        320.0
+        180.0,
+        450.0,
+        900.0
+      ],
+      "far_size_ratio_min": [
+        0.893,
+        0.994
+      ],
+      "far_size_ratio_max": [
+        0.945,
+        1.026
       ]
     },
     "PH_pine_mid_04": {
@@ -829,9 +877,17 @@
         }
       ],
       "distances": [
-        18.0,
-        60.0,
-        250.0
+        28.0,
+        110.0,
+        900.0
+      ],
+      "far_size_ratio_min": [
+        0.893,
+        0.994
+      ],
+      "far_size_ratio_max": [
+        0.945,
+        1.026
       ]
     },
     "PH_pine_03": {
@@ -850,9 +906,17 @@
         }
       ],
       "distances": [
-        22.0,
-        75.0,
-        320.0
+        28.0,
+        100.0,
+        900.0
+      ],
+      "far_size_ratio_min": [
+        0.828,
+        0.99
+      ],
+      "far_size_ratio_max": [
+        0.887,
+        0.993
       ]
     },
     "PH_pine_bg_03": {
@@ -871,9 +935,17 @@
         }
       ],
       "distances": [
-        40.0,
-        110.0,
-        320.0
+        180.0,
+        450.0,
+        900.0
+      ],
+      "far_size_ratio_min": [
+        0.828,
+        0.99
+      ],
+      "far_size_ratio_max": [
+        0.887,
+        0.993
       ]
     },
     "PH_pine_mid_03": {
@@ -892,9 +964,17 @@
         }
       ],
       "distances": [
-        18.0,
-        60.0,
-        250.0
+        28.0,
+        110.0,
+        900.0
+      ],
+      "far_size_ratio_min": [
+        0.828,
+        0.99
+      ],
+      "far_size_ratio_max": [
+        0.887,
+        0.993
       ]
     },
     "PH_pine_01": {
@@ -913,9 +993,17 @@
         }
       ],
       "distances": [
-        22.0,
-        75.0,
-        320.0
+        28.0,
+        100.0,
+        900.0
+      ],
+      "far_size_ratio_min": [
+        0.848,
+        0.995
+      ],
+      "far_size_ratio_max": [
+        0.94,
+        0.997
       ]
     },
     "PH_pine_bg_01": {
@@ -934,9 +1022,17 @@
         }
       ],
       "distances": [
-        40.0,
-        110.0,
-        320.0
+        180.0,
+        450.0,
+        900.0
+      ],
+      "far_size_ratio_min": [
+        0.848,
+        0.995
+      ],
+      "far_size_ratio_max": [
+        0.94,
+        0.997
       ]
     },
     "PH_pine_mid_01": {
@@ -955,9 +1051,17 @@
         }
       ],
       "distances": [
-        18.0,
-        60.0,
-        250.0
+        28.0,
+        110.0,
+        900.0
+      ],
+      "far_size_ratio_min": [
+        0.848,
+        0.995
+      ],
+      "far_size_ratio_max": [
+        0.94,
+        0.997
       ]
     },
     "PH_shrub_01": {
@@ -976,9 +1080,17 @@
         }
       ],
       "distances": [
-        14.0,
-        45.0,
-        160.0
+        20.0,
+        75.0,
+        900.0
+      ],
+      "far_size_ratio_min": [
+        0.949,
+        0.996
+      ],
+      "far_size_ratio_max": [
+        0.974,
+        1.084
       ]
     },
     "PH_shrub_02": {
@@ -997,9 +1109,17 @@
         }
       ],
       "distances": [
-        14.0,
-        45.0,
-        160.0
+        20.0,
+        75.0,
+        900.0
+      ],
+      "far_size_ratio_min": [
+        0.971,
+        0.987
+      ],
+      "far_size_ratio_max": [
+        0.983,
+        1.145
       ]
     }
   },

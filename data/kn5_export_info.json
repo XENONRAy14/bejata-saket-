@@ -1,7 +1,7 @@
 {
   "file": "out\\bejaia_saket\\bejaia_saket.kn5",
-  "bytes": 163350978,
-  "seconds": 34.11724369999865,
+  "bytes": 192213846,
+  "seconds": 31.119542399999773,
   "blender": "3.6.23",
   "warnings": [
     "Unknown logical object 'AC_AB_FINISH_L' might prevent other objects from loading.\r\n\tRename it to '__{obj.name}' if you do not want to export it.",
@@ -9,9 +9,10 @@
     "Unknown logical object 'AC_AB_START_L' might prevent other objects from loading.\r\n\tRename it to '__{obj.name}' if you do not want to export it.",
     "Unknown logical object 'AC_AB_START_R' might prevent other objects from loading.\r\n\tRename it to '__{obj.name}' if you do not want to export it."
   ],
-  "visual_guard_sections": 27,
-  "collision_guard_sections": 27,
+  "visual_guard_sections": 39,
+  "collision_guard_sections": 39,
+  "collision_visible": true,
   "collision_renderable": false,
   "collision_height_m": 1.03,
-  "sha256": "884220a9c1546c3d171704a9bc4e202563b5b73480a745815f061d0ae29eaae6"
+  "sha256": "b84362cbf1c0823bba1879c9e4e7172aea0733d13608c9029f9528b059350fbe"
 }
