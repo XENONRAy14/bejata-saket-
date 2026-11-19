@@ -14,6 +14,7 @@ from mathutils import Vector
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'scripts'))
 from pilot_common import frame
 from scenery_kn5 import Reader, nodes, parse_tree, read
+from scenery_preview_common import tree_lod
 
 
 def blender_vector(values):return np.asarray(values)[:,[0,2,1]]*[1,-1,1]
@@ -123,12 +124,11 @@ def render(track,output,label,data,station):
     for line in (track/'extension/trees/trees.txt').read_text().splitlines():
         plant=parse_tree(line);distance=np.linalg.norm(np.asarray(plant['position'])-origin)
         if distance>900:continue
-        lod=0 if distance<28 else 1 if distance<100 else 2
         path=track/'extension/trees'/plant['model']
         with zipfile.ZipFile(path) as archive:
             config=configparser.ConfigParser();config.read_string(archive.read('tree.ini').decode())
-            if not config.has_section('LOD_2'):lod=0 if distance<150 else 1
-            if distance>float(config[f'LOD_{lod}']['DISTANCE']):continue
+            lod=tree_lod(config,distance)
+            if lod is None:continue
         key=(str(path),lod)
         if key not in prototypes:prototypes[key]=tree_model(path,folder,lod)
         obj=bpy.data.objects.new('TREE_'+str(tree_count),prototypes[key]);bpy.context.collection.objects.link(obj)
