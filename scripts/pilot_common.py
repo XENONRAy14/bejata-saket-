@@ -123,7 +123,12 @@ def ground(data,station,side,distance):
     return np.array([*xy,z])
 
 
-def dds(image,path,coverage=False):
+def resize_channels(image,size,resample=Image.Resampling.BOX):
+    return Image.merge(image.mode,[channel.resize(size,resample) for channel in image.split()])
+
+
+def dds(image,path,coverage=False,data=False):
+    if coverage and data:raise ValueError('Data channels cannot use opacity coverage')
     image=image.convert('RGBA')
     base=np.asarray(image)
     target=float(np.mean(base[:,:,3]>=128))
@@ -140,10 +145,16 @@ def dds(image,path,coverage=False):
             array[:,:,3]=np.clip(alpha*scale,0,255).astype('uint8')
         stream=io.BytesIO();Image.fromarray(array).save(stream,format='DDS',pixel_format='DXT5')
         blob=stream.getvalue()
+        if data and np.any(array[:,:,3]!=255):
+            opaque=array.copy();opaque[:,:,3]=255;colors=io.BytesIO();Image.fromarray(opaque).save(colors,format='DDS',pixel_format='DXT5')
+            blocks=np.frombuffer(blob[128:],dtype=np.uint8).reshape(-1,16).copy()
+            blocks[:,8:]=np.frombuffer(colors.getvalue()[128:],dtype=np.uint8).reshape(-1,16)[:,8:]
+            blob=blob[:128]+blocks.tobytes()
         if header is None:header=bytearray(blob[:128])
         chunks.append(blob[128:])
         if image.size==(1,1):break
-        image=image.resize((max(1,image.width//2),max(1,image.height//2)),Image.Resampling.BOX)
+        size=(max(1,image.width//2),max(1,image.height//2))
+        image=resize_channels(image,size) if data else image.resize(size,Image.Resampling.BOX)
         level+=1
     struct.pack_into('<I',header,8,struct.unpack_from('<I',header,8)[0]|0x20000)
     struct.pack_into('<I',header,28,len(chunks))

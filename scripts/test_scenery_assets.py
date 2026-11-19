@@ -1,13 +1,34 @@
 from types import SimpleNamespace
+import io
+import struct
 import unittest
 
 import numpy as np
+from PIL import Image
 
-from scenery_assets import card_lod_groups, wire_groups
+from scenery_assets import card_lod_groups, dds_blob, wire_groups
+from pilot_common import resize_channels
 from treefx_wire import mesh_blob, read_mesh
 
 
 class CardLodTests(unittest.TestCase):
+    def test_weight_resize_retains_rgb_when_fourth_weight_is_zero(self):
+        image=Image.new('RGBA',(16,16),(20,60,175,0))
+        resized=resize_channels(image,(7,7),Image.Resampling.BICUBIC)
+        np.testing.assert_array_equal(np.asarray(resized),np.tile([20,60,175,0],(7,7,1)))
+
+    def test_weight_dds_keeps_litter_in_every_mip_with_zero_fourth_weight(self):
+        blob=dds_blob(Image.new('RGBA',(16,16),(0,0,255,0)),data=True)
+        count=struct.unpack_from('<I',blob,28)[0];size=16;offset=128
+        for _ in range(count):
+            length=max(1,(size+3)//4)**2*16;header=bytearray(blob[:128])
+            struct.pack_into('<2I',header,12,size,size);struct.pack_into('<I',header,28,1)
+            mip=np.asarray(Image.open(io.BytesIO(header+blob[offset:offset+length])).convert('RGBA'))
+            self.assertTrue((mip[:,:,2]>=248).all());self.assertFalse(mip[:,:,3].any())
+            offset+=length;size=max(1,size//2)
+        self.assertEqual(offset,len(blob))
+        with self.assertRaises(ValueError):dds_blob(Image.new('RGBA',(4,4)),data=True,coverage=True)
+
     def test_medium_lod_only_removes_whole_atlas_views(self):
         part=SimpleNamespace(vertices=[[0,0,0],[1,0,0],[1,0,1],[0,0,0],[1,0,0],[1,0,1]],
             normals=[[0,-1,0]]*6,uv=[[0,0],[.4,0],[.4,.4],[.6,0],[1,0],[1,.4]],faces=[[0,1,2],[3,4,5]])

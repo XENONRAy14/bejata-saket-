@@ -86,9 +86,9 @@ def edge_atlas(path,pilot=None,seed=24028):
     return atlas
 
 
-def dds_blob(image,coverage=False):
+def dds_blob(image,coverage=False,data=False):
     with tempfile.TemporaryDirectory() as directory:
-        path=Path(directory)/'texture.dds';dds(image,path,coverage=coverage);return path.read_bytes()
+        path=Path(directory)/'texture.dds';dds(image,path,coverage=coverage,data=data);return path.read_bytes()
 
 
 def ground_mask(node,select,size=1024):

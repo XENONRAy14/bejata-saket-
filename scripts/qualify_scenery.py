@@ -14,6 +14,7 @@ from scipy.spatial import cKDTree
 from scenery_placement import edge_batches, load_zones, plan_sector
 from scenery_kn5 import assign_material, clone_material, mesh, nodes, parse_tree, read, string, subset, uint, validate_lock, write
 from scenery_assets import dds_blob, edge_atlas, ground_mask, repair_pine_archive
+from pilot_common import resize_channels
 from treefx_wire import vector_ac
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -62,8 +63,8 @@ def import_materials(base,pilot,names):
     return imported
 
 
-def add_texture(base,name,image,coverage=False):
-    blob=dds_blob(image,coverage=coverage);base['textures'].append(dict(name=name,blob=blob,raw=uint(1)+string(name)+uint(len(blob))+blob))
+def add_texture(base,name,image,coverage=False,data=False):
+    blob=dds_blob(image,coverage=coverage,data=data);base['textures'].append(dict(name=name,blob=blob,raw=uint(1)+string(name)+uint(len(blob))+blob))
 
 
 def forest_ground(base,pilot,select):
@@ -82,11 +83,11 @@ def forest_ground(base,pilot,select):
         if not any(m['name']=='forest_floor' for m in base['materials']):import_materials(base,pilot,('forest_floor',))
         floor=next(m for m in base['materials'] if m['name']=='forest_floor')
         blob=next(t['blob'] for t in base['textures'] if t['name']==old['textures']['txMask'])
-        weights=np.array(Image.open(io.BytesIO(blob)).convert('RGBA').resize((mask.shape[1],mask.shape[0])),dtype=np.uint16)
+        weights=np.array(resize_channels(Image.open(io.BytesIO(blob)).convert('RGBA'),(mask.shape[1],mask.shape[0]),Image.Resampling.BICUBIC),dtype=np.uint16)
         weights[:,:,0]+=weights[:,:,2];weights[:,:,2]=0
         if weights.max()>255:raise ValueError('Unnormalised original terrain mask')
         weights[mask]=[0,0,255,0]
-        name='FOREST_FLOOR_'+node['name'];texture=name+'_mask.dds';add_texture(base,texture,Image.fromarray(weights.astype('uint8')))
+        name='FOREST_FLOOR_'+node['name'];texture=name+'_mask.dds';add_texture(base,texture,Image.fromarray(weights.astype('uint8')),data=True)
         material=clone_material(old,name,dict(txMask=texture,txDetailB=floor['textures']['txDiffuse'],txNormalB=floor['textures']['txNormal']))
         assign_material(node,len(base['materials']));base['materials'].append(material)
         materials.append(dict(mesh=node['name'],material=name,mask_pixels=int(mask.sum())));count+=int(selected.sum())
