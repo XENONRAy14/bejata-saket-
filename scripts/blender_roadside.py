@@ -14,10 +14,23 @@ from blender_mesh import object_mesh
 from check_kn5 import inspect_dds
 
 
+def clear_roadside_details():
+    for obj in list(bpy.data.objects):
+        if obj.name.startswith('DETAIL_') and not obj.name.startswith('DETAIL_GUARD_'):
+            bpy.data.objects.remove(obj,do_unlink=True)
+
+
+def roadside_node_settings(nodes):
+    result={name:value for name,value in nodes.items() if not name.startswith('DETAIL_')}
+    result['DETAIL_*']=dict(lodIn=0,lodOut=1400,castShadows=True)
+    result['DETAIL_*_roadside_litter']=dict(lodIn=0,lodOut=1400,castShadows=False)
+    result.update({name:value for name,value in nodes.items() if name.startswith('DETAIL_GUARD_')})
+    return result
+
+
 def main():
     bpy.ops.preferences.addon_enable(module='blender_assetto_corsa_tools')
-    for obj in list(bpy.data.objects):
-        if obj.name.startswith('DETAIL_'):bpy.data.objects.remove(obj,do_unlink=True)
+    clear_roadside_details()
     from blender_materials import material_nodes,main as export
     recipe=json.loads((ROOT/'data/roadside_info.json').read_text())
     specs=dict(roadside_signs=recipe['sign_material'],roadside_litter=recipe['litter_material'],roadside_concrete=recipe['concrete_material'])
@@ -40,10 +53,7 @@ def main():
     info['dds_gpu_bytes']=sum(v['gpu_bytes'] for v in info['textures'].values())
     path.write_text(json.dumps(info,indent=2)+'\n')
     path=ROOT/'blend/settings.json';settings=json.loads(path.read_text())
-    for name in list(settings['nodes']):
-        if name.startswith('DETAIL_'):del settings['nodes'][name]
-    settings['nodes']['DETAIL_*']=dict(lodIn=0,lodOut=1400,castShadows=True)
-    settings['nodes']['DETAIL_*_roadside_litter']=dict(lodIn=0,lodOut=1400,castShadows=False)
+    settings['nodes']=roadside_node_settings(settings['nodes'])
     path.write_text(json.dumps(settings,indent=2)+'\n')
     export()
     print('ROADSIDE_SCENE_OK visual_only=True')

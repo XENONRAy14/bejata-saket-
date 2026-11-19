@@ -24,6 +24,23 @@ class MaterialSlotRegressionTests(unittest.TestCase):
         self.assertEqual([len(p.vertices) for p in mesh.polygons],[3,3])
         bpy.data.meshes.remove(mesh)
 
+class GuardrailStageTests(unittest.TestCase):
+    def test_roadside_cleanup_preserves_guardrails_and_specific_settings(self):
+        from blender_roadside import clear_roadside_details,roadside_node_settings
+        guard=bpy.data.objects.new('DETAIL_GUARD_000_L',None)
+        physical=bpy.data.objects.new('1WALL_COLLIDER_GUARD_000_L',None)
+        name='DETAIL_000_roadside_signs'
+        bpy.data.objects.new(name,None)
+        clear_roadside_details()
+        self.assertNotIn(name,bpy.data.objects)
+        self.assertIn(guard.name,bpy.data.objects)
+        self.assertIn(physical.name,bpy.data.objects)
+        specific=dict(lodOut=10000,visible=True,renderable=True)
+        nodes=roadside_node_settings({'*':{},'DETAIL_GUARD_*':specific,'DETAIL_*':{}})
+        self.assertEqual(nodes['DETAIL_GUARD_*'],specific)
+        self.assertGreater(list(nodes).index('DETAIL_GUARD_*'),list(nodes).index('DETAIL_*_roadside_litter'))
+        bpy.data.objects.remove(guard);bpy.data.objects.remove(physical)
+
 class CardLodTests(unittest.TestCase):
     def test_shrub_leaves_export_both_sides_without_duplicating_bark(self):
         from pilot_treefx import groups_for_mesh
@@ -46,7 +63,7 @@ class CardLodTests(unittest.TestCase):
         self.assertEqual(len(mesh.uv_layers.active.data),4)
         bpy.data.meshes.remove(mesh)
 
-suite=unittest.TestSuite([unittest.defaultTestLoader.loadTestsFromTestCase(MaterialSlotRegressionTests),unittest.defaultTestLoader.loadTestsFromTestCase(CardLodTests)])
+suite=unittest.TestSuite([unittest.defaultTestLoader.loadTestsFromTestCase(MaterialSlotRegressionTests),unittest.defaultTestLoader.loadTestsFromTestCase(CardLodTests),unittest.defaultTestLoader.loadTestsFromTestCase(GuardrailStageTests)])
 result=unittest.TextTestRunner(verbosity=2).run(suite)
 if not result.wasSuccessful():raise RuntimeError('Blender material-slot regression')
 print('PILOT_BLENDER_REGRESSION_OK',result.testsRun)
