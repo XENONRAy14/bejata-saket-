@@ -1,16 +1,19 @@
 """Isolated main-route sector qualification using compiled, cached CC0 assets."""
 import configparser
 import hashlib
+import io
 import json
 from pathlib import Path
 import shutil
 import struct
 
 import numpy as np
+from PIL import Image
 from scipy.spatial import cKDTree
 
 from scenery_placement import edge_batches, load_zones, plan_sector
-from scenery_kn5 import mesh, nodes, parse_tree, read, subset, validate_lock, write
+from scenery_kn5 import assign_material, clone_material, mesh, nodes, parse_tree, read, string, subset, uint, validate_lock, write
+from scenery_assets import dds_blob, edge_atlas, ground_mask, repair_pine_archive
 from treefx_wire import vector_ac
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -59,6 +62,37 @@ def import_materials(base,pilot,names):
     return imported
 
 
+def add_texture(base,name,image,coverage=False):
+    blob=dds_blob(image,coverage=coverage);base['textures'].append(dict(name=name,blob=blob,raw=uint(1)+string(name)+uint(len(blob))+blob))
+
+
+def forest_ground(base,pilot,select):
+    count=0;materials=[]
+    for node in list(nodes(base)):
+        if node['kind']!=2 or not node['name'].startswith('1GRASS'):continue
+        old=base['materials'][node['material']]
+        if old['name'] not in ('grass','grass_mountain'):continue
+        vertices=np.frombuffer(node['vertices'],'<f4').reshape(-1,11);faces=np.frombuffer(node['indices'],'<u2').reshape(-1,3)
+        selected=select(vertices[faces,:3].mean(1))
+        if not selected.any():continue
+        mask=ground_mask(node,select)
+        if not mask.any():continue
+        if old['textures']['txDetailB']!=old['textures']['txDetailR'] or old['textures']['txNormalB']!=old['textures']['txNormalR']:
+            raise ValueError('Forest floor needs duplicate original grass channels')
+        if not any(m['name']=='forest_floor' for m in base['materials']):import_materials(base,pilot,('forest_floor',))
+        floor=next(m for m in base['materials'] if m['name']=='forest_floor')
+        blob=next(t['blob'] for t in base['textures'] if t['name']==old['textures']['txMask'])
+        weights=np.array(Image.open(io.BytesIO(blob)).convert('RGBA').resize((mask.shape[1],mask.shape[0])),dtype=np.uint16)
+        weights[:,:,0]+=weights[:,:,2];weights[:,:,2]=0
+        if weights.max()>255:raise ValueError('Unnormalised original terrain mask')
+        weights[mask]=[0,0,255,0]
+        name='FOREST_FLOOR_'+node['name'];texture=name+'_mask.dds';add_texture(base,texture,Image.fromarray(weights.astype('uint8')))
+        material=clone_material(old,name,dict(txMask=texture,txDetailB=floor['textures']['txDiffuse'],txNormalB=floor['textures']['txNormal']))
+        assign_material(node,len(base['materials']));base['materials'].append(material)
+        materials.append(dict(mesh=node['name'],material=name,mask_pixels=int(mask.sum())));count+=int(selected.sum())
+    return count,materials
+
+
 def qualify(sector='summit',output=None):
     if sector!='summit':raise ValueError('Only summit is qualified in this step')
     source=ROOT/'out/bejaia_saket';baseline=source/'bejaia_saket.kn5'
@@ -70,37 +104,39 @@ def qualify(sector='summit',output=None):
     s0,s1=spec['start_m'],spec['end_m']
     with np.load(ROOT/'data/centerline.npz') as datafile:data=dict(datafile)
     models=json.loads((ROOT/'data/pilot300/treefx_models.json').read_text())
-    layout=plan_sector(data,models,s0,s1,zones=config['main']);select=station_selector(data,s0,s1)
+    zones=dict(config['main'],edge_spacings_m=[.65,1.1],edge_widths_m=[[.8,1.4],[1.6,2.4]],edge_heights_m=[[.8,1.4],[1.6,2.4]],tree_layers=[
+        dict(kind='pine',spacing=15,offset=[17,19],scale=[.9,1.05],width=[1.5,1.7],bury_fraction=.1),
+        dict(kind='midstory',spacing=12.5,offset=[17,19],scale=[.95,1.08],width=[1.6,1.85],bury_fraction=.60),
+        dict(kind='background',spacing=9.5,offset=[34,40],scale=[1,1.2],width=[1.8,2.1],bury_fraction=.50)])
+    layout=plan_sector(data,models,s0,s1,zones=zones);select=station_selector(data,s0,s1)
     base=read(baseline);pilot=read(ROOT/'out/bejaia_saket_pilot300/bejaia_saket_pilot300.kn5')
     original_nodes={node['name']:node['raw'] for node in nodes(base)}
     materials=import_materials(base,pilot,('forest_edge',))
-    floor_triangles=legacy_triangles=0
+    if layout['edges']:
+        add_texture(base,'SUMMIT_forest_edge.dds',edge_atlas(ROOT/'out/bejaia_saket_pilot300/extension/trees/ph_pine_01.bin',pilot),coverage=True)
+        index=materials['forest_edge'];base['materials'][index]=clone_material(base['materials'][index],'forest_edge',dict(txDiffuse='SUMMIT_forest_edge.dds'))
+    floor_triangles,floor_materials=forest_ground(base,pilot,select);legacy_triangles=0
     def modify(parent):
-        nonlocal floor_triangles,legacy_triangles
+        nonlocal legacy_triangles
         children=[]
         for node in parent['children']:
             if node['kind']==1:modify(node)
-            if node['kind']!=2 or not (legacy_foliage(node['name']) or (node['name'].startswith('LAND_') and base['materials'][node['material']]['name']=='grass')):
+            if node['kind']!=2 or not legacy_foliage(node['name']):
                 children.append(node);continue
             values=np.frombuffer(node['vertices'],dtype='<f4').reshape(-1,11)
             faces=np.frombuffer(node['indices'],dtype='<u2').reshape(-1,3)
             mask=select(values[faces,:3].mean(axis=1))
-            if not legacy_foliage(node['name']):mask&=select(values[faces,:3].reshape(-1,3)).reshape(-1,3).all(axis=1)
             if not mask.any():children.append(node);continue
             kept=subset(node,~mask)
             if kept:children.append(kept)
-            if legacy_foliage(node['name']):legacy_triangles+=int(mask.sum())
-            else:
-                if 'forest_floor' not in materials:materials.update(import_materials(base,pilot,('forest_floor',)))
-                floor=subset(node,mask,name='SCENERY_FLOOR_'+node['name'],material=materials['forest_floor'],forest_uv=True)
-                children.append(floor);floor_triangles+=int(mask.sum())
+            legacy_triangles+=int(mask.sum())
         parent['children']=children
     modify(base['root'])
     for distant in (False,True):
         for (chunk,side),(vertices,quads,uv,normals) in edge_batches(data,layout['edges'],distant=distant).items():
-            values=np.zeros((len(vertices),11),dtype='<f4');values[:,:3]=vector_ac(vertices);values[:,3:6]=vector_ac(normals)
+            values=np.zeros((len(vertices),11),dtype='<f4');values[:,:3]=vector_ac(vertices);values[:,3:6]=[0,1,0]
             values[:,6:8]=np.asarray(uv)*[1,-1]
-            tangents=np.cross(values[:,3:6],[0,1,0]);tangents/=np.linalg.norm(tangents,axis=1)[:,None];values[:,8:11]=tangents
+            values[:,8:11]=[1,0,0]
             faces=[triangle for a,b,c,d in quads for triangle in ((a,b,c),(a,c,d))]
             node=mesh(f"SCENERY_{'FAR' if distant else 'NEAR'}_EDGE_{chunk}_{side}",values,faces,materials['forest_edge'])
             tail=bytearray(node['tail'])
@@ -110,7 +146,7 @@ def qualify(sector='summit',output=None):
     # Preserve every unrelated original record, not only the physical subset.
     current={node['name']:node['raw'] for node in nodes(base)}
     for name,raw in original_nodes.items():
-        if name==base['root']['name'] or name.startswith('LAND_') or legacy_foliage(name):continue
+        if name==base['root']['name'] or name.startswith('1GRASS') or legacy_foliage(name):continue
         if current.get(name)!=raw:raise ValueError('Unrelated main node changed: '+name)
     old_lines=(source/'extension/trees/trees.txt').read_text().splitlines()
     kept=[];removed=0
@@ -126,24 +162,26 @@ def qualify(sector='summit',output=None):
     (output/'PILOT_ASSET_LICENSES.json').write_text((ROOT/'out/bejaia_saket_pilot300/LICENSES.json').read_text())
     write(output/'bejaia_saket.kn5',base)
     folder=output/'extension/trees';(folder/'trees.txt').write_text('\n'.join(lines)+'\n')
-    for plant in layout['trees']:
-        name=models[plant['model']]['file'];shutil.copyfile(ROOT/'out/bejaia_saket_pilot300/extension/trees'/name,folder/name)
+    repaired={}
+    for name in sorted({models[plant['model']]['file'] for plant in layout['trees']}):
+        repaired[name]=repair_pine_archive(ROOT/'out/bejaia_saket_pilot300/extension/trees'/name,folder/name)
     used={parse_tree(line)['model'] for line in lines}
     for archive in folder.glob('*.bin'):
         if archive.name not in used:archive.unlink()
     if floor_triangles:
         config_path=output/'extension/ext_config.ini';csp=configparser.ConfigParser(interpolation=None);csp.optionxform=str;csp.read(config_path)
         for section,key in (('GRASS_FX','GRASS_MATERIALS'),('RAIN_FX','ROUGH_MATERIALS')):
-            csp[section][key]=csp[section][key]+', forest_floor'
-        with config_path.open('w') as stream:csp.write(stream)
+            csp[section][key]=csp[section][key]+', '+', '.join(m['material'] for m in floor_materials)
+        stream=io.StringIO();csp.write(stream);config_path.write_text(stream.getvalue().rstrip()+'\n')
     physics=validate_lock(baseline,output/'bejaia_saket.kn5')
     added=[n for n in nodes(base) if n['name'].startswith('SCENERY_')]
     meshes=[n for n in nodes(base) if n['kind']==2]
     report=dict(sector=sector,placement=layout['report'],old_tree_instances_removed=removed,
         main_tree_instances_retained=len(kept),new_tree_instances=len(layout['trees']),total_tree_instances=len(lines),
         legacy_foliage_triangles_removed=legacy_triangles,forest_floor_triangles=floor_triangles,
-        forest_floor_applied=bool(floor_triangles),qualification_complete=bool(floor_triangles),
-        forest_floor_blocker=None if floor_triangles else 'No existing visual-only ground inside the 80m summit corridor; nearby ground is physical and locked',
+        forest_floor_materials=floor_materials,repaired_medium_lods=repaired,
+        forest_floor_applied=bool(floor_triangles),qualification_complete=False,visual_review_required=True,
+        forest_floor_blocker=None if floor_triangles else 'No eligible existing grass in the sector',
         added_meshes=len(added),added_vertices=sum(len(n['vertices'])//44 for n in added),
         added_triangles=sum(len(n['indices'])//6 for n in added),total_meshes=len(meshes),
         total_vertices=sum(len(n['vertices'])//44 for n in meshes),total_triangles=sum(len(n['indices'])//6 for n in meshes),
@@ -151,5 +189,5 @@ def qualify(sector='summit',output=None):
         source_blender_assets_required=False,runtime_tested=False)
     (output/'scenery_report.json').write_text(json.dumps(report,indent=2)+'\n')
     (output/'scenery_placements.json').write_text(json.dumps(layout,indent=2)+'\n')
-    print('PHYSICS_LOCK_OK',json.dumps(physics));print('SCENERY_QUALIFICATION_'+('OK' if floor_triangles else 'PARTIAL'),json.dumps(report))
+    print('PHYSICS_LOCK_OK',json.dumps(physics));print('SCENERY_QUALIFICATION_PARTIAL',json.dumps(report))
     return output

@@ -33,6 +33,12 @@ def material(name,texture,folder,alpha=False):
         if alpha:
             clip=mat.node_tree.nodes.new('ShaderNodeMath');clip.operation='GREATER_THAN';clip.inputs[1].default_value=.3
             mat.node_tree.links.new(node.outputs['Alpha'],clip.inputs[0]);mat.node_tree.links.new(clip.outputs[0],shader.inputs['Alpha'])
+            if name=='forest_edge':
+                nodes=mat.node_tree.nodes;links=mat.node_tree.links;geometry=nodes.new('ShaderNodeNewGeometry')
+                front=nodes.new('ShaderNodeMath');front.operation='SUBTRACT';front.inputs[0].default_value=1
+                links.new(geometry.outputs['Backfacing'],front.inputs[1])
+                coverage=nodes.new('ShaderNodeMath');coverage.operation='MULTIPLY'
+                links.new(front.outputs[0],coverage.inputs[0]);links.new(clip.outputs[0],coverage.inputs[1]);links.new(coverage.outputs[0],shader.inputs['Alpha'])
             mat.blend_method='CLIP';mat.alpha_threshold=.3
     return mat
 
@@ -90,7 +96,7 @@ def tree_model(path,folder,lod=0):
             reader.number();indices=np.frombuffer(reader.take(reader.number()*2),dtype='<u2').reshape(-1,3)
             count=reader.number();values=np.frombuffer(reader.take(count*44),dtype=np.dtype([('v','<f4',(8,)),('tail','u1',(12,))]))['v'].copy()
             offset=len(vertices);vertices.extend(blender_vector(values[:,:3]*[radius,height,radius]));normals.extend(blender_vector(values[:,3:6]))
-            uvs.extend(values[:,6:8]*[1,-1]+[0,1]);faces.extend(indices+offset)
+            uvs.extend(values[:,6:8]*[1,-1]+[0,1]);faces.extend(indices.astype(np.int64)+offset)
             face_materials.extend([len(materials)]*len(indices))
             name=names[diffuse];materials.append(material(name,(name,archive.read(name)),folder,alpha=True))
         obj=object_mesh(path.stem,np.asarray(vertices),faces,np.asarray(uvs),materials,face_materials,np.asarray(normals))
@@ -98,7 +104,7 @@ def tree_model(path,folder,lod=0):
         return obj.data
 
 
-def render(track,output,label,data,station):
+def render(track,output,label,data,station,reverse=False):
     bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
     folder=output/'preview_cache';folder.mkdir(exist_ok=True)
     model=read(track/'bejaia_saket.kn5');textures={t['name']:t['blob'] for t in model['textures']}
@@ -140,15 +146,17 @@ def render(track,output,label,data,station):
     sun_data=bpy.data.lights.new('SUN','SUN');sun_data.energy=3;sun=bpy.data.objects.new('SUN',sun_data);bpy.context.collection.objects.link(sun)
     sun.rotation_euler=(.55,-.4,-.8);sun_data.angle=.08
     cam_data=bpy.data.cameras.new('SUMMIT_DRIVER');cam=bpy.data.objects.new('SUMMIT_DRIVER',cam_data);bpy.context.collection.objects.link(cam)
-    cam.location=origin;target=origin+tangent*40+[0,0,-.7]
+    cam.location=origin;target=origin+tangent*(-40 if reverse else 40)+[0,0,-.7]
     cam.rotation_euler=(Vector(target)-Vector(origin)).to_track_quat('-Z','Y').to_euler();cam_data.lens=28;cam_data.clip_end=4000;scene.camera=cam
     scene.view_settings.view_transform='Filmic';scene.view_settings.look='Medium High Contrast';scene.view_settings.exposure=0
     scene.render.resolution_x=1280;scene.render.resolution_y=720;scene.render.resolution_percentage=100
     scene.render.filepath=str(output/f'{label}.png');bpy.ops.render.render(write_still=True)
-    print('SCENERY_DRIVER_RENDER_OK',label,'station',station,'height',1.25,'tree_preview_instances',tree_count,flush=True)
+    print('SCENERY_DRIVER_RENDER_OK',label,'station',station,'height',1.25,'reverse',reverse,'tree_preview_instances',tree_count,flush=True)
 
 
 if __name__=='__main__':
     output=Path(sys.argv[sys.argv.index('--')+1])
     with np.load(ROOT/'data/centerline.npz') as source:data=dict(source)
-    for label,track in [('before',ROOT/'out/bejaia_saket'),('after',output)]:render(track,output,label,data,1030.)
+    for label,track in [('before',ROOT/'out/bejaia_saket'),('after',output)]:
+        render(track,output,label,data,1030.)
+        render(track,output,label+'_exit_reverse',data,1230.,reverse=True)

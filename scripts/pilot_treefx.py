@@ -14,6 +14,7 @@ from PIL import Image
 from mathutils import Vector
 import math
 from treefx_wire import mesh_blob,read_mesh
+from scenery_assets import card_lod_groups
 
 
 def groups_for_mesh(mesh,specs,texture_names,double_sided=False):
@@ -154,14 +155,16 @@ def compile_models(prototypes,specs,*,output_dir=OUT/'extension/trees',cache_dir
             bpy.context.collection.objects.link(temporary)
             if lod==1:reduce_card_views(temporary.data)
             source_triangles=sum(len(p.vertices)-2 for p in temporary.data.polygons)
-            if source_triangles>target:
+            if source_triangles>target and not (lod==1 and source_name.startswith('PH_pine_0')):
                 mod=temporary.modifiers.new('TreeFX LOD','DECIMATE');mod.ratio=target/source_triangles;mod.use_collapse_triangulate=True
             bpy.context.view_layer.update()
             dg=bpy.context.evaluated_depsgraph_get();dg.update()
             mesh=bpy.data.meshes.new_from_object(temporary.evaluated_get(dg),preserve_all_data_layers=True,depsgraph=dg)
             if lod==2:
                 groups=[(texture_names.index(name),texture_names.index('flat_normal.dds'),part) for name,part in far_groups]
+            elif lod==1 and source_name.startswith('PH_pine_0'):groups=card_lod_groups(near_groups,texture_names)
             else:groups=groups_for_mesh(mesh,specs,texture_names,double_sided=shrub)
+            if lod==0:near_groups=groups
             blob,metrics=mesh_blob(groups,textures,radius,height)
             if lod==1 and source_name.startswith('PH_pine_0'):medium_preview_mesh=mesh.copy()
             if lod==2:assert metrics['triangles']==16

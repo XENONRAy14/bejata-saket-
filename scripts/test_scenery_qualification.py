@@ -10,7 +10,8 @@ from unittest.mock import patch
 import numpy as np
 
 from qualify_scenery import legacy_foliage, parse_tree, qualify, station_selector
-from scenery_kn5 import mesh, nodes, protected, read, string, subset, uint, validate_lock, write
+from scenery_kn5 import assign_material, clone_material, mesh, nodes, protected, read, string, subset, uint, validate_lock, write
+from scenery_assets import ground_mask
 
 
 def model():
@@ -47,6 +48,33 @@ class QualificationTests(unittest.TestCase):
         result=subset(node,[True],name='FLOOR',material=0,forest_uv=True)
         np.testing.assert_equal(np.frombuffer(result['vertices'],dtype='<f4').reshape(-1,11)[:,:3],
                                 np.frombuffer(node['vertices'],dtype='<f4').reshape(-1,11)[:,:3])
+
+    def test_grass_material_only_exception_keeps_geometry_flags_names_locked(self):
+        original=model();original['materials']*=5;node=original['root']['children'][0];node['name']='1GRASS_test'
+        before=protected(original);assign_material(node,4)
+        self.assertEqual(before,protected(original))
+        for offset in (0,-1,-40):
+            raw=node['raw'];data=bytearray(raw);data[offset]^=1;node['raw']=bytes(data)
+            self.assertNotEqual(before,protected(original));node['raw']=raw
+        node['name']='1ROAD_test';before=protected(original);assign_material(node,0)
+        self.assertNotEqual(before,protected(original))
+
+    def test_material_clone_changes_only_name_and_selected_texture(self):
+        material=dict(name='old',shader='ksPerPixel',properties={},textures={'txDiffuse':'old.dds'},
+            raw=string('old')+string('ksPerPixel')+bytes(6)+uint(0)+uint(1)+string('txDiffuse')+uint(3)+string('old.dds'))
+        cloned=clone_material(material,'new',dict(txDiffuse='new.dds'))
+        self.assertIn(uint(3)+string('new.dds'),cloned['raw']);self.assertEqual(cloned['textures']['txDiffuse'],'new.dds')
+        with self.assertRaises(ValueError):clone_material(material,'bad',dict(unknown='bad'))
+
+    def test_ground_mask_does_not_paint_outside_sector_or_uv_aliases(self):
+        values=np.zeros((4,11),'<f4');values[:,:3]=[[0,0,0],[1,0,0],[1,0,1],[0,0,1]];values[:,6:8]=values[:,[0,2]]
+        node=mesh('1GRASS_test',values,[[0,1,2],[0,2,3]],0)
+        select=lambda p:(p[:,0]>.5)&(p[:,0]<2)
+        mask=ground_mask(node,select,16);self.assertEqual(int(mask.sum()),128);self.assertFalse(mask[:,:8].any())
+        duplicate=values.copy();duplicate[:,0]+=10
+        alias=mesh('1GRASS_test',np.concatenate([values,duplicate]),[[0,1,2],[0,2,3],[4,5,6],[4,6,7]],0)
+        self.assertFalse(ground_mask(alias,select,16).any())
+        self.assertFalse(ground_mask(node,lambda p:np.zeros(len(p),bool),16).any())
 
     def test_truncation_and_invalid_counts_fail(self):
         with tempfile.TemporaryDirectory() as directory:

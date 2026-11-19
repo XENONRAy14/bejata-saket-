@@ -76,12 +76,12 @@ def edge_layout(data,sea_side=None,*,s0=None,s1=None,zones=None,seed=None):
     sea=(lambda station:sea_side) if sea_side is not None else sea_sides(data,zones.get('side_smoothing_m',30))
     result=[]
     for side in (0,1):
-        for tier,spacing in enumerate((2.8,4.2)):
+        for tier,spacing in enumerate(zones.get('edge_spacings_m',(2.8,4.2))):
             for station in np.arange(s0+3,s1-2,spacing):
                 station=float(np.clip(station+rng.uniform(-.3,.3),s0+2,s1-2))
                 if vista_open(station,s1-s0,side,sea(station),zones=zones):continue
-                width=float(rng.uniform(*((3.5,4.5),(4.8,6.0))[tier]))
-                height=float(rng.uniform(*((1.4,1.9),(2.5,3.3))[tier]))
+                width=float(rng.uniform(*zones.get('edge_widths_m',((3.5,4.5),(4.8,6.0)))[tier]))
+                height=float(rng.uniform(*zones.get('edge_heights_m',((1.4,1.9),(2.5,3.3)))[tier]))
                 half_road=float(np.interp(station,data['s3'],data['width']))/2
                 offset=half_road+((2.5 if pilot else zones.get('road_clearance_m',4)+.1),6.3)[tier]+width/2
                 _,tangent,_=frame(data,station)
@@ -210,16 +210,21 @@ def main_tree_layout(data,models,s0,s1,zones):
     if any(not names for names in kinds.values()):raise ValueError('Need pine, midstory, background and shrub models')
     rng=np.random.default_rng(sector_seed(s0,zones.get('seed',24024)))
     sea=sea_sides(data,zones.get('side_smoothing_m',30));plants=[]
+    layers=zones.get('tree_layers',[
+        dict(kind='pine',spacing=21,offset=[12,15]),dict(kind='midstory',spacing=35,offset=[18,24]),
+        dict(kind='background',spacing=16,offset=[34,38]),dict(kind='shrub',spacing=24,offset=[6,9])])
     for side in (0,1):
-        for kind,spacing,offset_range in (('pine',21,(12,15)),('midstory',35,(18,24)),('background',16,(34,38)),('shrub',24,(6,9))):
+        for layer in layers:
+            kind=layer['kind'];spacing=layer['spacing'];offset_range=layer['offset']
             for station in np.arange(s0+8,s1-5,spacing):
                 station=float(station+rng.uniform(-1.3,1.3))
                 if vista_open(station,s1-s0,side,sea(station),zones=zones,layer=kind):continue
-                species=kinds[kind][int(rng.integers(len(kinds[kind])))];scale=float(rng.uniform(.68,.96))
-                broad=float(rng.uniform(1.08,1.35))
+                species=kinds[kind][int(rng.integers(len(kinds[kind])))];scale=float(rng.uniform(*layer.get('scale',[.68,.96])))
+                broad=float(rng.uniform(*layer.get('width',[1.08,1.35])))
                 half=float(np.interp(station,data['s3'],data['width']))/2
                 offset=half+float(rng.uniform(*offset_range))
                 point=ground(data,station,side,offset);point[2]-=.12
+                if layer.get('bury_fraction'):point[2]-=float(models[species]['height'])*scale*layer['bury_fraction']
                 plants.append(dict(model=species,position=point.tolist(),angle=float(rng.uniform(0,2*np.pi)),
                     scale=scale,width=broad,station=station,side=side,offset=offset))
     return plants

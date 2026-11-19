@@ -113,12 +113,30 @@ def subset(node,mask,*,name=None,material=None,forest_uv=False):
     return mesh(name or node['name'],values,inverse.reshape(-1,3),node['material'] if material is None else material,flags=node['flags'],tail=node['tail'])
 
 
+def assign_material(node,index):
+    node['material']=index;node['raw']=node['raw'][:-33]+uint(index)+node['raw'][-29:]
+
+
+def clone_material(material,name,textures):
+    r=Reader(material['raw']);r.text();r.text();flags=r.take(6);properties=[]
+    for _ in range(r.number()):
+        start=r.offset;r.text();r.take(40);properties.append(r.blob[start:r.offset])
+    slots=[]
+    for _ in range(r.number()):
+        slot=r.text();index=r.number();old=r.text();slots.append(string(slot)+uint(index)+string(textures.get(slot,old)))
+    if textures.keys()-material['textures'].keys():raise ValueError('Unknown material texture slot')
+    return dict(name=name,shader=material['shader'],properties=material['properties'],textures=dict(material['textures'],**textures),
+        raw=string(name)+string(material['shader'])+flags+uint(len(properties))+b''.join(properties)+uint(len(slots))+b''.join(slots))
+
+
 def protected(model):
     result={}
     def walk(node,parents):
         if node['name'][:1].isdigit() or node['name'].startswith(('AC_','DETAIL_GUARD_')):
-            blob=b''.join(parents)+node['raw']
-            if node['kind']==2:blob+=model['materials'][node['material']]['raw']
+            raw=node['raw']
+            if node['kind']==2 and node['name'].startswith('1GRASS'):raw=raw[:-33]+raw[-29:]
+            blob=b''.join(parents)+raw
+            if node['kind']==2 and not node['name'].startswith('1GRASS'):blob+=model['materials'][node['material']]['raw']
             if node['name'] in result:raise ValueError('Duplicate protected node')
             result[node['name']]=hashlib.sha256(blob).hexdigest()
         for child in node['children']:walk(child,parents+([node['matrix']] if node['kind']==1 else []))
