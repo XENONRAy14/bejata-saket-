@@ -69,9 +69,10 @@ LOD0 and decoded LOD1 exposes this, independently of the preview material.
 `out/preview/pine_native_lod0_lod1.png` is that comparison, left to right.
 `out/preview/pine_lod1_repair.png` compares old and repaired LOD1.
 
-The compiler now derives pine LOD1 from sound LOD0 geometry, removing complete
-atlas views rather than collapsing surviving triangles. Qualification repairs
-only its own cached archives, including midstory models, using this same rule.
+Qualification derives pine LOD1 from sound LOD0 geometry, removing complete
+atlas views rather than collapsing surviving triangles. It repairs only its
+own cached archives, including midstory models. The pilot compiler retains its
+validated 9,003-triangle medium-LOD cap and does not use this higher-cost repair.
 Pilot output archives are not overwritten. Repaired medium LODs have
 12,896–13,698 triangles; this costs more than the broken old medium LOD.
 No FPS improvement is claimed. Preview LOD selection uses each archive's real
