@@ -28,10 +28,10 @@ def tree_line(plant,models):
 
 def make_installable(output):
     (output/'models.ini').write_text('[MODEL_0]\nFILE=bejaia_saket.kn5\nPOSITION=0,0,0\nROTATION=0,0,0\n')
-    path=output/'ui/ui_track.json';metadata=json.loads(path.read_text())
+    path=output/'ui/ui_track.json';metadata=json.loads(path.read_text(encoding='utf-8'))
     metadata['name']='RN24 Béjaïa–Saket — Summit scenery qualification'
     metadata['description']='Separate summit scenery qualification build; not the main RN24 installation.'
-    path.write_text(json.dumps(metadata,ensure_ascii=False,indent=2)+'\n')
+    path.write_text(json.dumps(metadata,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
 
 def station_selector(data,s0,s1):

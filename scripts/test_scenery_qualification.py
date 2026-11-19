@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 import numpy as np
 
-from qualify_scenery import legacy_foliage, parse_tree, qualify, station_selector
+from qualify_scenery import legacy_foliage, make_installable, parse_tree, qualify, station_selector
 from scenery_kn5 import assign_material, clone_material, mesh, nodes, protected, read, string, subset, uint, validate_lock, write
 from scenery_assets import ground_mask
 
@@ -23,6 +23,14 @@ def model():
 
 
 class QualificationTests(unittest.TestCase):
+    def test_install_metadata_preserves_utf8_independently_of_locale(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output=Path(directory);(output/'ui').mkdir();path=output/'ui/ui_track.json'
+            path.write_text(json.dumps(dict(author='Équipe Béjaïa'),ensure_ascii=False),encoding='utf-8')
+            make_installable(output)
+            metadata=json.loads(path.read_bytes().decode('utf-8'))
+            self.assertEqual(metadata['author'],'Équipe Béjaïa');self.assertIn('Béjaïa',metadata['name'])
+
     def test_binary_roundtrip_and_lock(self):
         with tempfile.TemporaryDirectory() as directory:
             a=Path(directory)/'a.kn5';b=Path(directory)/'b.kn5';write(a,model());parsed=read(a);write(b,parsed)
@@ -119,7 +127,7 @@ class QualificationTests(unittest.TestCase):
                 self.assertFalse(report['qualification_complete']);self.assertFalse(report['forest_floor_applied'])
                 self.assertTrue(report['physics_lock']['all_checksums_identical'])
                 self.assertIn('FILE=bejaia_saket.kn5',(output/'models.ini').read_text())
-                self.assertIn('qualification',json.loads((output/'ui/ui_track.json').read_text())['name'])
+                self.assertIn('qualification',json.loads((output/'ui/ui_track.json').read_text(encoding='utf-8'))['name'])
                 self.assertEqual((output/'PILOT_ASSET_CREDITS.md').read_bytes(),b'credit\n')
                 self.assertEqual((output/'extension/ext_config.ini').read_bytes(),(source/'extension/ext_config.ini').read_bytes())
                 self.assertEqual(baseline.read_bytes(),original)
